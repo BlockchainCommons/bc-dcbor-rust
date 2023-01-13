@@ -1,6 +1,8 @@
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA256
 
+Hash: SHA256
+
 # Contributor License Agreement
 
 Version 1.0
@@ -11,7 +13,7 @@ E-Mail: `wolf@wolfmcnally.com`
 
 Legal Jurisdiction: Wyoming, United States of America
 
-Project: https://github.com/BlockchainCommons/bc-rust-envelope
+Project: https://github.com/BlockchainCommons/bc-envelope-rust
 
 Date: `13 January 2023`
 
@@ -54,17 +56,17 @@ I promise not to offer contributions that contain or depend on the work of other
 ***As far as the law allows, my contributions come as is, without any warranty or condition.  Other than under [Copyright Guarantee](#copyright-guarantee), [Patent Guarantee](#patent-guarantee), or [Open Source Guarantee](#open-source-guarantee), I will not be liable to anyone for any damages related to my contributions or this contributor license agreement, under any kind of legal claim.***
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCAAdFiEElDZS7jhEF2DD3DU2S2wvz4lHgK4FAmPBJe0ACgkQS2wvz4lH
-gK6lsw/+Ly5tis7STlHA+6PsEFc+n2um5bou01xjB+22xwQuVB4t3/kyFDS+OB/F
-1ojPGFnEI3QT1R9xm/kYQqUowfF/+7r9q4xUrNAsMbHgvevYWtlUge0LPa6Ro7rH
-E9bBpTY0QoqnUC6iZeEBTehEKqrtSfWOWXocg15IC1PBfl3OMKbjpp0wGXIxO0Gd
-xK+ZrmtJQ7Pv0j+a+0pyAzZ614MsM2EDqaJIPccKPtvbNSjt21JpLtwb67S9h2rN
-wfpxV5EY1jnrLG1zaNcmtyJjLQjyqGGImzVaSLmtM2BKRjQF33XXKhq0ZrBPJzZU
-oaeS10YQ+YxYL6nZBLZCMv/+3dP7FvQtz6DZGTjSPMoThZwB+5joxQUhx3ly9or6
-7jeeWlZYFS5CCPnNJrkqqLl53+S2iWTBHy7wJMZSpQxSnvEdVRZE3KJHdSkofdrp
-+NIbwI1izsPSvzqx7C5ktVF+NEeOfNSHvsiaPWPLRq5lx5yQrRLEITLuwGSy07I3
-nxhSEIGjLxU6x29AQQUEd5erqPRh8pkKwas1XYZdhttLO0eCCld50rOvE0Za5RlZ
-kd+qBXxgF0qr04cWqd7bjsQTtmAI7gxmjuclXd7u1vKaiR21kltEPjEA+cR25q2g
-LPMprSpGL5R/MVbgncdNT5mo0li087LQ/H1DTU15msKBE1TC8HA=
-=KZfJ
+iQIzBAEBCAAdFiEElDZS7jhEF2DD3DU2S2wvz4lHgK4FAmPBM1oACgkQS2wvz4lH
+gK7aaA/+ML3P29swITy7lTelj+eokx0a30zbJ04ni2x/1PCUw73lEM9H3cCgpdLu
+7/gxjj1VC60xCHXs55ERNVGVXzKGjMVvObSgvQrykKjBX6O7jy/OlOog2cj6QQLb
+l4O6SxZ2ZhLSuuYK9ft2dRfDKye28rBtBYPGT4k86uHzmImMRn0Oa8amzlKNR8kC
+95Qt+hRVdbuip5iwRkA7RRTOpId1kXIYuAYLxf9OlypCYH2/kj7cOwc3Q2R6JGd3
+gzh8afm1pr6vL/3q1ZR1zkw5JqwV8Is7gN0hq1RdYjPKEZhl1escbFhk8LrAOpqc
+nHwC+THcqpJyhXxh0uHato0bfJ0O80kefFtKOcfAZv0s2p5sfIDaSrjA/hDFidqB
+vEVLzArPTC8nqYj7kiNgCe9sIU/kNpTPhcO/W5B4p2QeYDgNDzRzeTfae56OHltP
+mm6BrVV+OLMgY0c7CXOx5mrFmOiEu3xx4RsCnDeR5Lrb/yAZbP+Xe5vvzbILtnUV
+shfejWRUIcvf/gQSFmnL4WoRfOBecEYs7hbAm8b4YooxAc6n2WA812/GY/L6kAIC
+QHLSsyFEB096RrFejml8tWYvC0tFEuC0q8euKiCW2WoEAGUinLDhcBujV2KR3NeB
+T39Jh4GbVz9VBazJT1jB/dcjBYJbdKGY90wVk+fGgJHwnM0h9fY=
+=HoBG
 -----END PGP SIGNATURE-----

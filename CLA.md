@@ -8,7 +8,7 @@ E-Mail: `$email`
 
 Legal Jurisdiction: Wyoming, United States of America
 
-Project: https://github.com/BlockchainCommons/bc-rust-envelope
+Project: https://github.com/BlockchainCommons/bc-envelope-rust
 
 Date: `$date`
 
