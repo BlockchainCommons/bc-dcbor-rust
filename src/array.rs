@@ -57,6 +57,7 @@ mod tests {
         v.push(Box::new("Hello"));
         v.push(Box::new("World"));
         v.push(Box::new(vec![10, 20, 30]));
+        // [1, 2, "Hello", "World", [10, 20, 30]]
         test_encode_heterogenous_array(&v, "8501026548656c6c6f65576f726c64830a14181e");
     }
 }
