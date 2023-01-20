@@ -12,18 +12,17 @@ impl CBOREncode for ByteString {
     fn cbor_encode(&self) -> Vec<u8> {
         let a = &self.0;
         let mut buf = a.len().varint_encode(2);
-        buf.append(&mut a.to_owned());
+        for b in a {
+            buf.push(*b);
+        }
         buf
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{hex::{bytes_to_hex, hex_to_bytes}, cbor::CBOREncode, bytestring::ByteString};
-
-    fn test_encode<T: CBOREncode>(t: T, expected: &str) {
-        assert_eq!(bytes_to_hex(&t.cbor_encode()), expected);
-    }
+    use crate::{test_util::test_encode, hex::hex_to_bytes};
+    use super::ByteString;
 
     #[test]
     fn encode_bytestring() {

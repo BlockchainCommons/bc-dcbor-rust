@@ -84,11 +84,7 @@ impl CBOREncode for i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{hex::bytes_to_hex, cbor::CBOREncode};
-
-    fn test_encode<T: CBOREncode>(t: T, expected: &str) {
-        assert_eq!(bytes_to_hex(&t.cbor_encode()), expected);
-    }
+    use crate::test_util::test_encode;
 
     #[test]
     fn encode_u8() {
