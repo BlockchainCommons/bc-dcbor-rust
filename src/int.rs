@@ -163,14 +163,6 @@ mod tests {
         test_encode(23u8, "17");
         test_encode(24u8, "1818");
         test_encode(u8::MAX, "18ff");
-        // let mut buf: Vec<u8> = Vec::new();
-        // buf.push(0x85);
-        // 0u8.cbor_append(&mut buf);
-        // 1u8.cbor_append(&mut buf);
-        // 23u8.cbor_append(&mut buf);
-        // 24u8.cbor_append(&mut buf);
-        // 255u8.cbor_append(&mut buf);
-        // assert_eq!(bytes_to_hex(&buf), "85000117181818ff");
     }
 
     #[test]
