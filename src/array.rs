@@ -4,8 +4,7 @@ impl<T> CBOREncode for &[T] where T: CBOREncode {
     fn cbor_encode(&self) -> Vec<u8> {
         let mut buf = self.len().varint_encode(4);
         for item in *self {
-            let mut v = item.cbor_encode();
-            buf.append(&mut v);
+            buf.extend(item.cbor_encode());
         }
         buf
     }
@@ -15,8 +14,7 @@ impl CBOREncode for &[Box<dyn CBOREncode>] {
     fn cbor_encode(&self) -> Vec<u8> {
         let mut buf = self.len().varint_encode(4);
         for item in *self {
-            let mut v = item.cbor_encode();
-            buf.append(&mut v);
+            buf.extend(item.cbor_encode());
         }
         buf
     }
@@ -26,7 +24,7 @@ impl<T> CBOREncode for Vec<T> where T: CBOREncode {
     fn cbor_encode(&self) -> Vec<u8> {
         let mut buf = self.len().varint_encode(4);
         for item in self {
-            buf.append(&mut item.cbor_encode());
+            buf.extend(item.cbor_encode());
         }
         buf
     }
@@ -36,7 +34,7 @@ impl CBOREncode for Vec<Box<dyn CBOREncode>> {
     fn cbor_encode(&self) -> Vec<u8> {
         let mut buf = self.len().varint_encode(4);
         for item in self {
-            buf.append(&mut item.cbor_encode());
+            buf.extend(item.cbor_encode());
         }
         buf
     }

@@ -9,6 +9,6 @@ pub trait CBORAppend {
 
 impl<T> CBORAppend for T where T: CBOREncode {
     fn cbor_append(&self, buf: &mut Vec<u8>) {
-        buf.append(&mut self.cbor_encode());
+        buf.extend(self.cbor_encode());
     }
 }
