@@ -76,7 +76,7 @@ impl CBOREncode for i8 {
 impl IntoCBOR for i8 {
     fn cbor(&self) -> CBOR {
         if *self < 0 {
-            CBOR::NINT(*self as i128)
+            CBOR::NINT(*self as i64)
         } else {
             CBOR::UINT(*self as u64)
         }
@@ -99,7 +99,7 @@ impl CBOREncode for i16 {
 impl IntoCBOR for i16 {
     fn cbor(&self) -> CBOR {
         if *self < 0 {
-            CBOR::NINT(*self as i128)
+            CBOR::NINT(*self as i64)
         } else {
             CBOR::UINT(*self as u64)
         }
@@ -122,7 +122,7 @@ impl CBOREncode for i32 {
 impl IntoCBOR for i32 {
     fn cbor(&self) -> CBOR {
         if *self < 0 {
-            CBOR::NINT(*self as i128)
+            CBOR::NINT(*self as i64)
         } else {
             CBOR::UINT(*self as u64)
         }
@@ -132,8 +132,8 @@ impl IntoCBOR for i32 {
 impl CBOREncode for i64 {
     fn cbor_encode(&self) -> Vec<u8> {
         if *self < 0 {
-            let b = *self as i128;
-            let a = (-b - 1) as u64;
+            let b = *self as u64;
+            let a = (-(b as i128) - 1) as u64;
             a.varint_encode(1)
         } else {
             let a = *self as u64;
@@ -145,7 +145,7 @@ impl CBOREncode for i64 {
 impl IntoCBOR for i64 {
     fn cbor(&self) -> CBOR {
         if *self < 0 {
-            CBOR::NINT(*self as i128)
+            CBOR::NINT(*self as i64)
         } else {
             CBOR::UINT(*self as u64)
         }
@@ -154,7 +154,7 @@ impl IntoCBOR for i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_encode, cbor::IntoCBOR, bytes::Bytes};
+    use crate::{test_util::test_encode, cbor::IntoCBOR};
 
     #[test]
     fn encode_u8() {
@@ -266,8 +266,8 @@ mod tests {
 
     #[test]
     fn into_cbor() {
-        let a = Bytes::from_hex("112233");
-        let cbor = a.cbor();
-        println!("{:?}", cbor);
+        assert_eq!(format!("{:?}", 32.cbor()), "UINT(32)");
+        assert_eq!(format!("{:?}", 32.cbor().cbor()), "UINT(32)");
+        assert_eq!(format!("{:?}", (-32).cbor()), "NINT(-32)");
     }
 }

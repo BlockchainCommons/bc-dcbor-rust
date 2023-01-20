@@ -10,6 +10,12 @@ impl CBOREncode for &str {
     }
 }
 
+impl CBOREncode for String {
+    fn cbor_encode(&self) -> Vec<u8> {
+        self.as_str().cbor_encode()
+    }
+}
+
 impl IntoCBOR for &str {
     fn cbor(&self) -> CBOR {
         CBOR::STRING(self.to_string())
@@ -18,10 +24,15 @@ impl IntoCBOR for &str {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_encode;
+    use crate::{test_util::test_encode, cbor::IntoCBOR};
 
     #[test]
-    fn encode_string() {
+    fn encode() {
         test_encode("Hello", "6548656c6c6f");
+    }
+
+    #[test]
+    fn into_cbor() {
+        assert_eq!(format!("{:?}", "Hello".cbor()), "STRING(\"Hello\")");
     }
 }

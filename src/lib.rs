@@ -10,3 +10,4 @@ pub mod array;
 pub mod map;
 pub mod value;
 pub mod cbor;
+pub mod tag;
