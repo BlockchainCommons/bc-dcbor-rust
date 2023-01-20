@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{cbor_encode::CBOREncode, varint::VarIntEncode};
+use crate::{cbor::CBOREncode, varint::VarIntEncode};
 
 pub type CBORMap = HashMap<Vec<u8>, Vec<u8>>;
 

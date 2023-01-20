@@ -1,4 +1,4 @@
-use crate::{cbor_encode::CBOREncode, varint::VarIntEncode, cbor::{IntoCBOR, CBOR}, hex::hex_to_bytes};
+use crate::{cbor::CBOREncode, varint::VarIntEncode, cbor::{IntoCBOR, CBOR}, hex::hex_to_bytes};
 
 #[derive(Clone, Debug)]
 pub struct Bytes(Vec<u8>);

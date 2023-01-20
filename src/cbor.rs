@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use crate::bytes::Bytes;
-
 #[derive(Debug)]
 pub enum CBOR {
     UINT(u64),
@@ -16,4 +14,18 @@ pub enum CBOR {
 
 pub trait IntoCBOR {
     fn cbor(&self) -> CBOR;
+}
+
+pub trait CBOREncode {
+    fn cbor_encode(&self) -> Vec<u8>;
+}
+
+pub trait CBORAppend {
+    fn cbor_append(&self, buf: &mut Vec<u8>);
+}
+
+impl<T> CBORAppend for T where T: CBOREncode {
+    fn cbor_append(&self, buf: &mut Vec<u8>) {
+        buf.extend(self.cbor_encode());
+    }
 }

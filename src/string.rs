@@ -1,4 +1,4 @@
-use crate::{cbor_encode::CBOREncode, varint::VarIntEncode, cbor::{IntoCBOR, CBOR}};
+use crate::{cbor::CBOREncode, varint::VarIntEncode, cbor::{IntoCBOR, CBOR}};
 
 impl CBOREncode for &str {
     fn cbor_encode(&self) -> Vec<u8> {
