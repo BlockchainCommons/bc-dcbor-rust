@@ -1,8 +1,14 @@
-use crate::{cbor::CBOREncode, varint::VarIntEncode};
+use crate::{cbor_encode::CBOREncode, varint::VarIntEncode, cbor::{IntoCBOR, CBOR}};
 
 impl CBOREncode for u8 {
     fn cbor_encode(&self) -> Vec<u8> {
         self.varint_encode(0)
+    }
+}
+
+impl IntoCBOR for u8 {
+    fn cbor(&self) -> CBOR {
+        CBOR::UINT(*self as u64)
     }
 }
 
@@ -12,9 +18,21 @@ impl CBOREncode for u16 {
     }
 }
 
+impl IntoCBOR for u16 {
+    fn cbor(&self) -> CBOR {
+        CBOR::UINT(*self as u64)
+    }
+}
+
 impl CBOREncode for u32 {
     fn cbor_encode(&self) -> Vec<u8> {
         self.varint_encode(0)
+    }
+}
+
+impl IntoCBOR for u32 {
+    fn cbor(&self) -> CBOR {
+        CBOR::UINT(*self as u64)
     }
 }
 
@@ -24,9 +42,21 @@ impl CBOREncode for u64 {
     }
 }
 
+impl IntoCBOR for u64 {
+    fn cbor(&self) -> CBOR {
+        CBOR::UINT(*self)
+    }
+}
+
 impl CBOREncode for usize {
     fn cbor_encode(&self) -> Vec<u8> {
         self.varint_encode(0)
+    }
+}
+
+impl IntoCBOR for usize {
+    fn cbor(&self) -> CBOR {
+        CBOR::UINT(*self as u64)
     }
 }
 
@@ -39,6 +69,16 @@ impl CBOREncode for i8 {
         } else {
             let a = *self as u8;
             a.varint_encode(0)
+        }
+    }
+}
+
+impl IntoCBOR for i8 {
+    fn cbor(&self) -> CBOR {
+        if *self < 0 {
+            CBOR::NINT(*self as i128)
+        } else {
+            CBOR::UINT(*self as u64)
         }
     }
 }
@@ -56,6 +96,16 @@ impl CBOREncode for i16 {
     }
 }
 
+impl IntoCBOR for i16 {
+    fn cbor(&self) -> CBOR {
+        if *self < 0 {
+            CBOR::NINT(*self as i128)
+        } else {
+            CBOR::UINT(*self as u64)
+        }
+    }
+}
+
 impl CBOREncode for i32 {
     fn cbor_encode(&self) -> Vec<u8> {
         if *self < 0 {
@@ -65,6 +115,16 @@ impl CBOREncode for i32 {
         } else {
             let a = *self as u32;
             a.varint_encode(0)
+        }
+    }
+}
+
+impl IntoCBOR for i32 {
+    fn cbor(&self) -> CBOR {
+        if *self < 0 {
+            CBOR::NINT(*self as i128)
+        } else {
+            CBOR::UINT(*self as u64)
         }
     }
 }
@@ -82,9 +142,19 @@ impl CBOREncode for i64 {
     }
 }
 
+impl IntoCBOR for i64 {
+    fn cbor(&self) -> CBOR {
+        if *self < 0 {
+            CBOR::NINT(*self as i128)
+        } else {
+            CBOR::UINT(*self as u64)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_encode;
+    use crate::{test_util::test_encode, cbor::IntoCBOR, bytes::Bytes};
 
     #[test]
     fn encode_u8() {
@@ -200,5 +270,12 @@ mod tests {
         test_encode(2147483647i64, "1a7fffffff");
         test_encode(i64::MIN, "3b7fffffffffffffff");
         test_encode(i64::MAX, "1b7fffffffffffffff");
+    }
+
+    #[test]
+    fn into_cbor() {
+        let a = Bytes::from_hex("112233");
+        let cbor = a.cbor();
+        println!("{:?}", cbor);
     }
 }

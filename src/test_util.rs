@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{cbor::CBOREncode, hex::bytes_to_hex};
+use crate::{cbor_encode::CBOREncode, hex::bytes_to_hex};
 
 pub fn test_encode<T: CBOREncode>(t: T, expected: &str) {
     assert_eq!(bytes_to_hex(&t.cbor_encode()), expected);

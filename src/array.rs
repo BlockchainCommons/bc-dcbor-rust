@@ -1,4 +1,4 @@
-use crate::{cbor::CBOREncode, varint::VarIntEncode};
+use crate::{cbor_encode::CBOREncode, varint::VarIntEncode};
 
 impl<T> CBOREncode for &[T] where T: CBOREncode {
     fn cbor_encode(&self) -> Vec<u8> {
@@ -42,7 +42,7 @@ impl CBOREncode for Vec<Box<dyn CBOREncode>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::{test_encode_array, test_encode_heterogenous_array}, cbor::CBOREncode};
+    use crate::{test_util::{test_encode_array, test_encode_heterogenous_array}, cbor_encode::CBOREncode};
 
     #[test]
     fn encode_array() {

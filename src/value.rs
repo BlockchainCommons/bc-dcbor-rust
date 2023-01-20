@@ -1,4 +1,4 @@
-use crate::cbor::CBOREncode;
+use crate::cbor_encode::CBOREncode;
 
 impl CBOREncode for bool {
     fn cbor_encode(&self) -> Vec<u8> {
