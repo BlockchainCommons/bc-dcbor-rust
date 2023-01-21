@@ -1,4 +1,4 @@
-use crate::{varint::VarIntEncode, bytes::Bytes, tag::Tagged, map::CBORMap};
+use crate::{bytes::Bytes, tag::Tagged, map::CBORMap, value::Value};
 
 #[derive(Debug, Clone)]
 pub enum CBOR {
@@ -9,7 +9,7 @@ pub enum CBOR {
     ARRAY(Vec<CBOR>),
     MAP(CBORMap),
     TAG(Box<Tagged>),
-    VALUE(u64)
+    VALUE(Value)
 }
 
 pub trait IntoCBOR {
@@ -26,8 +26,8 @@ impl IntoCBOR for CBOR {
     }
 }
 
-impl CBOREncode for CBOR {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl CBOR {
+    pub fn encode(&self) -> Vec<u8> {
         match self {
             CBOR::UINT(x) => x.cbor_encode(),
             CBOR::NINT(x) => x.cbor_encode(),
@@ -36,7 +36,13 @@ impl CBOREncode for CBOR {
             CBOR::ARRAY(x) => x.cbor_encode(),
             CBOR::MAP(x) => x.cbor_encode(),
             CBOR::TAG(x) => x.cbor_encode(),
-            CBOR::VALUE(x) => x.varint_encode(7),
+            CBOR::VALUE(x) => x.cbor_encode(),
         }
+    }
+}
+
+impl CBOREncode for CBOR {
+    fn cbor_encode(&self) -> Vec<u8> {
+        self.encode()
     }
 }
