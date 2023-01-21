@@ -38,18 +38,13 @@ impl std::fmt::Debug for Bytes {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_encode, cbor::IntoCBOR};
+    use crate::test_util::test_cbor;
 
     use super::Bytes;
 
     #[test]
     fn encode() {
-        test_encode(Bytes::new([0x11, 0x22, 0x33]), "43112233");
-        test_encode(Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"), "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7");
-    }
-
-    #[test]
-    fn into_cbor() {
-        assert_eq!(format!("{:?}", Bytes::from_hex("010203").cbor()), "BYTES(010203)");
+        test_cbor(Bytes::new([0x11, 0x22, 0x33]), "BYTES(112233)", "43112233");
+        test_cbor(Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"), "BYTES(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)", "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7");
     }
 }

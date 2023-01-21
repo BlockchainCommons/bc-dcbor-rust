@@ -154,120 +154,102 @@ impl IntoCBOR for i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_encode, cbor::IntoCBOR};
+    use crate::test_util::test_cbor;
 
     #[test]
-    fn encode_u8() {
-        test_encode(0u8, "00");
-        test_encode(1u8, "01");
-        test_encode(23u8, "17");
-        test_encode(24u8, "1818");
-        test_encode(u8::MAX, "18ff");
+    fn encode_unsigned() {
+        test_cbor(0u8, "UINT(0)", "00");
+        test_cbor(0u16, "UINT(0)", "00");
+        test_cbor(0u32, "UINT(0)", "00");
+        test_cbor(0u64, "UINT(0)", "00");
+        test_cbor(0 as usize, "UINT(0)", "00");
+
+        test_cbor(1u8, "UINT(1)", "01");
+        test_cbor(1u16, "UINT(1)", "01");
+        test_cbor(1u32, "UINT(1)", "01");
+        test_cbor(1u64, "UINT(1)", "01");
+        test_cbor(1 as usize, "UINT(1)", "01");
+
+        test_cbor(23u8, "UINT(23)", "17");
+        test_cbor(23u16, "UINT(23)", "17");
+        test_cbor(23u32, "UINT(23)", "17");
+        test_cbor(23u64, "UINT(23)", "17");
+        test_cbor(23 as usize, "UINT(23)", "17");
+
+        test_cbor(24u8, "UINT(24)", "1818");
+        test_cbor(24u16, "UINT(24)", "1818");
+        test_cbor(24u32, "UINT(24)", "1818");
+        test_cbor(24u64, "UINT(24)", "1818");
+        test_cbor(24 as usize, "UINT(24)", "1818");
+
+        test_cbor(u8::MAX, "UINT(255)", "18ff");
+        test_cbor(u8::MAX as u16, "UINT(255)", "18ff");
+        test_cbor(u8::MAX as u32, "UINT(255)", "18ff");
+        test_cbor(u8::MAX as u64, "UINT(255)", "18ff");
+        test_cbor(u8::MAX as usize, "UINT(255)", "18ff");
+
+        test_cbor(u16::MAX, "UINT(65535)", "19ffff");
+        test_cbor(u16::MAX as u32, "UINT(65535)", "19ffff");
+        test_cbor(u16::MAX as u64, "UINT(65535)", "19ffff");
+        test_cbor(u16::MAX as usize, "UINT(65535)", "19ffff");
+
+        test_cbor(65536u32, "UINT(65536)", "1a00010000");
+        test_cbor(65536u64, "UINT(65536)", "1a00010000");
+        test_cbor(65536u64 as usize, "UINT(65536)", "1a00010000");
+
+        test_cbor(u32::MAX, "UINT(4294967295)", "1affffffff");
+        test_cbor(u32::MAX as u64, "UINT(4294967295)", "1affffffff");
+        test_cbor(u32::MAX as usize, "UINT(4294967295)", "1affffffff");
+
+        test_cbor(4294967296u64, "UINT(4294967296)", "1b0000000100000000");
+
+        test_cbor(u64::MAX, "UINT(18446744073709551615)", "1bffffffffffffffff");
+        test_cbor(u64::MAX as usize, "UINT(18446744073709551615)", "1bffffffffffffffff");
     }
 
     #[test]
-    fn encode_u16() {
-        test_encode(0u16, "00");
-        test_encode(1u16, "01");
-        test_encode(23u16, "17");
-        test_encode(24u16, "1818");
-        test_encode(255u16, "18ff");
-        test_encode(256u16, "190100");
-        test_encode(u16::MAX, "19ffff");
-    }
+    fn encode_signed() {
+        test_cbor(-1i8, "NINT(-1)", "20");
+        test_cbor(-1i16, "NINT(-1)", "20");
+        test_cbor(-1i32, "NINT(-1)", "20");
+        test_cbor(-1i64, "NINT(-1)", "20");
 
-    #[test]
-    fn encode_u32() {
-        test_encode(0u32, "00");
-        test_encode(1u32, "01");
-        test_encode(23u32, "17");
-        test_encode(24u32, "1818");
-        test_encode(255u32, "18ff");
-        test_encode(256u32, "190100");
-        test_encode(65535u32, "19ffff");
-        test_encode(65536u32, "1a00010000");
-        test_encode(u32::MAX, "1affffffff");
-    }
+        test_cbor(-2i8, "NINT(-2)", "21");
+        test_cbor(-2i16, "NINT(-2)", "21");
+        test_cbor(-2i32, "NINT(-2)", "21");
+        test_cbor(-2i64, "NINT(-2)", "21");
 
-    #[test]
-    fn encode_u64() {
-        test_encode(0u64, "00");
-        test_encode(1u64, "01");
-        test_encode(23u64, "17");
-        test_encode(24u64, "1818");
-        test_encode(255u64, "18ff");
-        test_encode(256u64, "190100");
-        test_encode(65535u64, "19ffff");
-        test_encode(65536u64, "1a00010000");
-        test_encode(4294967295u64, "1affffffff");
-        test_encode(4294967296u64, "1b0000000100000000");
-        test_encode(u64::MAX, "1bffffffffffffffff");
-    }
+        test_cbor(-127i8, "NINT(-127)", "387e");
+        test_cbor(-127i16, "NINT(-127)", "387e");
+        test_cbor(-127i32, "NINT(-127)", "387e");
+        test_cbor(-127i64, "NINT(-127)", "387e");
 
-    #[test]
-    fn encode_i8() {
-        test_encode(0i8, "00");
-        test_encode(1i8, "01");
-        test_encode(23i8, "17");
-        test_encode(i8::MAX, "187f");
-        test_encode(-1i8, "20");
-        test_encode(-2i8, "21");
-        test_encode(-127i8, "387e");
-        test_encode(i8::MIN, "387f");
-    }
+        test_cbor(i8::MIN, "NINT(-128)", "387f");
+        test_cbor(i8::MIN as i16, "NINT(-128)", "387f");
+        test_cbor(i8::MIN as i32, "NINT(-128)", "387f");
+        test_cbor(i8::MIN as i64, "NINT(-128)", "387f");
 
-    #[test]
-    fn encode_i16() {
-        test_encode(0i16, "00");
-        test_encode(1i16, "01");
-        test_encode(23i16, "17");
-        test_encode(127i16, "187f");
-        test_encode(-1i16, "20");
-        test_encode(-2i16, "21");
-        test_encode(-127i16, "387e");
-        test_encode(-128i16, "387f");
-        test_encode(i16::MIN, "397fff");
-        test_encode(i16::MAX, "197fff");
-    }
+        test_cbor(i8::MAX, "UINT(127)", "187f");
+        test_cbor(i8::MAX as i16, "UINT(127)", "187f");
+        test_cbor(i8::MAX as i32, "UINT(127)", "187f");
+        test_cbor(i8::MAX as i64, "UINT(127)", "187f");
 
-    #[test]
-    fn encode_i32() {
-        test_encode(0i32, "00");
-        test_encode(1i32, "01");
-        test_encode(23i32, "17");
-        test_encode(127i32, "187f");
-        test_encode(-1i32, "20");
-        test_encode(-2i32, "21");
-        test_encode(-127i32, "387e");
-        test_encode(-128i32, "387f");
-        test_encode(-32768i32, "397fff");
-        test_encode(32767i32, "197fff");
-        test_encode(i32::MIN, "3a7fffffff");
-        test_encode(i32::MAX, "1a7fffffff");
-    }
+        test_cbor(i16::MIN, "NINT(-32768)", "397fff");
+        test_cbor(i16::MIN as i32, "NINT(-32768)", "397fff");
+        test_cbor(i16::MIN as i64, "NINT(-32768)", "397fff");
 
-    #[test]
-    fn encode_i64() {
-        test_encode(0i64, "00");
-        test_encode(1i64, "01");
-        test_encode(23i64, "17");
-        test_encode(127i64, "187f");
-        test_encode(-1i64, "20");
-        test_encode(-2i64, "21");
-        test_encode(-127i64, "387e");
-        test_encode(-128i64, "387f");
-        test_encode(-32768i64, "397fff");
-        test_encode(32767i64, "197fff");
-        test_encode(-2147483648i64, "3a7fffffff");
-        test_encode(2147483647i64, "1a7fffffff");
-        test_encode(i64::MIN, "3b7fffffffffffffff");
-        test_encode(i64::MAX, "1b7fffffffffffffff");
-    }
+        test_cbor(i16::MAX, "UINT(32767)", "197fff");
+        test_cbor(i16::MAX as i32, "UINT(32767)", "197fff");
+        test_cbor(i16::MAX as i64, "UINT(32767)", "197fff");
 
-    #[test]
-    fn into_cbor() {
-        assert_eq!(format!("{:?}", 32.cbor()), "UINT(32)");
-        assert_eq!(format!("{:?}", 32.cbor().cbor()), "UINT(32)");
-        assert_eq!(format!("{:?}", (-32).cbor()), "NINT(-32)");
+        test_cbor(i32::MIN, "NINT(-2147483648)", "3a7fffffff");
+        test_cbor(i32::MIN as i64, "NINT(-2147483648)", "3a7fffffff");
+
+        test_cbor(i32::MAX, "UINT(2147483647)", "1a7fffffff");
+        test_cbor(i32::MAX as i64, "UINT(2147483647)", "1a7fffffff");
+
+        test_cbor(i64::MIN, "NINT(-9223372036854775808)", "3b7fffffffffffffff");
+
+        test_cbor(i64::MAX, "UINT(9223372036854775807)", "1b7fffffffffffffff");
     }
 }

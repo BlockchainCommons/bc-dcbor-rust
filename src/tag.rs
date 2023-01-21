@@ -14,20 +14,24 @@ impl Tagged {
 
 impl CBOREncode for Tagged {
     fn cbor_encode(&self) -> Vec<u8> {
-        let mut buf = self.tag.varint_encode(7);
+        let mut buf = self.tag.varint_encode(6);
         buf.extend(self.item.cbor_encode());
         buf
     }
 }
 
+impl IntoCBOR for Tagged {
+    fn cbor(&self) -> CBOR {
+        CBOR::TAGGED(Box::new(self.clone()))
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{cbor::CBOREncode, hex::bytes_to_hex, tag::Tagged};
+    use crate::{tag::Tagged, test_util::test_cbor};
 
     #[test]
-    fn encode_tag() {
-        let tagged = Tagged::new(1, "Hello");
-        let bytes = tagged.cbor_encode();
-        println!("{:?}", bytes_to_hex(bytes));
+    fn encode() {
+        test_cbor(Tagged::new(1, "Hello"), "TAGGED(Tagged { tag: 1, item: STRING(\"Hello\") })", "c16548656c6c6f");
     }
 }

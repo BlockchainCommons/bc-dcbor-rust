@@ -24,15 +24,10 @@ impl IntoCBOR for &str {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_encode, cbor::IntoCBOR};
+    use crate::{test_util::test_cbor};
 
     #[test]
     fn encode() {
-        test_encode("Hello", "6548656c6c6f");
-    }
-
-    #[test]
-    fn into_cbor() {
-        assert_eq!(format!("{:?}", "Hello".cbor()), "STRING(\"Hello\")");
+        test_cbor("Hello", "STRING(\"Hello\")", "6548656c6c6f");
     }
 }

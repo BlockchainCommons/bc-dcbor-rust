@@ -8,7 +8,7 @@ pub enum CBOR {
     STRING(String),
     ARRAY(Vec<CBOR>),
     MAP(CBORMap),
-    TAG(Box<Tagged>),
+    TAGGED(Box<Tagged>),
     VALUE(Value)
 }
 
@@ -35,7 +35,7 @@ impl CBOR {
             CBOR::STRING(x) => x.cbor_encode(),
             CBOR::ARRAY(x) => x.cbor_encode(),
             CBOR::MAP(x) => x.cbor_encode(),
-            CBOR::TAG(x) => x.cbor_encode(),
+            CBOR::TAGGED(x) => x.cbor_encode(),
             CBOR::VALUE(x) => x.cbor_encode(),
         }
     }
