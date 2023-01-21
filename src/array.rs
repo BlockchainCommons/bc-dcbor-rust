@@ -30,12 +30,17 @@ impl<T, const N: usize> IntoCBOR for &[T; N] where T: IntoCBOR {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_cbor;
-    
+    use crate::{test_util::test_cbor, cbor::IntoCBOR};
+
     #[test]
     fn encode() {
         test_cbor(vec![1, 2, 3], "ARRAY([UINT(1), UINT(2), UINT(3)])", "83010203");
         test_cbor([1, 2, 3], "ARRAY([UINT(1), UINT(2), UINT(3)])", "83010203");
         test_cbor(&[1, -2, 3], "ARRAY([UINT(1), NINT(-2), UINT(3)])", "83012103");
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(format!("{}", [1, 2, 3].cbor()), "[1, 2, 3]");
     }
 }

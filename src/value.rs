@@ -41,9 +41,20 @@ impl std::fmt::Debug for Value {
     }
 }
 
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self.0 {
+            20 => "false".to_owned(),
+            21 => "true".to_owned(),
+            _ => format!("simple({:?})", self.0),
+        };
+        f.write_str(&s)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_cbor;
+    use crate::{test_util::test_cbor, cbor::IntoCBOR};
 
     use super::Value;
 
@@ -52,5 +63,12 @@ mod tests {
         test_cbor(false, "VALUE(false)", "f4");
         test_cbor(true, "VALUE(true)", "f5");
         test_cbor(Value::new(100), "VALUE(100)", "f864");
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(format!("{}", Value::new(20).cbor()), "false");
+        assert_eq!(format!("{}", Value::new(21).cbor()), "true");
+        assert_eq!(format!("{}", Value::new(100).cbor()), "simple(100)");
     }
 }

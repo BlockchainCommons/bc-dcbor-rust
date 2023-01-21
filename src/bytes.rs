@@ -36,9 +36,17 @@ impl std::fmt::Debug for Bytes {
     }
 }
 
+impl std::fmt::Display for Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("h'")?;
+        f.write_str(&bytes_to_hex(&self.0))?;
+        f.write_str("'")
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_cbor;
+    use crate::{test_util::test_cbor, cbor::IntoCBOR};
 
     use super::Bytes;
 
@@ -46,5 +54,10 @@ mod tests {
     fn encode() {
         test_cbor(Bytes::new([0x11, 0x22, 0x33]), "BYTES(112233)", "43112233");
         test_cbor(Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"), "BYTES(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)", "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7");
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(format!("{}", Bytes::new([0x11, 0x22, 0x33]).cbor()), "h'112233'");
     }
 }

@@ -154,7 +154,7 @@ impl IntoCBOR for i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_cbor;
+    use crate::{test_util::test_cbor, cbor::IntoCBOR};
 
     #[test]
     fn encode_unsigned() {
@@ -251,5 +251,11 @@ mod tests {
         test_cbor(i64::MIN, "NINT(-9223372036854775808)", "3b7fffffffffffffff");
 
         test_cbor(i64::MAX, "UINT(9223372036854775807)", "1b7fffffffffffffff");
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(format!("{}", 42.cbor()), "42");
+        assert_eq!(format!("{}", (-42).cbor()), "-42");
     }
 }

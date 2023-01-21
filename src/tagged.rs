@@ -10,6 +10,10 @@ impl Tagged {
     pub fn new<T>(tag: u64, item: T) -> Tagged where T: IntoCBOR {
         Tagged { tag, item: item.cbor() }
     }
+
+    pub fn name(&self) -> String {
+        format!("{}", self.tag)
+    }
 }
 
 impl CBOREncode for Tagged {
@@ -26,12 +30,23 @@ impl IntoCBOR for Tagged {
     }
 }
 
+impl std::fmt::Display for Tagged {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{}({})", self.name(), self.item))
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{tag::Tagged, test_util::test_cbor};
+    use crate::{tagged::Tagged, test_util::test_cbor, cbor::IntoCBOR};
 
     #[test]
     fn encode() {
         test_cbor(Tagged::new(1, "Hello"), "TAGGED(Tagged { tag: 1, item: STRING(\"Hello\") })", "c16548656c6c6f");
+    }
+
+    #[test]
+    fn format() {
+        assert_eq!(format!("{}", Tagged::new(32, "Hello").cbor()), "32(\"Hello\")");
     }
 }

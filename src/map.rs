@@ -36,7 +36,7 @@ impl CBORMapInsert for CBORMap {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_util::test_cbor;
+    use crate::{test_util::test_cbor, cbor::IntoCBOR};
 
     use super::{CBORMapInsert, CBORMap};
 
@@ -54,5 +54,14 @@ mod tests {
         test_cbor(m,
             "MAP({[10]: (UINT(10), UINT(1)), [24, 100]: (UINT(100), UINT(2)), [32]: (NINT(-1), UINT(3)), [97, 122]: (STRING(\"z\"), UINT(4)), [98, 97, 97]: (STRING(\"aa\"), UINT(5)), [129, 24, 100]: (ARRAY([UINT(100)]), UINT(6)), [129, 32]: (ARRAY([NINT(-1)]), UINT(7)), [244]: (VALUE(false), UINT(8))})",
             "a80a011864022003617a046261610581186406812007f408");
+    }
+
+    #[test]
+    fn format() {
+        let mut m = CBORMap::new();
+        m.cbor_insert(-1, 3);
+        m.cbor_insert(vec![-1], 7);
+        m.cbor_insert("z", 4);
+        assert_eq!(format!("{}", m.cbor()), "{-1: 3, \"z\": 4, [-1]: 7}");
     }
 }
