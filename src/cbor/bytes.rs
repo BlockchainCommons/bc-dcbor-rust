@@ -1,4 +1,6 @@
-use crate::{hex::{hex_to_bytes, bytes_to_hex}, cbor::{CBOREncode, IntoCBOR, CBOR}, varint::VarIntEncode};
+use crate::util::hex::{hex_to_bytes, bytes_to_hex};
+
+use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
 
 #[derive(Clone)]
 pub struct Bytes(Vec<u8>);
@@ -16,7 +18,7 @@ impl Bytes {
 impl CBOREncode for Bytes {
     fn cbor_encode(&self) -> Vec<u8> {
         let a = &self.0;
-        let mut buf = a.len().varint_encode(2);
+        let mut buf = a.len().varint_encode(MajorType::BYTES);
         for b in a {
             buf.push(*b);
         }
@@ -46,7 +48,7 @@ impl std::fmt::Display for Bytes {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
 
     use super::Bytes;
 

@@ -1,4 +1,4 @@
-use crate::{cbor::{CBOREncode, CBOR, IntoCBOR}, varint::VarIntEncode};
+use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
 
 #[derive(Debug, Clone)]
 pub struct Tagged {
@@ -18,7 +18,7 @@ impl Tagged {
 
 impl CBOREncode for Tagged {
     fn cbor_encode(&self) -> Vec<u8> {
-        let mut buf = self.tag.varint_encode(6);
+        let mut buf = self.tag.varint_encode(MajorType::TAGGED);
         buf.extend(self.item.cbor_encode());
         buf
     }
@@ -38,15 +38,17 @@ impl std::fmt::Display for Tagged {
 
 #[cfg(test)]
 mod tests {
-    use crate::{tagged::Tagged, test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
+
+    use super::Tagged;
 
     #[test]
     fn encode() {
-        test_cbor(Tagged::new(1, "Hello"), "TAGGED(Tagged { tag: 1, item: STRING(\"Hello\") })", "c16548656c6c6f");
+        test_cbor(Tagged::new(1, "Hello"), r#"TAGGED(Tagged { tag: 1, item: STRING("Hello") })"#, "c16548656c6c6f");
     }
 
     #[test]
     fn format() {
-        assert_eq!(format!("{}", Tagged::new(32, "Hello").cbor()), "32(\"Hello\")");
+        assert_eq!(format!("{}", Tagged::new(32, "Hello").cbor()), r#"32("Hello")"#);
     }
 }

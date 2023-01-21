@@ -1,8 +1,8 @@
-use crate::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::VarIntEncode};
+use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
 
 impl<T> CBOREncode for Vec<T> where T: CBOREncode {
     fn cbor_encode(&self) -> Vec<u8> {
-        let mut buf = self.len().varint_encode(4);
+        let mut buf = self.len().varint_encode(MajorType::ARRAY);
         for item in self {
             buf.extend(item.cbor_encode());
         }
@@ -30,7 +30,7 @@ impl<T, const N: usize> IntoCBOR for &[T; N] where T: IntoCBOR {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
 
     #[test]
     fn encode() {

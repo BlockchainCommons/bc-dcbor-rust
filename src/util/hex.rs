@@ -15,3 +15,13 @@ pub fn bytes_to_hex<T>(bytes: T) -> String where T: AsRef<[u8]> {
     }
     hex
 }
+
+pub trait IntoHex {
+    fn hex(&self) -> String;
+}
+
+impl IntoHex for Vec<u8> {
+    fn hex(&self) -> String {
+        bytes_to_hex(self)
+    }
+}

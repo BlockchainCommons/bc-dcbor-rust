@@ -1,4 +1,4 @@
-use crate::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::VarIntEncode};
+use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
 
 #[derive(Clone)]
 pub struct Value(u64);
@@ -11,7 +11,7 @@ impl Value {
 
 impl CBOREncode for Value {
     fn cbor_encode(&self) -> Vec<u8> {
-        self.0.varint_encode(7)
+        self.0.varint_encode(MajorType::VALUE)
     }
 }
 
@@ -54,7 +54,7 @@ impl std::fmt::Display for Value {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
 
     use super::Value;
 

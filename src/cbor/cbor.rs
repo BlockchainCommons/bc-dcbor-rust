@@ -1,4 +1,6 @@
-use crate::{bytes::Bytes, tagged::Tagged, map::CBORMap, value::Value, string_util::flanked};
+use crate::util::string_util::flanked;
+
+use super::{bytes::Bytes, map::CBORMap, tagged::Tagged, value::Value};
 
 #[derive(Debug, Clone)]
 pub enum CBOR {
@@ -51,12 +53,12 @@ fn format_string(s: &str) -> String {
     let mut result = "".to_string();
     for c in s.chars() {
         if c == '"' {
-            result.push_str("\\\"");
+            result.push_str(r#"\""#);
         } else {
             result.push(c);
         }
     }
-    flanked(&result, "\"", "\"")
+    flanked(&result, r#"""#, r#"""#)
 }
 
 fn format_array(a: &Vec<CBOR>) -> String {
