@@ -13,7 +13,8 @@ mod test {
         let bob = Tagged::new(200, Tagged::new(24, "Bob"));
         let knows_bob = Tagged::new(200, Tagged::new(221, [knows, bob]));
         let envelope = Tagged::new(200, [alice, knows_bob]);
-        println!("{}", envelope.cbor());
-        println!("{}", envelope.cbor().encode().hex());
+        let cbor = envelope.cbor();
+        assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
+        assert_eq!(format!("{}", cbor.encode().hex()), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
     }
 }
