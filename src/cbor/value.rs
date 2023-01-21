@@ -11,21 +11,21 @@ impl Value {
 
 impl CBOREncode for Value {
     fn cbor_encode(&self) -> Vec<u8> {
-        self.0.varint_encode(MajorType::VALUE)
+        self.0.varint_encode(MajorType::Value)
     }
 }
 
 impl IntoCBOR for Value {
     fn cbor(&self) -> CBOR {
-        CBOR::VALUE(self.clone())
+        CBOR::Value(self.clone())
     }
 }
 
 impl IntoCBOR for bool {
     fn cbor(&self) -> CBOR {
         match self {
-            false => CBOR::VALUE(Value::new(20)),
-            true => CBOR::VALUE(Value::new(21)),
+            false => CBOR::Value(Value::new(20)),
+            true => CBOR::Value(Value::new(21)),
         }
     }
 }
@@ -60,9 +60,9 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(false, "VALUE(false)", "f4");
-        test_cbor(true, "VALUE(true)", "f5");
-        test_cbor(Value::new(100), "VALUE(100)", "f864");
+        test_cbor(false, "Value(false)", "f4");
+        test_cbor(true, "Value(true)", "f5");
+        test_cbor(Value::new(100), "Value(100)", "f864");
     }
 
     #[test]

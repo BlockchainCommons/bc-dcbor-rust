@@ -4,14 +4,14 @@ use super::{bytes::Bytes, map::CBORMap, tagged::Tagged, value::Value};
 
 #[derive(Debug, Clone)]
 pub enum CBOR {
-    UINT(u64),
-    NINT(i64),
-    BYTES(Bytes),
-    STRING(String),
-    ARRAY(Vec<CBOR>),
-    MAP(CBORMap),
-    TAGGED(Box<Tagged>),
-    VALUE(Value)
+    Uint(u64),
+    Nint(i64),
+    Bytes(Bytes),
+    String(String),
+    Array(Vec<CBOR>),
+    Map(CBORMap),
+    Tagged(Box<Tagged>),
+    Value(Value)
 }
 
 pub trait IntoCBOR {
@@ -31,14 +31,14 @@ impl IntoCBOR for CBOR {
 impl CBOR {
     pub fn encode(&self) -> Vec<u8> {
         match self {
-            CBOR::UINT(x) => x.cbor_encode(),
-            CBOR::NINT(x) => x.cbor_encode(),
-            CBOR::BYTES(x) => x.cbor_encode(),
-            CBOR::STRING(x) => x.cbor_encode(),
-            CBOR::ARRAY(x) => x.cbor_encode(),
-            CBOR::MAP(x) => x.cbor_encode(),
-            CBOR::TAGGED(x) => x.cbor_encode(),
-            CBOR::VALUE(x) => x.cbor_encode(),
+            CBOR::Uint(x) => x.cbor_encode(),
+            CBOR::Nint(x) => x.cbor_encode(),
+            CBOR::Bytes(x) => x.cbor_encode(),
+            CBOR::String(x) => x.cbor_encode(),
+            CBOR::Array(x) => x.cbor_encode(),
+            CBOR::Map(x) => x.cbor_encode(),
+            CBOR::Tagged(x) => x.cbor_encode(),
+            CBOR::Value(x) => x.cbor_encode(),
         }
     }
 }
@@ -74,14 +74,14 @@ fn format_map(m: &CBORMap) -> String {
 impl std::fmt::Display for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            CBOR::UINT(x) => format!("{}", x),
-            CBOR::NINT(x) => format!("{}", x),
-            CBOR::BYTES(x) => format!("{}", x),
-            CBOR::STRING(x) => format_string(x),
-            CBOR::ARRAY(x) => format_array(x),
-            CBOR::MAP(x) => format_map(x),
-            CBOR::TAGGED(x) => format!("{}", x),
-            CBOR::VALUE(x) => format!("{}", x),
+            CBOR::Uint(x) => format!("{}", x),
+            CBOR::Nint(x) => format!("{}", x),
+            CBOR::Bytes(x) => format!("{}", x),
+            CBOR::String(x) => format_string(x),
+            CBOR::Array(x) => format_array(x),
+            CBOR::Map(x) => format_map(x),
+            CBOR::Tagged(x) => format!("{}", x),
+            CBOR::Value(x) => format!("{}", x),
         };
         f.write_str(&s)
     }

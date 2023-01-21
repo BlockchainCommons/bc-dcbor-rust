@@ -18,7 +18,7 @@ impl Tagged {
 
 impl CBOREncode for Tagged {
     fn cbor_encode(&self) -> Vec<u8> {
-        let mut buf = self.tag.varint_encode(MajorType::TAGGED);
+        let mut buf = self.tag.varint_encode(MajorType::Tagged);
         buf.extend(self.item.cbor_encode());
         buf
     }
@@ -26,7 +26,7 @@ impl CBOREncode for Tagged {
 
 impl IntoCBOR for Tagged {
     fn cbor(&self) -> CBOR {
-        CBOR::TAGGED(Box::new(self.clone()))
+        CBOR::Tagged(Box::new(self.clone()))
     }
 }
 
@@ -44,7 +44,7 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(Tagged::new(1, "Hello"), r#"TAGGED(Tagged { tag: 1, item: STRING("Hello") })"#, "c16548656c6c6f");
+        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(Tagged { tag: 1, item: String("Hello") })"#, "c16548656c6c6f");
     }
 
     #[test]

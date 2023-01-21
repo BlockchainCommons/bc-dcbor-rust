@@ -7,7 +7,7 @@ pub type CBORMap = BTreeMap<Vec<u8>, (CBOR, CBOR)>;
 impl CBOREncode for CBORMap {
     fn cbor_encode(&self) -> Vec<u8> {
         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.iter().map(|x| (x.0.to_owned(), x.1.1.cbor_encode())).collect();
-        let mut buf = pairs.len().varint_encode(MajorType::MAP);
+        let mut buf = pairs.len().varint_encode(MajorType::Map);
         for pair in pairs {
             buf.extend(pair.0);
             buf.extend(pair.1);
@@ -18,7 +18,7 @@ impl CBOREncode for CBORMap {
 
 impl IntoCBOR for CBORMap {
     fn cbor(&self) -> CBOR {
-        CBOR::MAP(self.clone())
+        CBOR::Map(self.clone())
     }
 }
 
@@ -52,7 +52,7 @@ mod tests {
         m.cbor_insert("aa", 5);
         m.cbor_insert(vec![100], 6);
         test_cbor(m,
-            r#"MAP({[10]: (UINT(10), UINT(1)), [24, 100]: (UINT(100), UINT(2)), [32]: (NINT(-1), UINT(3)), [97, 122]: (STRING("z"), UINT(4)), [98, 97, 97]: (STRING("aa"), UINT(5)), [129, 24, 100]: (ARRAY([UINT(100)]), UINT(6)), [129, 32]: (ARRAY([NINT(-1)]), UINT(7)), [244]: (VALUE(false), UINT(8))})"#,
+            r#"Map({[10]: (Uint(10), Uint(1)), [24, 100]: (Uint(100), Uint(2)), [32]: (Nint(-1), Uint(3)), [97, 122]: (String("z"), Uint(4)), [98, 97, 97]: (String("aa"), Uint(5)), [129, 24, 100]: (Array([Uint(100)]), Uint(6)), [129, 32]: (Array([Nint(-1)]), Uint(7)), [244]: (Value(false), Uint(8))})"#,
             "a80a011864022003617a046261610581186406812007f408");
     }
 

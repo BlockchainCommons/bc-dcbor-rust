@@ -2,7 +2,7 @@ use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType
 
 impl<T> CBOREncode for Vec<T> where T: CBOREncode {
     fn cbor_encode(&self) -> Vec<u8> {
-        let mut buf = self.len().varint_encode(MajorType::ARRAY);
+        let mut buf = self.len().varint_encode(MajorType::Array);
         for item in self {
             buf.extend(item.cbor_encode());
         }
@@ -12,19 +12,19 @@ impl<T> CBOREncode for Vec<T> where T: CBOREncode {
 
 impl<T> IntoCBOR for Vec<T> where T: IntoCBOR {
     fn cbor(&self) -> CBOR {
-        CBOR::ARRAY(self.iter().map(|x| x.cbor()).collect())
+        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 }
 
 impl<T, const N: usize> IntoCBOR for [T; N] where T: IntoCBOR {
     fn cbor(&self) -> CBOR {
-        CBOR::ARRAY(self.iter().map(|x| x.cbor()).collect())
+        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 }
 
 impl<T, const N: usize> IntoCBOR for &[T; N] where T: IntoCBOR {
     fn cbor(&self) -> CBOR {
-        CBOR::ARRAY(self.iter().map(|x| x.cbor()).collect())
+        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 }
 
@@ -34,9 +34,9 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(vec![1, 2, 3], "ARRAY([UINT(1), UINT(2), UINT(3)])", "83010203");
-        test_cbor([1, 2, 3], "ARRAY([UINT(1), UINT(2), UINT(3)])", "83010203");
-        test_cbor(&[1, -2, 3], "ARRAY([UINT(1), NINT(-2), UINT(3)])", "83012103");
+        test_cbor(vec![1, 2, 3], "Array([Uint(1), Uint(2), Uint(3)])", "83010203");
+        test_cbor([1, 2, 3], "Array([Uint(1), Uint(2), Uint(3)])", "83010203");
+        test_cbor(&[1, -2, 3], "Array([Uint(1), Nint(-2), Uint(3)])", "83012103");
     }
 
     #[test]

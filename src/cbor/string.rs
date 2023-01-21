@@ -2,7 +2,7 @@ use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType
 
 impl CBOREncode for &str {
     fn cbor_encode(&self) -> Vec<u8> {
-        let mut buf = self.len().varint_encode(MajorType::STRING);
+        let mut buf = self.len().varint_encode(MajorType::String);
         for byte in self.bytes() {
             buf.push(byte);
         }
@@ -18,7 +18,7 @@ impl CBOREncode for String {
 
 impl IntoCBOR for &str {
     fn cbor(&self) -> CBOR {
-        CBOR::STRING(self.to_string())
+        CBOR::String(self.to_string())
     }
 }
 
@@ -28,7 +28,7 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor("Hello", r#"STRING("Hello")"#, "6548656c6c6f");
+        test_cbor("Hello", r#"String("Hello")"#, "6548656c6c6f");
     }
 
     #[test]

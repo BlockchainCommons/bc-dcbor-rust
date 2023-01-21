@@ -18,7 +18,7 @@ impl Bytes {
 impl CBOREncode for Bytes {
     fn cbor_encode(&self) -> Vec<u8> {
         let a = &self.0;
-        let mut buf = a.len().varint_encode(MajorType::BYTES);
+        let mut buf = a.len().varint_encode(MajorType::Bytes);
         for b in a {
             buf.push(*b);
         }
@@ -28,7 +28,7 @@ impl CBOREncode for Bytes {
 
 impl IntoCBOR for Bytes {
     fn cbor(&self) -> CBOR {
-        CBOR::BYTES(self.to_owned())
+        CBOR::Bytes(self.to_owned())
     }
 }
 
@@ -54,8 +54,8 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(Bytes::new([0x11, 0x22, 0x33]), "BYTES(112233)", "43112233");
-        test_cbor(Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"), "BYTES(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)", "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7");
+        test_cbor(Bytes::new([0x11, 0x22, 0x33]), "Bytes(112233)", "43112233");
+        test_cbor(Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"), "Bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)", "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7");
     }
 
     #[test]
