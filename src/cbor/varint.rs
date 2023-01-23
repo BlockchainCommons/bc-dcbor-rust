@@ -24,11 +24,11 @@ fn type_bits(t: MajorType) -> u8 {
     b << 5
 }
 
-pub trait VarIntEncode {
+pub trait EncodeVarInt {
     fn varint_encode(&self, major_type: MajorType) -> Vec<u8>;
 }
 
-impl VarIntEncode for u8 {
+impl EncodeVarInt for u8 {
     fn varint_encode(&self, major_type: MajorType) -> Vec<u8> {
         if *self <= 23 {
             vec![*self | type_bits(major_type)]
@@ -41,7 +41,7 @@ impl VarIntEncode for u8 {
     }
 }
 
-impl VarIntEncode for u16 {
+impl EncodeVarInt for u16 {
     fn varint_encode(&self, major_type: MajorType) -> Vec<u8> {
         if *self <= u8::MAX as u16 {
             (*self as u8).varint_encode(major_type)
@@ -54,7 +54,7 @@ impl VarIntEncode for u16 {
     }
 }
 
-impl VarIntEncode for u32 {
+impl EncodeVarInt for u32 {
     fn varint_encode(&self, major_type: MajorType) -> Vec<u8> {
         if *self <= u16::MAX as u32 {
             (*self as u16).varint_encode(major_type)
@@ -68,7 +68,7 @@ impl VarIntEncode for u32 {
     }
 }
 
-impl VarIntEncode for u64 {
+impl EncodeVarInt for u64 {
     fn varint_encode(&self, major_type: MajorType) -> Vec<u8> {
         if *self <= u32::MAX as u64 {
             (*self as u32).varint_encode(major_type)
@@ -84,7 +84,7 @@ impl VarIntEncode for u64 {
     }
 }
 
-impl VarIntEncode for usize {
+impl EncodeVarInt for usize {
     fn varint_encode(&self, major_type: MajorType) -> Vec<u8> {
         match usize::BITS {
             32 => (*self as u32).varint_encode(major_type),

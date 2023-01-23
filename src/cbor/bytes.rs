@@ -1,6 +1,6 @@
 use crate::util::hex::{hex_to_bytes, bytes_to_hex};
 
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 pub struct Bytes(Vec<u8>);

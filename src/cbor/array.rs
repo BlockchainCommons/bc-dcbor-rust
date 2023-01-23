@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl<T> EncodeCBOR for Vec<T> where T: EncodeCBOR {
     fn encode_cbor(&self) -> Vec<u8> {

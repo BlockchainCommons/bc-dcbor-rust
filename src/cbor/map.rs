@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
 
 pub type CBORMap = BTreeMap<Vec<u8>, (CBOR, CBOR)>;
 
