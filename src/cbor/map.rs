@@ -7,7 +7,7 @@ pub type CBORMap = BTreeMap<Vec<u8>, (CBOR, CBOR)>;
 impl EncodeCBOR for CBORMap {
     fn encode_cbor(&self) -> Vec<u8> {
         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.iter().map(|x| (x.0.to_owned(), x.1.1.encode_cbor())).collect();
-        let mut buf = pairs.len().varint_encode(MajorType::Map);
+        let mut buf = pairs.len().encode_varint(MajorType::Map);
         for pair in pairs {
             buf.extend(pair.0);
             buf.extend(pair.1);

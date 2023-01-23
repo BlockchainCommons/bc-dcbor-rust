@@ -2,7 +2,7 @@ use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, M
 
 impl EncodeCBOR for &str {
     fn encode_cbor(&self) -> Vec<u8> {
-        let mut buf = self.len().varint_encode(MajorType::String);
+        let mut buf = self.len().encode_varint(MajorType::String);
         for byte in self.bytes() {
             buf.push(byte);
         }

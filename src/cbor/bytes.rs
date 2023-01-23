@@ -18,7 +18,7 @@ impl Bytes {
 impl EncodeCBOR for Bytes {
     fn encode_cbor(&self) -> Vec<u8> {
         let a = &self.0;
-        let mut buf = a.len().varint_encode(MajorType::Bytes);
+        let mut buf = a.len().encode_varint(MajorType::Bytes);
         for b in a {
             buf.push(*b);
         }

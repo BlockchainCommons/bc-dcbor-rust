@@ -11,7 +11,7 @@ impl Value {
 
 impl EncodeCBOR for Value {
     fn encode_cbor(&self) -> Vec<u8> {
-        self.0.varint_encode(MajorType::Value)
+        self.0.encode_varint(MajorType::Value)
     }
 }
 

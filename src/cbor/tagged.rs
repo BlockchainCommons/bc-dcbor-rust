@@ -18,7 +18,7 @@ impl Tagged {
 
 impl EncodeCBOR for Tagged {
     fn encode_cbor(&self) -> Vec<u8> {
-        let mut buf = self.tag.varint_encode(MajorType::Tagged);
+        let mut buf = self.tag.encode_varint(MajorType::Tagged);
         buf.extend(self.item.encode_cbor());
         buf
     }

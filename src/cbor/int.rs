@@ -2,7 +2,7 @@ use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, M
 
 impl EncodeCBOR for u8 {
     fn encode_cbor(&self) -> Vec<u8> {
-        self.varint_encode(MajorType::Uint)
+        self.encode_varint(MajorType::Uint)
     }
 }
 
@@ -20,7 +20,7 @@ impl IntoCBOR for u8 {
 
 impl EncodeCBOR for u16 {
     fn encode_cbor(&self) -> Vec<u8> {
-        self.varint_encode(MajorType::Uint)
+        self.encode_varint(MajorType::Uint)
     }
 }
 
@@ -38,7 +38,7 @@ impl IntoCBOR for u16 {
 
 impl EncodeCBOR for u32 {
     fn encode_cbor(&self) -> Vec<u8> {
-        self.varint_encode(MajorType::Uint)
+        self.encode_varint(MajorType::Uint)
     }
 }
 
@@ -56,7 +56,7 @@ impl IntoCBOR for u32 {
 
 impl EncodeCBOR for u64 {
     fn encode_cbor(&self) -> Vec<u8> {
-        self.varint_encode(MajorType::Uint)
+        self.encode_varint(MajorType::Uint)
     }
 }
 
@@ -74,7 +74,7 @@ impl IntoCBOR for u64 {
 
 impl EncodeCBOR for usize {
     fn encode_cbor(&self) -> Vec<u8> {
-        self.varint_encode(MajorType::Uint)
+        self.encode_varint(MajorType::Uint)
     }
 }
 
@@ -95,10 +95,10 @@ impl EncodeCBOR for i8 {
         if *self < 0 {
             let b = *self as i16;
             let a = (-b - 1) as u8;
-            a.varint_encode(MajorType::Nint)
+            a.encode_varint(MajorType::Nint)
         } else {
             let a = *self as u8;
-            a.varint_encode(MajorType::Uint)
+            a.encode_varint(MajorType::Uint)
         }
     }
 }
@@ -128,10 +128,10 @@ impl EncodeCBOR for i16 {
         if *self < 0 {
             let b = *self as i32;
             let a = (-b - 1) as u16;
-            a.varint_encode(MajorType::Nint)
+            a.encode_varint(MajorType::Nint)
         } else {
             let a = *self as u16;
-            a.varint_encode(MajorType::Uint)
+            a.encode_varint(MajorType::Uint)
         }
     }
 }
@@ -161,10 +161,10 @@ impl EncodeCBOR for i32 {
         if *self < 0 {
             let b = *self as i64;
             let a = (-b - 1) as u32;
-            a.varint_encode(MajorType::Nint)
+            a.encode_varint(MajorType::Nint)
         } else {
             let a = *self as u32;
-            a.varint_encode(MajorType::Uint)
+            a.encode_varint(MajorType::Uint)
         }
     }
 }
@@ -194,10 +194,10 @@ impl EncodeCBOR for i64 {
         if *self < 0 {
             let b = *self as u64;
             let a = (-(b as i128) - 1) as u64;
-            a.varint_encode(MajorType::Nint)
+            a.encode_varint(MajorType::Nint)
         } else {
             let a = *self as u64;
-            a.varint_encode(MajorType::Uint)
+            a.encode_varint(MajorType::Uint)
         }
     }
 }

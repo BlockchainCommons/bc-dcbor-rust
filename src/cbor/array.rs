@@ -2,7 +2,7 @@ use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, M
 
 impl<T> EncodeCBOR for Vec<T> where T: EncodeCBOR {
     fn encode_cbor(&self) -> Vec<u8> {
-        let mut buf = self.len().varint_encode(MajorType::Array);
+        let mut buf = self.len().encode_varint(MajorType::Array);
         for item in self {
             buf.extend(item.encode_cbor());
         }
