@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
 pub type CBORMap = BTreeMap<Vec<u8>, (CBOR, CBOR)>;
 
@@ -16,15 +16,21 @@ impl CBOREncode for CBORMap {
     }
 }
 
-impl IntoCBOR for CBORMap {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for CBORMap {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Map(self.clone())
+    }
+}
+
+impl IntoCBOR for CBORMap {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Map(self)
     }
 }
 
 pub trait CBORMapInsert {
     fn cbor_insert(&mut self, k: CBOR, v: CBOR);
-    fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: IntoCBOR, V: IntoCBOR;
+    fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR;
 }
 
 impl CBORMapInsert for CBORMap {
@@ -32,14 +38,14 @@ impl CBORMapInsert for CBORMap {
         self.insert(k.cbor_encode(), (k, v));
     }
 
-    fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: IntoCBOR, V: IntoCBOR {
-        self.cbor_insert(k.cbor(), v.cbor());
+    fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR {
+        self.cbor_insert(k.as_cbor(), v.as_cbor());
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::AsCBOR};
 
     use super::{CBORMapInsert, CBORMap};
 
@@ -65,6 +71,6 @@ mod tests {
         m.cbor_insert_into(-1, 3);
         m.cbor_insert_into(vec![-1], 7);
         m.cbor_insert_into("z", 4);
-        assert_eq!(format!("{}", m.cbor()), r#"{-1: 3, "z": 4, [-1]: 7}"#);
+        assert_eq!(format!("{}", m.as_cbor()), r#"{-1: 3, "z": 4, [-1]: 7}"#);
     }
 }

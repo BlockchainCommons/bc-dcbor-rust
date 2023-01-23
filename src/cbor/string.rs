@@ -1,4 +1,4 @@
-use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
 impl CBOREncode for &str {
     fn cbor_encode(&self) -> Vec<u8> {
@@ -16,15 +16,21 @@ impl CBOREncode for String {
     }
 }
 
-impl IntoCBOR for &str {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for &str {
+    fn as_cbor(&self) -> CBOR {
         CBOR::String(self.to_string())
+    }
+}
+
+impl IntoCBOR for String {
+    fn into_cbor(self) -> CBOR {
+        CBOR::String(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::AsCBOR};
 
     #[test]
     fn encode() {
@@ -33,6 +39,6 @@ mod tests {
 
     #[test]
     fn format() {
-        assert_eq!(format!("{}", "Hello".cbor()), r#""Hello""#);
+        assert_eq!(format!("{}", "Hello".as_cbor()), r#""Hello""#);
     }
 }

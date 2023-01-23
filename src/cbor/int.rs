@@ -1,4 +1,4 @@
-use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
 impl CBOREncode for u8 {
     fn cbor_encode(&self) -> Vec<u8> {
@@ -6,9 +6,15 @@ impl CBOREncode for u8 {
     }
 }
 
-impl IntoCBOR for u8 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for u8 {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Uint(*self as u64)
+    }
+}
+
+impl IntoCBOR for u8 {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Uint(self as u64)
     }
 }
 
@@ -18,9 +24,15 @@ impl CBOREncode for u16 {
     }
 }
 
-impl IntoCBOR for u16 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for u16 {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Uint(*self as u64)
+    }
+}
+
+impl IntoCBOR for u16 {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Uint(self as u64)
     }
 }
 
@@ -30,9 +42,15 @@ impl CBOREncode for u32 {
     }
 }
 
-impl IntoCBOR for u32 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for u32 {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Uint(*self as u64)
+    }
+}
+
+impl IntoCBOR for u32 {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Uint(self as u64)
     }
 }
 
@@ -42,9 +60,15 @@ impl CBOREncode for u64 {
     }
 }
 
-impl IntoCBOR for u64 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for u64 {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Uint(*self)
+    }
+}
+
+impl IntoCBOR for u64 {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Uint(self)
     }
 }
 
@@ -54,9 +78,15 @@ impl CBOREncode for usize {
     }
 }
 
-impl IntoCBOR for usize {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for usize {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Uint(*self as u64)
+    }
+}
+
+impl IntoCBOR for usize {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Uint(self as u64)
     }
 }
 
@@ -73,12 +103,22 @@ impl CBOREncode for i8 {
     }
 }
 
-impl IntoCBOR for i8 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for i8 {
+    fn as_cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::Nint(*self as i64)
         } else {
             CBOR::Uint(*self as u64)
+        }
+    }
+}
+
+impl IntoCBOR for i8 {
+    fn into_cbor(self) -> CBOR {
+        if self < 0 {
+            CBOR::Nint(self as i64)
+        } else {
+            CBOR::Uint(self as u64)
         }
     }
 }
@@ -96,12 +136,22 @@ impl CBOREncode for i16 {
     }
 }
 
-impl IntoCBOR for i16 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for i16 {
+    fn as_cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::Nint(*self as i64)
         } else {
             CBOR::Uint(*self as u64)
+        }
+    }
+}
+
+impl IntoCBOR for i16 {
+    fn into_cbor(self) -> CBOR {
+        if self < 0 {
+            CBOR::Nint(self as i64)
+        } else {
+            CBOR::Uint(self as u64)
         }
     }
 }
@@ -119,12 +169,22 @@ impl CBOREncode for i32 {
     }
 }
 
-impl IntoCBOR for i32 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for i32 {
+    fn as_cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::Nint(*self as i64)
         } else {
             CBOR::Uint(*self as u64)
+        }
+    }
+}
+
+impl IntoCBOR for i32 {
+    fn into_cbor(self) -> CBOR {
+        if self < 0 {
+            CBOR::Nint(self as i64)
+        } else {
+            CBOR::Uint(self as u64)
         }
     }
 }
@@ -142,12 +202,22 @@ impl CBOREncode for i64 {
     }
 }
 
-impl IntoCBOR for i64 {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for i64 {
+    fn as_cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::Nint(*self as i64)
         } else {
             CBOR::Uint(*self as u64)
+        }
+    }
+}
+
+impl IntoCBOR for i64 {
+    fn into_cbor(self) -> CBOR {
+        if self < 0 {
+            CBOR::Nint(self as i64)
+        } else {
+            CBOR::Uint(self as u64)
         }
     }
 }
@@ -255,7 +325,7 @@ mod tests {
 
     #[test]
     fn format() {
-        assert_eq!(format!("{}", 42.cbor()), "42");
-        assert_eq!(format!("{}", (-42).cbor()), "-42");
+        assert_eq!(format!("{}", 42.into_cbor()), "42");
+        assert_eq!(format!("{}", (-42).into_cbor()), "-42");
     }
 }

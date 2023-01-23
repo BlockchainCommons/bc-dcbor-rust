@@ -1,4 +1,4 @@
-use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
 #[derive(Debug, Clone)]
 pub struct Tagged {
@@ -7,8 +7,8 @@ pub struct Tagged {
 }
 
 impl Tagged {
-    pub fn new<T>(tag: u64, item: T) -> Tagged where T: IntoCBOR {
-        Tagged { tag, item: item.cbor() }
+    pub fn new<T>(tag: u64, item: T) -> Tagged where T: AsCBOR {
+        Tagged { tag, item: item.as_cbor() }
     }
 
     pub fn name(&self) -> String {
@@ -24,9 +24,15 @@ impl CBOREncode for Tagged {
     }
 }
 
-impl IntoCBOR for Tagged {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for Tagged {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Tagged(Box::new(self.clone()))
+    }
+}
+
+impl IntoCBOR for Tagged {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Tagged(Box::new(self))
     }
 }
 
@@ -44,7 +50,7 @@ impl std::fmt::Display for Tagged {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::{test_util::test_cbor, cbor::AsCBOR};
 
     use super::Tagged;
 
@@ -55,6 +61,6 @@ mod tests {
 
     #[test]
     fn format() {
-        assert_eq!(format!("{}", Tagged::new(32, "Hello").cbor()), r#"32("Hello")"#);
+        assert_eq!(format!("{}", Tagged::new(32, "Hello").as_cbor()), r#"32("Hello")"#);
     }
 }

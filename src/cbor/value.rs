@@ -1,4 +1,4 @@
-use super::{cbor::{CBOREncode, IntoCBOR, CBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
 #[derive(Clone)]
 pub struct Value(u64);
@@ -15,18 +15,30 @@ impl CBOREncode for Value {
     }
 }
 
-impl IntoCBOR for Value {
-    fn cbor(&self) -> CBOR {
+impl AsCBOR for Value {
+    fn as_cbor(&self) -> CBOR {
         CBOR::Value(self.clone())
     }
 }
 
-impl IntoCBOR for bool {
-    fn cbor(&self) -> CBOR {
+impl IntoCBOR for Value {
+    fn into_cbor(self) -> CBOR {
+        CBOR::Value(self)
+    }
+}
+
+impl AsCBOR for bool {
+    fn as_cbor(&self) -> CBOR {
         match self {
             false => CBOR::Value(Value::new(20)),
             true => CBOR::Value(Value::new(21)),
         }
+    }
+}
+
+impl IntoCBOR for bool {
+    fn into_cbor(self) -> CBOR {
+        self.as_cbor()
     }
 }
 
@@ -73,8 +85,8 @@ mod tests {
 
     #[test]
     fn format() {
-        assert_eq!(format!("{}", Value::new(20).cbor()), "false");
-        assert_eq!(format!("{}", Value::new(21).cbor()), "true");
-        assert_eq!(format!("{}", Value::new(100).cbor()), "simple(100)");
+        assert_eq!(format!("{}", Value::new(20).into_cbor()), "false");
+        assert_eq!(format!("{}", Value::new(21).into_cbor()), "true");
+        assert_eq!(format!("{}", Value::new(100).into_cbor()), "simple(100)");
     }
 }
