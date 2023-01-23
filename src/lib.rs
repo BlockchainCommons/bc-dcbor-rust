@@ -7,7 +7,7 @@ mod test {
     use crate::{cbor::{tagged::Tagged, cbor::IntoCBOR, decode::cbor_decode}, util::hex::IntoHex};
 
     #[test]
-    fn cbor_encode() {
+    fn encode_cbor() {
         let alice = Tagged::new(200, Tagged::new(24, "Alice"));
         let knows = Tagged::new(200, Tagged::new(24, "knows"));
         let bob = Tagged::new(200, Tagged::new(24, "Bob"));

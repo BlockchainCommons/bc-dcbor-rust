@@ -159,13 +159,13 @@ pub fn cbor_decode(data: &[u8]) -> Result<CBOR, Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::cbor::{cbor::{CBOREncode, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::{CBORMap, CBORMapInsert}};
+    use crate::cbor::{cbor::{EncodeCBOR, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::{CBORMap, CBORMapInsert}};
 
     use super::cbor_decode;
 
     fn test_decode<T>(value: T) where T: AsCBOR {
         let cbor = value.as_cbor();
-        let bytes = cbor.cbor_encode();
+        let bytes = cbor.encode_cbor();
         //println!("{}", bytes_to_hex(&bytes));
         let decoded_cbor = cbor_decode(&bytes).unwrap();
         assert_eq!(cbor, decoded_cbor);

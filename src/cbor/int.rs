@@ -1,7 +1,7 @@
-use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
-impl CBOREncode for u8 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for u8 {
+    fn encode_cbor(&self) -> Vec<u8> {
         self.varint_encode(MajorType::Uint)
     }
 }
@@ -18,8 +18,8 @@ impl IntoCBOR for u8 {
     }
 }
 
-impl CBOREncode for u16 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for u16 {
+    fn encode_cbor(&self) -> Vec<u8> {
         self.varint_encode(MajorType::Uint)
     }
 }
@@ -36,8 +36,8 @@ impl IntoCBOR for u16 {
     }
 }
 
-impl CBOREncode for u32 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for u32 {
+    fn encode_cbor(&self) -> Vec<u8> {
         self.varint_encode(MajorType::Uint)
     }
 }
@@ -54,8 +54,8 @@ impl IntoCBOR for u32 {
     }
 }
 
-impl CBOREncode for u64 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for u64 {
+    fn encode_cbor(&self) -> Vec<u8> {
         self.varint_encode(MajorType::Uint)
     }
 }
@@ -72,8 +72,8 @@ impl IntoCBOR for u64 {
     }
 }
 
-impl CBOREncode for usize {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for usize {
+    fn encode_cbor(&self) -> Vec<u8> {
         self.varint_encode(MajorType::Uint)
     }
 }
@@ -90,8 +90,8 @@ impl IntoCBOR for usize {
     }
 }
 
-impl CBOREncode for i8 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for i8 {
+    fn encode_cbor(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as i16;
             let a = (-b - 1) as u8;
@@ -123,8 +123,8 @@ impl IntoCBOR for i8 {
     }
 }
 
-impl CBOREncode for i16 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for i16 {
+    fn encode_cbor(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as i32;
             let a = (-b - 1) as u16;
@@ -156,8 +156,8 @@ impl IntoCBOR for i16 {
     }
 }
 
-impl CBOREncode for i32 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for i32 {
+    fn encode_cbor(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as i64;
             let a = (-b - 1) as u32;
@@ -189,8 +189,8 @@ impl IntoCBOR for i32 {
     }
 }
 
-impl CBOREncode for i64 {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for i64 {
+    fn encode_cbor(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as u64;
             let a = (-(b as i128) - 1) as u64;

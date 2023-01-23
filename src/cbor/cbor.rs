@@ -22,8 +22,8 @@ pub trait IntoCBOR {
     fn into_cbor(self) -> CBOR;
 }
 
-pub trait CBOREncode {
-    fn cbor_encode(&self) -> Vec<u8>;
+pub trait EncodeCBOR {
+    fn encode_cbor(&self) -> Vec<u8>;
 }
 
 impl AsCBOR for CBOR {
@@ -41,20 +41,20 @@ impl IntoCBOR for CBOR {
 impl CBOR {
     pub fn encode(&self) -> Vec<u8> {
         match self {
-            CBOR::Uint(x) => x.cbor_encode(),
-            CBOR::Nint(x) => x.cbor_encode(),
-            CBOR::Bytes(x) => x.cbor_encode(),
-            CBOR::String(x) => x.cbor_encode(),
-            CBOR::Array(x) => x.cbor_encode(),
-            CBOR::Map(x) => x.cbor_encode(),
-            CBOR::Tagged(x) => x.cbor_encode(),
-            CBOR::Value(x) => x.cbor_encode(),
+            CBOR::Uint(x) => x.encode_cbor(),
+            CBOR::Nint(x) => x.encode_cbor(),
+            CBOR::Bytes(x) => x.encode_cbor(),
+            CBOR::String(x) => x.encode_cbor(),
+            CBOR::Array(x) => x.encode_cbor(),
+            CBOR::Map(x) => x.encode_cbor(),
+            CBOR::Tagged(x) => x.encode_cbor(),
+            CBOR::Value(x) => x.encode_cbor(),
         }
     }
 }
 
-impl CBOREncode for CBOR {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for CBOR {
+    fn encode_cbor(&self) -> Vec<u8> {
         self.encode()
     }
 }

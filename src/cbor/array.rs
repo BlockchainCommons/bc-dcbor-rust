@@ -1,10 +1,10 @@
-use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
-impl<T> CBOREncode for Vec<T> where T: CBOREncode {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl<T> EncodeCBOR for Vec<T> where T: EncodeCBOR {
+    fn encode_cbor(&self) -> Vec<u8> {
         let mut buf = self.len().varint_encode(MajorType::Array);
         for item in self {
-            buf.extend(item.cbor_encode());
+            buf.extend(item.encode_cbor());
         }
         buf
     }

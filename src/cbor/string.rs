@@ -1,7 +1,7 @@
-use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
-impl CBOREncode for &str {
-    fn cbor_encode(&self) -> Vec<u8> {
+impl EncodeCBOR for &str {
+    fn encode_cbor(&self) -> Vec<u8> {
         let mut buf = self.len().varint_encode(MajorType::String);
         for byte in self.bytes() {
             buf.push(byte);
@@ -10,9 +10,9 @@ impl CBOREncode for &str {
     }
 }
 
-impl CBOREncode for String {
-    fn cbor_encode(&self) -> Vec<u8> {
-        self.as_str().cbor_encode()
+impl EncodeCBOR for String {
+    fn encode_cbor(&self) -> Vec<u8> {
+        self.as_str().encode_cbor()
     }
 }
 

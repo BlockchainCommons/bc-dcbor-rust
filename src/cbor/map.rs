@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 
-use super::{cbor::{CBOREncode, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{VarIntEncode, MajorType}};
 
 pub type CBORMap = BTreeMap<Vec<u8>, (CBOR, CBOR)>;
 
-impl CBOREncode for CBORMap {
-    fn cbor_encode(&self) -> Vec<u8> {
-        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.iter().map(|x| (x.0.to_owned(), x.1.1.cbor_encode())).collect();
+impl EncodeCBOR for CBORMap {
+    fn encode_cbor(&self) -> Vec<u8> {
+        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.iter().map(|x| (x.0.to_owned(), x.1.1.encode_cbor())).collect();
         let mut buf = pairs.len().varint_encode(MajorType::Map);
         for pair in pairs {
             buf.extend(pair.0);
@@ -35,7 +35,7 @@ pub trait CBORMapInsert {
 
 impl CBORMapInsert for CBORMap {
     fn cbor_insert(&mut self, k: CBOR, v: CBOR) {
-        self.insert(k.cbor_encode(), (k, v));
+        self.insert(k.encode_cbor(), (k, v));
     }
 
     fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR {
