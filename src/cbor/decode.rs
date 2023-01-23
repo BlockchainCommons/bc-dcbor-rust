@@ -4,9 +4,8 @@ use super::{cbor::{CBOR, AsCBOR, IntoCBOR}, varint::MajorType, bytes::Bytes, tag
 
 #[derive(Debug)]
 pub enum Error {
-    Empty,
-    BadHeaderValue(u8),
     Underrun,
+    UnsupportedHeaderValue(u8),
     NonCanonicalInt,
     InvalidString(Utf8Error),
 }
@@ -14,8 +13,7 @@ pub enum Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            Error::Empty => format!("the data to decode is empty"),
-            Error::BadHeaderValue(v) => format!("unsupported value in header ({})", v),
+            Error::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
             Error::Underrun => format!("early end of data"),
             Error::NonCanonicalInt => format!("non-canonical int format"),
             Error::InvalidString(err) => format!("invalid string format: {:?}", err),
@@ -45,7 +43,7 @@ fn parse_header(header: u8) -> (MajorType, u8) {
 
 fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), Error> {
     if data.is_empty() {
-        return Err(Error::Empty)
+        return Err(Error::Underrun)
     }
     let (major_type, header_value) = parse_header(data[0]);
     let data_remaining = data.len() - 1;
@@ -89,7 +87,7 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), Error> {
             if val <= u32::MAX as u64 { return Err(Error::NonCanonicalInt) }
             (val, 9)
         },
-        v => return Err(Error::BadHeaderValue(v))
+        v => return Err(Error::UnsupportedHeaderValue(v))
     };
     Ok((major_type, value, varint_len))
 }
@@ -101,9 +99,9 @@ fn parse_bytes<'a>(data: &'a [u8], len: usize) -> Result<&'a [u8], Error> {
     Ok(&data[0..len])
 }
 
-pub fn cbor_decode_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
+fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
     if data.is_empty() {
-        return Err(Error::Empty)
+        return Err(Error::Underrun)
     }
     let (major_type, value, header_varint_len) = parse_header_varint(&data)?;
     match major_type {
@@ -125,26 +123,26 @@ pub fn cbor_decode_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
             let mut pos = header_varint_len;
             let mut items = Vec::new();
             for _ in 0..value {
-                let (item, item_len) = cbor_decode_internal(&data[pos..])?;
+                let (item, item_len) = decode_cbor_internal(&data[pos..])?;
                 items.push(item);
                 pos += item_len;
             }
-            Ok((CBOR::Array(items), pos))
+            Ok((items.into_cbor(), pos))
         },
         MajorType::Map => {
             let mut pos = header_varint_len;
             let mut map = CBORMap::new();
             for _ in 0..value {
-                let (key, key_len) = cbor_decode_internal(&data[pos..])?;
+                let (key, key_len) = decode_cbor_internal(&data[pos..])?;
                 pos += key_len;
-                let (value, value_len) = cbor_decode_internal(&data[pos..])?;
-                map.cbor_insert(key, value);
+                let (value, value_len) = decode_cbor_internal(&data[pos..])?;
                 pos += value_len;
+                map.cbor_insert(key, value);
             }
-            Ok((CBOR::Map(map), pos))
+            Ok((map.into_cbor(), pos))
         },
         MajorType::Tagged => {
-            let (item, item_len) = cbor_decode_internal(&data[header_varint_len..])?;
+            let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
             let tagged = Tagged::new(value, item);
             Ok((tagged.into_cbor(), header_varint_len + item_len))
         },
@@ -152,8 +150,8 @@ pub fn cbor_decode_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
     }
 }
 
-pub fn cbor_decode(data: &[u8]) -> Result<CBOR, Error> {
-    let (cbor, _) = cbor_decode_internal(data)?;
+pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
+    let (cbor, _) = decode_cbor_internal(data)?;
     Ok(cbor)
 }
 
@@ -161,13 +159,13 @@ pub fn cbor_decode(data: &[u8]) -> Result<CBOR, Error> {
 mod test {
     use crate::cbor::{cbor::{EncodeCBOR, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::{CBORMap, CBORMapInsert}};
 
-    use super::cbor_decode;
+    use super::decode_cbor;
 
     fn test_decode<T>(value: T) where T: AsCBOR {
         let cbor = value.as_cbor();
         let bytes = cbor.encode_cbor();
         //println!("{}", bytes_to_hex(&bytes));
-        let decoded_cbor = cbor_decode(&bytes).unwrap();
+        let decoded_cbor = decode_cbor(&bytes).unwrap();
         assert_eq!(cbor, decoded_cbor);
     }
 
