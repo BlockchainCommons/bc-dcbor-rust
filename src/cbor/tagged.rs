@@ -30,6 +30,12 @@ impl IntoCBOR for Tagged {
     }
 }
 
+impl PartialEq for Tagged {
+    fn eq(&self, other: &Self) -> bool {
+        self.tag == other.tag && self.item == other.item
+    }
+}
+
 impl std::fmt::Display for Tagged {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&format!("{}({})", self.name(), self.item))

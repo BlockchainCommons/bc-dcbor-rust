@@ -16,6 +16,12 @@ impl<T> IntoCBOR for Vec<T> where T: IntoCBOR {
     }
 }
 
+impl IntoCBOR for Vec<Box<dyn IntoCBOR>> {
+    fn cbor(&self) -> CBOR {
+        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
+    }
+}
+
 impl<T, const N: usize> IntoCBOR for [T; N] where T: IntoCBOR {
     fn cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())

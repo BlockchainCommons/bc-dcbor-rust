@@ -49,6 +49,22 @@ impl CBOREncode for CBOR {
     }
 }
 
+impl PartialEq for CBOR {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Uint(l0), Self::Uint(r0)) => l0 == r0,
+            (Self::Nint(l0), Self::Nint(r0)) => l0 == r0,
+            (Self::Bytes(l0), Self::Bytes(r0)) => l0 == r0,
+            (Self::String(l0), Self::String(r0)) => l0 == r0,
+            (Self::Array(l0), Self::Array(r0)) => l0 == r0,
+            (Self::Map(l0), Self::Map(r0)) => l0 == r0,
+            (Self::Tagged(l0), Self::Tagged(r0)) => l0 == r0,
+            (Self::Value(l0), Self::Value(r0)) => l0 == r0,
+            _ => false,
+        }
+    }
+}
+
 fn format_string(s: &str) -> String {
     let mut result = "".to_string();
     for c in s.chars() {
