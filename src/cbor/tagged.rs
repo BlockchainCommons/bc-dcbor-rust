@@ -58,9 +58,4 @@ mod tests {
     fn encode() {
         test_cbor(Tagged::new(1, "Hello"), r#"Tagged(Tagged { tag: 1, item: String("Hello") })"#, r#"1("Hello")"#, "c16548656c6c6f");
     }
-
-    #[test]
-    fn format() {
-        assert_eq!(format!("{}", Tagged::new(32, "Hello").as_cbor()), r#"32("Hello")"#);
-    }
 }

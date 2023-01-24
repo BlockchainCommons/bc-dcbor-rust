@@ -74,9 +74,4 @@ mod tests {
             "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
         );
     }
-
-    #[test]
-    fn format() {
-        assert_eq!(format!("{}", Bytes::new([0x11, 0x22, 0x33]).into_cbor()), "h'112233'");
-    }
 }

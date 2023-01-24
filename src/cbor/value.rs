@@ -82,11 +82,4 @@ mod tests {
         test_cbor(true, "Value(true)", "true", "f5");
         test_cbor(Value::new(100), "Value(100)", "simple(100)", "f864");
     }
-
-    #[test]
-    fn format() {
-        assert_eq!(format!("{}", Value::new(20).into_cbor()), "false");
-        assert_eq!(format!("{}", Value::new(21).into_cbor()), "true");
-        assert_eq!(format!("{}", Value::new(100).into_cbor()), "simple(100)");
-    }
 }

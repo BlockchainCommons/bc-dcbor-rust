@@ -65,13 +65,4 @@ mod tests {
             r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
             "a80a011864022003617a046261610581186406812007f408");
     }
-
-    #[test]
-    fn format() {
-        let mut m = CBORMap::new();
-        m.cbor_insert_into(-1, 3);
-        m.cbor_insert_into(vec![-1], 7);
-        m.cbor_insert_into("z", 4);
-        assert_eq!(format!("{}", m.as_cbor()), r#"{-1: 3, "z": 4, [-1]: 7}"#);
-    }
 }

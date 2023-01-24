@@ -36,9 +36,4 @@ mod tests {
     fn encode() {
         test_cbor("Hello", r#"String("Hello")"#, r#""Hello""#, "6548656c6c6f");
     }
-
-    #[test]
-    fn format() {
-        assert_eq!(format!("{}", "Hello".as_cbor()), r#""Hello""#);
-    }
 }
