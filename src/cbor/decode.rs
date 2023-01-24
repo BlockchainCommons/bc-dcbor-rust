@@ -8,7 +8,8 @@ pub enum Error {
     UnsupportedHeaderValue(u8),
     NonCanonicalInt,
     InvalidString(Utf8Error),
-    UnusedData(usize)
+    UnusedData(usize),
+    MisorderedMapKey,
 }
 
 impl std::fmt::Display for Error {
@@ -19,6 +20,7 @@ impl std::fmt::Display for Error {
             Error::NonCanonicalInt => format!("non-canonical int format"),
             Error::InvalidString(err) => format!("invalid string format: {:?}", err),
             Error::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
+            Error::MisorderedMapKey => format!("mis-ordered map key")
         };
         f.write_str(&s)
     }
@@ -150,7 +152,9 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                 pos += key_len;
                 let (value, value_len) = decode_cbor_internal(&data[pos..])?;
                 pos += value_len;
-                map.cbor_insert(key, value);
+                if !map.cbor_insert_next(key, value) {
+                    return Err(Error::MisorderedMapKey);
+                }
             }
             Ok((map.into_cbor(), pos))
         },

@@ -101,6 +101,24 @@ impl CBORMap {
     pub fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR {
         self.cbor_insert(k.as_cbor(), v.as_cbor());
     }
+
+    pub fn cbor_insert_next(&mut self, k: CBOR, v: CBOR) -> bool {
+        match self.0.last_entry() {
+            None => {
+                self.cbor_insert(k, v);
+                true
+            },
+            Some(entry) => {
+                let new_key = CBORMapKey::new(k.encode_cbor());
+                let entry_key = entry.key();
+                if entry_key >= &new_key {
+                    return false
+                }
+                self.0.insert(new_key, CBORMapValue::new(k, v));
+                true
+            }
+        }
+    }
 }
 
 impl PartialEq for CBORMap {
@@ -145,7 +163,7 @@ impl std::fmt::Debug for CBORMap {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::test_util::test_cbor;
+    use crate::{cbor::{test_util::test_cbor, decode::{decode_cbor, Error}}, util::hex::hex_to_bytes};
 
     use super::CBORMap;
 
@@ -164,5 +182,11 @@ mod tests {
             r#"Map({0x0a: (UInt(10), UInt(1)), 0x1864: (UInt(100), UInt(2)), 0x20: (NInt(-1), UInt(3)), 0x617a: (String("z"), UInt(4)), 0x626161: (String("aa"), UInt(5)), 0x811864: (Array([UInt(100)]), UInt(6)), 0x8120: (Array([NInt(-1)]), UInt(7)), 0xf4: (Value(false), UInt(8))})"#,
             r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
             "a80a011864022003617a046261610581186406812007f408");
+    }
+
+    #[test]
+    fn misordered() {
+        let cbor = decode_cbor(&hex_to_bytes("a2026141016142"));
+        assert_eq!(cbor, Err(Error::MisorderedMapKey));
     }
 }
