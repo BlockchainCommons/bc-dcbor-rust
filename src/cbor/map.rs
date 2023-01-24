@@ -93,6 +93,14 @@ impl CBORMap {
     pub fn iter<'a>(&'a self) -> CBORMapIter<'a> {
         CBORMapIter::new(self.0.values())
     }
+
+    pub fn cbor_insert(&mut self, k: CBOR, v: CBOR) {
+        self.0.insert(CBORMapKey::new(k.encode_cbor()), CBORMapValue::new(k, v));
+    }
+
+    pub fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR {
+        self.cbor_insert(k.as_cbor(), v.as_cbor());
+    }
 }
 
 impl PartialEq for CBORMap {
@@ -129,21 +137,6 @@ impl IntoCBOR for CBORMap {
     }
 }
 
-pub trait CBORMapInsert {
-    fn cbor_insert(&mut self, k: CBOR, v: CBOR);
-    fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR;
-}
-
-impl CBORMapInsert for CBORMap {
-    fn cbor_insert(&mut self, k: CBOR, v: CBOR) {
-        self.0.insert(CBORMapKey::new(k.encode_cbor()), CBORMapValue::new(k, v));
-    }
-
-    fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR {
-        self.cbor_insert(k.as_cbor(), v.as_cbor());
-    }
-}
-
 impl std::fmt::Debug for CBORMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{:?}", self.0))
@@ -154,7 +147,7 @@ impl std::fmt::Debug for CBORMap {
 mod tests {
     use crate::cbor::test_util::test_cbor;
 
-    use super::{CBORMapInsert, CBORMap};
+    use super::CBORMap;
 
     #[test]
     fn encode() {
