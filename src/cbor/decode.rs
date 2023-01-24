@@ -8,6 +8,7 @@ pub enum Error {
     UnsupportedHeaderValue(u8),
     NonCanonicalInt,
     InvalidString(Utf8Error),
+    UnusedData(usize)
 }
 
 impl std::fmt::Display for Error {
@@ -17,12 +18,24 @@ impl std::fmt::Display for Error {
             Error::Underrun => format!("early end of data"),
             Error::NonCanonicalInt => format!("non-canonical int format"),
             Error::InvalidString(err) => format!("invalid string format: {:?}", err),
+            Error::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
         };
         f.write_str(&s)
     }
 }
 
 impl std::error::Error for Error {
+}
+
+impl PartialEq for Error {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::UnsupportedHeaderValue(l0), Self::UnsupportedHeaderValue(r0)) => l0 == r0,
+            (Self::InvalidString(l0), Self::InvalidString(r0)) => l0 == r0,
+            (Self::UnusedData(l0), Self::UnusedData(r0)) => l0 == r0,
+            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
+        }
+    }
 }
 
 fn parse_header(header: u8) -> (MajorType, u8) {
@@ -151,13 +164,17 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
 }
 
 pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
-    let (cbor, _) = decode_cbor_internal(data)?;
+    let (cbor, len) = decode_cbor_internal(data)?;
+    let remaining = data.len() - len;
+    if remaining > 0 {
+        return Err(Error::UnusedData(remaining));
+    }
     Ok(cbor)
 }
 
 #[cfg(test)]
 mod test {
-    use crate::cbor::{cbor::{EncodeCBOR, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::{CBORMap, CBORMapInsert}};
+    use crate::{cbor::{cbor::{EncodeCBOR, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::{CBORMap, CBORMapInsert}, decode::Error}, util::hex::hex_to_bytes};
 
     use super::decode_cbor;
 
@@ -200,5 +217,11 @@ mod test {
         test_decode(false);
         test_decode(true);
         test_decode(Value::new(32));
+    }
+
+    #[test]
+    fn unused_data() {
+        let cbor = decode_cbor(&hex_to_bytes("0001"));
+        assert_eq!(cbor, Err(Error::UnusedData(1)));
     }
 }
