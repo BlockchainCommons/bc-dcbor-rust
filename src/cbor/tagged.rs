@@ -2,8 +2,8 @@ use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, M
 
 #[derive(Debug, Clone)]
 pub struct Tagged {
-    tag: u64,
-    item: CBOR,
+    pub tag: u64,
+    pub item: CBOR,
 }
 
 impl Tagged {
@@ -56,6 +56,6 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(Tagged { tag: 1, item: String("Hello") })"#, r#"1("Hello")"#, "c16548656c6c6f");
+        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(1, String("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
     }
 }

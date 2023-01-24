@@ -2,7 +2,7 @@ use crate::util::string_util::flanked;
 
 use super::{bytes::Bytes, map::CBORMap, tagged::Tagged, value::Value};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum CBOR {
     UInt(u64),
     NInt(i64),
@@ -93,8 +93,23 @@ fn format_array(a: &Vec<CBOR>) -> String {
 }
 
 fn format_map(m: &CBORMap) -> String {
-    let s: Vec<String> = m.values().map(|x| format!("{}: {}", x.0, x.1)).collect();
+    let s: Vec<String> = m.iter().map(|x| format!("{}: {}", x.0, x.1)).collect();
     flanked(&s.join(", "), "{", "}")
+}
+
+impl std::fmt::Debug for CBOR {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UInt(x) => f.debug_tuple("UInt").field(x).finish(),
+            Self::NInt(x) => f.debug_tuple("NInt").field(x).finish(),
+            Self::Bytes(x) => f.debug_tuple("Bytes").field(x).finish(),
+            Self::String(x) => f.debug_tuple("String").field(x).finish(),
+            Self::Array(x) => f.debug_tuple("Array").field(x).finish(),
+            Self::Map(x) => f.debug_tuple("Map").field(x).finish(),
+            Self::Tagged(x) => f.write_fmt(format_args!("Tagged({}, {:?})", x.tag, x.item)),
+            Self::Value(x) => f.debug_tuple("Value").field(x).finish(),
+        }
+    }
 }
 
 impl std::fmt::Display for CBOR {
