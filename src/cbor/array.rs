@@ -48,7 +48,7 @@ impl<T, const N: usize> AsCBOR for &[T; N] where T: AsCBOR {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::AsCBOR};
+    use crate::cbor::test_util::test_cbor;
 
     #[test]
     fn encode() {

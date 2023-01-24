@@ -60,7 +60,7 @@ impl std::fmt::Display for Bytes {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::test_util::test_cbor;
 
     use super::Bytes;
 

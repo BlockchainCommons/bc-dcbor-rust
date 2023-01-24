@@ -224,7 +224,7 @@ impl IntoCBOR for i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::IntoCBOR};
+    use crate::cbor::test_util::test_cbor;
 
     #[test]
     fn encode_unsigned() {

@@ -45,7 +45,7 @@ impl CBORMapInsert for CBORMap {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::{test_util::test_cbor, cbor::AsCBOR};
+    use crate::cbor::test_util::test_cbor;
 
     use super::{CBORMapInsert, CBORMap};
 
