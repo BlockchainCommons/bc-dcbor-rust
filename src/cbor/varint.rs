@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub enum MajorType {
-    Uint,
-    Nint,
+    UInt,
+    NInt,
     Bytes,
     String,
     Array,
@@ -12,8 +12,8 @@ pub enum MajorType {
 
 fn type_bits(t: MajorType) -> u8 {
     let b = match t {
-        MajorType::Uint => 0,
-        MajorType::Nint => 1,
+        MajorType::UInt => 0,
+        MajorType::NInt => 1,
         MajorType::Bytes => 2,
         MajorType::String => 3,
         MajorType::Array => 4,

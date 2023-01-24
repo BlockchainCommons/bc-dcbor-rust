@@ -4,8 +4,8 @@ use super::{bytes::Bytes, map::CBORMap, tagged::Tagged, value::Value};
 
 #[derive(Debug, Clone)]
 pub enum CBOR {
-    Uint(u64),
-    Nint(i64),
+    UInt(u64),
+    NInt(i64),
     Bytes(Bytes),
     String(String),
     Array(Vec<CBOR>),
@@ -41,8 +41,8 @@ impl IntoCBOR for CBOR {
 impl CBOR {
     pub fn encode(&self) -> Vec<u8> {
         match self {
-            CBOR::Uint(x) => x.encode_cbor(),
-            CBOR::Nint(x) => x.encode_cbor(),
+            CBOR::UInt(x) => x.encode_cbor(),
+            CBOR::NInt(x) => x.encode_cbor(),
             CBOR::Bytes(x) => x.encode_cbor(),
             CBOR::String(x) => x.encode_cbor(),
             CBOR::Array(x) => x.encode_cbor(),
@@ -62,8 +62,8 @@ impl EncodeCBOR for CBOR {
 impl PartialEq for CBOR {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Uint(l0), Self::Uint(r0)) => l0 == r0,
-            (Self::Nint(l0), Self::Nint(r0)) => l0 == r0,
+            (Self::UInt(l0), Self::UInt(r0)) => l0 == r0,
+            (Self::NInt(l0), Self::NInt(r0)) => l0 == r0,
             (Self::Bytes(l0), Self::Bytes(r0)) => l0 == r0,
             (Self::String(l0), Self::String(r0)) => l0 == r0,
             (Self::Array(l0), Self::Array(r0)) => l0 == r0,
@@ -100,8 +100,8 @@ fn format_map(m: &CBORMap) -> String {
 impl std::fmt::Display for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            CBOR::Uint(x) => format!("{}", x),
-            CBOR::Nint(x) => format!("{}", x),
+            CBOR::UInt(x) => format!("{}", x),
+            CBOR::NInt(x) => format!("{}", x),
             CBOR::Bytes(x) => format!("{}", x),
             CBOR::String(x) => format_string(x),
             CBOR::Array(x) => format_array(x),

@@ -27,8 +27,8 @@ impl std::error::Error for Error {
 
 fn parse_header(header: u8) -> (MajorType, u8) {
     let major_type = match header >> 5 {
-        0 => MajorType::Uint,
-        1 => MajorType::Nint,
+        0 => MajorType::UInt,
+        1 => MajorType::NInt,
         2 => MajorType::Bytes,
         3 => MajorType::String,
         4 => MajorType::Array,
@@ -105,8 +105,8 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
     }
     let (major_type, value, header_varint_len) = parse_header_varint(&data)?;
     match major_type {
-        MajorType::Uint => Ok((CBOR::Uint(value), header_varint_len)),
-        MajorType::Nint => Ok((CBOR::Nint(-(value as i64) - 1), header_varint_len)),
+        MajorType::UInt => Ok((CBOR::UInt(value), header_varint_len)),
+        MajorType::NInt => Ok((CBOR::NInt(-(value as i64) - 1), header_varint_len)),
         MajorType::Bytes => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
