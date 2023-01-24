@@ -52,9 +52,9 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(vec![1, 2, 3], "Array([Uint(1), Uint(2), Uint(3)])", "83010203");
-        test_cbor([1, 2, 3], "Array([Uint(1), Uint(2), Uint(3)])", "83010203");
-        test_cbor(&[1, -2, 3], "Array([Uint(1), Nint(-2), Uint(3)])", "83012103");
+        test_cbor(vec![1, 2, 3], "Array([Uint(1), Uint(2), Uint(3)])", "[1, 2, 3]", "83010203");
+        test_cbor([1, 2, 3], "Array([Uint(1), Uint(2), Uint(3)])", "[1, 2, 3]", "83010203");
+        test_cbor(&[1, -2, 3], "Array([Uint(1), Nint(-2), Uint(3)])", "[1, -2, 3]", "83012103");
     }
 
     #[test]

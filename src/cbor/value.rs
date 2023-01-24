@@ -78,9 +78,9 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(false, "Value(false)", "f4");
-        test_cbor(true, "Value(true)", "f5");
-        test_cbor(Value::new(100), "Value(100)", "f864");
+        test_cbor(false, "Value(false)", "false", "f4");
+        test_cbor(true, "Value(true)", "true", "f5");
+        test_cbor(Value::new(100), "Value(100)", "simple(100)", "f864");
     }
 
     #[test]

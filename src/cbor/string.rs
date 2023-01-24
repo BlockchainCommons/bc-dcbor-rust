@@ -34,7 +34,7 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor("Hello", r#"String("Hello")"#, "6548656c6c6f");
+        test_cbor("Hello", r#"String("Hello")"#, r#""Hello""#, "6548656c6c6f");
     }
 
     #[test]

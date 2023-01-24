@@ -62,6 +62,7 @@ mod tests {
         m.cbor_insert_into(vec![100], 6);
         test_cbor(m,
             r#"Map({[10]: (Uint(10), Uint(1)), [24, 100]: (Uint(100), Uint(2)), [32]: (Nint(-1), Uint(3)), [97, 122]: (String("z"), Uint(4)), [98, 97, 97]: (String("aa"), Uint(5)), [129, 24, 100]: (Array([Uint(100)]), Uint(6)), [129, 32]: (Array([Nint(-1)]), Uint(7)), [244]: (Value(false), Uint(8))})"#,
+            r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
             "a80a011864022003617a046261610581186406812007f408");
     }
 

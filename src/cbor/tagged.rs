@@ -56,7 +56,7 @@ mod tests {
 
     #[test]
     fn encode() {
-        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(Tagged { tag: 1, item: String("Hello") })"#, "c16548656c6c6f");
+        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(Tagged { tag: 1, item: String("Hello") })"#, r#"1("Hello")"#, "c16548656c6c6f");
     }
 
     #[test]
