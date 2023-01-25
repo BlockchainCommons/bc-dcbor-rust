@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 pub struct Value(u64);
@@ -9,7 +9,7 @@ impl Value {
     }
 }
 
-impl EncodeCBOR for Value {
+impl CBOREncodable for Value {
     fn encode_cbor(&self) -> Vec<u8> {
         self.0.encode_varint(MajorType::Value)
     }

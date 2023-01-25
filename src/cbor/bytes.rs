@@ -1,6 +1,6 @@
 use crate::util::hex::{hex_to_bytes, bytes_to_hex};
 
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 pub struct Bytes(Vec<u8>);
@@ -15,7 +15,7 @@ impl Bytes {
     }
 }
 
-impl EncodeCBOR for Bytes {
+impl CBOREncodable for Bytes {
     fn encode_cbor(&self) -> Vec<u8> {
         let a = &self.0;
         let mut buf = a.len().encode_varint(MajorType::Bytes);

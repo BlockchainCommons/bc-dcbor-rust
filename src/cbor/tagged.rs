@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Debug, Clone)]
 pub struct Tagged {
@@ -16,7 +16,7 @@ impl Tagged {
     }
 }
 
-impl EncodeCBOR for Tagged {
+impl CBOREncodable for Tagged {
     fn encode_cbor(&self) -> Vec<u8> {
         let mut buf = self.tag.encode_varint(MajorType::Tagged);
         buf.extend(self.item.encode_cbor());

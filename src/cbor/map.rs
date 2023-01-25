@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, btree_map::Values};
 
 use crate::util::hex::bytes_to_hex;
 
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 struct CBORMapValue {
@@ -131,7 +131,7 @@ impl Eq for CBORMap {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-impl EncodeCBOR for CBORMap {
+impl CBOREncodable for CBORMap {
     fn encode_cbor(&self) -> Vec<u8> {
         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.encode_cbor())).collect();
         let mut buf = pairs.len().encode_varint(MajorType::Map);

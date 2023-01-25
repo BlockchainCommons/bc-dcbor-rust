@@ -178,7 +178,7 @@ pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{EncodeCBOR, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap, decode::Error}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::{CBOREncodable, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap, decode::Error}, util::hex::hex_to_bytes};
 
     use super::decode_cbor;
 
