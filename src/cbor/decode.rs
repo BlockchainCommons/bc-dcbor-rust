@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, AsCBOR, IntoCBOR}, varint::MajorType, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap};
+use super::{cbor::{CBOR, AsCBOR}, varint::MajorType, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap};
 
 #[derive(Debug)]
 pub enum Error {
@@ -126,7 +126,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let bytes = Bytes::new(buf);
-            Ok((bytes.into_cbor(), header_varint_len + data_len))
+            Ok((bytes.as_cbor(), header_varint_len + data_len))
         },
         MajorType::String => {
             let data_len = value as usize;
@@ -142,7 +142,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                 items.push(item);
                 pos += item_len;
             }
-            Ok((items.into_cbor(), pos))
+            Ok((items.as_cbor(), pos))
         },
         MajorType::Map => {
             let mut pos = header_varint_len;
@@ -156,14 +156,14 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                     return Err(Error::MisorderedMapKey);
                 }
             }
-            Ok((map.into_cbor(), pos))
+            Ok((map.as_cbor(), pos))
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
             let tagged = Tagged::new(value, item);
-            Ok((tagged.into_cbor(), header_varint_len + item_len))
+            Ok((tagged.as_cbor(), header_varint_len + item_len))
         },
-        MajorType::Value => Ok((Value::new(value).into_cbor(), header_varint_len)),
+        MajorType::Value => Ok((Value::new(value).as_cbor(), header_varint_len)),
     }
 }
 

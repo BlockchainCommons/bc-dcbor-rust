@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl EncodeCBOR for u8 {
     fn encode_cbor(&self) -> Vec<u8> {
@@ -9,12 +9,6 @@ impl EncodeCBOR for u8 {
 impl AsCBOR for u8 {
     fn as_cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
-    }
-}
-
-impl IntoCBOR for u8 {
-    fn into_cbor(self) -> CBOR {
-        CBOR::UInt(self as u64)
     }
 }
 
@@ -30,12 +24,6 @@ impl AsCBOR for u16 {
     }
 }
 
-impl IntoCBOR for u16 {
-    fn into_cbor(self) -> CBOR {
-        CBOR::UInt(self as u64)
-    }
-}
-
 impl EncodeCBOR for u32 {
     fn encode_cbor(&self) -> Vec<u8> {
         self.encode_varint(MajorType::UInt)
@@ -45,12 +33,6 @@ impl EncodeCBOR for u32 {
 impl AsCBOR for u32 {
     fn as_cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
-    }
-}
-
-impl IntoCBOR for u32 {
-    fn into_cbor(self) -> CBOR {
-        CBOR::UInt(self as u64)
     }
 }
 
@@ -66,12 +48,6 @@ impl AsCBOR for u64 {
     }
 }
 
-impl IntoCBOR for u64 {
-    fn into_cbor(self) -> CBOR {
-        CBOR::UInt(self)
-    }
-}
-
 impl EncodeCBOR for usize {
     fn encode_cbor(&self) -> Vec<u8> {
         self.encode_varint(MajorType::UInt)
@@ -81,12 +57,6 @@ impl EncodeCBOR for usize {
 impl AsCBOR for usize {
     fn as_cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
-    }
-}
-
-impl IntoCBOR for usize {
-    fn into_cbor(self) -> CBOR {
-        CBOR::UInt(self as u64)
     }
 }
 
@@ -109,16 +79,6 @@ impl AsCBOR for i8 {
             CBOR::NInt(*self as i64)
         } else {
             CBOR::UInt(*self as u64)
-        }
-    }
-}
-
-impl IntoCBOR for i8 {
-    fn into_cbor(self) -> CBOR {
-        if self < 0 {
-            CBOR::NInt(self as i64)
-        } else {
-            CBOR::UInt(self as u64)
         }
     }
 }
@@ -146,16 +106,6 @@ impl AsCBOR for i16 {
     }
 }
 
-impl IntoCBOR for i16 {
-    fn into_cbor(self) -> CBOR {
-        if self < 0 {
-            CBOR::NInt(self as i64)
-        } else {
-            CBOR::UInt(self as u64)
-        }
-    }
-}
-
 impl EncodeCBOR for i32 {
     fn encode_cbor(&self) -> Vec<u8> {
         if *self < 0 {
@@ -179,16 +129,6 @@ impl AsCBOR for i32 {
     }
 }
 
-impl IntoCBOR for i32 {
-    fn into_cbor(self) -> CBOR {
-        if self < 0 {
-            CBOR::NInt(self as i64)
-        } else {
-            CBOR::UInt(self as u64)
-        }
-    }
-}
-
 impl EncodeCBOR for i64 {
     fn encode_cbor(&self) -> Vec<u8> {
         if *self < 0 {
@@ -208,16 +148,6 @@ impl AsCBOR for i64 {
             CBOR::NInt(*self as i64)
         } else {
             CBOR::UInt(*self as u64)
-        }
-    }
-}
-
-impl IntoCBOR for i64 {
-    fn into_cbor(self) -> CBOR {
-        if self < 0 {
-            CBOR::NInt(self as i64)
-        } else {
-            CBOR::UInt(self as u64)
         }
     }
 }

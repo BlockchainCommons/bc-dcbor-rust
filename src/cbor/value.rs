@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 pub struct Value(u64);
@@ -21,24 +21,12 @@ impl AsCBOR for Value {
     }
 }
 
-impl IntoCBOR for Value {
-    fn into_cbor(self) -> CBOR {
-        CBOR::Value(self)
-    }
-}
-
 impl AsCBOR for bool {
     fn as_cbor(&self) -> CBOR {
         match self {
             false => CBOR::Value(Value::new(20)),
             true => CBOR::Value(Value::new(21)),
         }
-    }
-}
-
-impl IntoCBOR for bool {
-    fn into_cbor(self) -> CBOR {
-        self.as_cbor()
     }
 }
 

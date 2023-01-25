@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Debug, Clone)]
 pub struct Tagged {
@@ -27,12 +27,6 @@ impl EncodeCBOR for Tagged {
 impl AsCBOR for Tagged {
     fn as_cbor(&self) -> CBOR {
         CBOR::Tagged(Box::new(self.clone()))
-    }
-}
-
-impl IntoCBOR for Tagged {
-    fn into_cbor(self) -> CBOR {
-        CBOR::Tagged(Box::new(self))
     }
 }
 

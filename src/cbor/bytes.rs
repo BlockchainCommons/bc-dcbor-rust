@@ -1,6 +1,6 @@
 use crate::util::hex::{hex_to_bytes, bytes_to_hex};
 
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 pub struct Bytes(Vec<u8>);
@@ -29,12 +29,6 @@ impl EncodeCBOR for Bytes {
 impl AsCBOR for Bytes {
     fn as_cbor(&self) -> CBOR {
         CBOR::Bytes(self.to_owned())
-    }
-}
-
-impl IntoCBOR for Bytes {
-    fn into_cbor(self) -> CBOR {
-        CBOR::Bytes(self)
     }
 }
 

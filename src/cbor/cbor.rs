@@ -18,10 +18,6 @@ pub trait AsCBOR {
     fn as_cbor(&self) -> CBOR;
 }
 
-pub trait IntoCBOR {
-    fn into_cbor(self) -> CBOR;
-}
-
 pub trait EncodeCBOR {
     fn encode_cbor(&self) -> Vec<u8>;
 }
@@ -29,12 +25,6 @@ pub trait EncodeCBOR {
 impl AsCBOR for CBOR {
     fn as_cbor(&self) -> CBOR {
         self.clone()
-    }
-}
-
-impl IntoCBOR for CBOR {
-    fn into_cbor(self) -> CBOR {
-        self
     }
 }
 

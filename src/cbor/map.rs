@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, btree_map::Values};
 
 use crate::util::hex::bytes_to_hex;
 
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 struct CBORMapValue {
@@ -146,12 +146,6 @@ impl EncodeCBOR for CBORMap {
 impl AsCBOR for CBORMap {
     fn as_cbor(&self) -> CBOR {
         CBOR::Map(self.clone())
-    }
-}
-
-impl IntoCBOR for CBORMap {
-    fn into_cbor(self) -> CBOR {
-        CBOR::Map(self)
     }
 }
 

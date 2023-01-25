@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl EncodeCBOR for &str {
     fn encode_cbor(&self) -> Vec<u8> {
@@ -19,12 +19,6 @@ impl EncodeCBOR for String {
 impl AsCBOR for &str {
     fn as_cbor(&self) -> CBOR {
         CBOR::String(self.to_string())
-    }
-}
-
-impl IntoCBOR for String {
-    fn into_cbor(self) -> CBOR {
-        CBOR::String(self)
     }
 }
 

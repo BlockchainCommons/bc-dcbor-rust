@@ -1,4 +1,4 @@
-use super::{cbor::{EncodeCBOR, AsCBOR, CBOR, IntoCBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{EncodeCBOR, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl<T> EncodeCBOR for Vec<T> where T: EncodeCBOR {
     fn encode_cbor(&self) -> Vec<u8> {
@@ -16,12 +16,6 @@ impl<T> AsCBOR for Vec<T> where T: AsCBOR {
     }
 }
 
-impl<T> IntoCBOR for Vec<T> where T: IntoCBOR {
-    fn into_cbor(self) -> CBOR {
-        CBOR::Array(self.into_iter().map(|x| x.into_cbor()).collect())
-    }
-}
-
 impl AsCBOR for Vec<Box<dyn AsCBOR>> {
     fn as_cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
@@ -31,12 +25,6 @@ impl AsCBOR for Vec<Box<dyn AsCBOR>> {
 impl<T, const N: usize> AsCBOR for [T; N] where T: AsCBOR {
     fn as_cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
-    }
-}
-
-impl<T, const N: usize> IntoCBOR for [T; N] where T: IntoCBOR {
-    fn into_cbor(self) -> CBOR {
-        CBOR::Array(self.into_iter().map(|x| x.into_cbor()).collect())
     }
 }
 
