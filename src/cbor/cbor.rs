@@ -1,6 +1,6 @@
 use crate::util::{string_util::flanked, hex::{bytes_to_hex, hex_to_bytes}};
 
-use super::{map::CBORMap, tagged::Tagged, value::Value, varint::{EncodeVarInt, MajorType}};
+use super::{map::CBORMap, varint::{EncodeVarInt, MajorType}};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
@@ -166,14 +166,117 @@ impl std::fmt::Display for Bytes {
     }
 }
 
+#[derive(Clone)]
+pub struct Value(u64);
+
+impl Value {
+    pub fn new(v: u64) -> Value {
+        Value(v)
+    }
+}
+
+impl CBOREncodable for Value {
+    fn cbor(&self) -> CBOR {
+        CBOR::Value(self.clone())
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        self.0.encode_varint(MajorType::Value)
+    }
+}
+
+impl CBOREncodable for bool {
+    fn cbor(&self) -> CBOR {
+        match self {
+            false => CBOR::Value(Value::new(20)),
+            true => CBOR::Value(Value::new(21)),
+        }
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        match self {
+            false => Value::new(20).encode_cbor(),
+            true => Value::new(21).encode_cbor()
+        }
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl std::fmt::Debug for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self.0 {
+            20 => "false".to_owned(),
+            21 => "true".to_owned(),
+            _ => format!("{:?}", self.0),
+        };
+        f.write_str(&s)
+    }
+}
+
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self.0 {
+            20 => "false".to_owned(),
+            21 => "true".to_owned(),
+            _ => format!("simple({:?})", self.0),
+        };
+        f.write_str(&s)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Tagged {
+    pub tag: u64,
+    pub item: CBOR,
+}
+
+impl Tagged {
+    pub fn new<T>(tag: u64, item: T) -> Tagged where T: CBOREncodable {
+        Tagged { tag, item: item.cbor() }
+    }
+
+    pub fn name(&self) -> String {
+        format!("{}", self.tag)
+    }
+}
+
+impl CBOREncodable for Tagged {
+    fn cbor(&self) -> CBOR {
+        CBOR::Tagged(Box::new(self.clone()))
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        let mut buf = self.tag.encode_varint(MajorType::Tagged);
+        buf.extend(self.item.encode_cbor());
+        buf
+    }
+}
+
+impl PartialEq for Tagged {
+    fn eq(&self, other: &Self) -> bool {
+        self.tag == other.tag && self.item == other.item
+    }
+}
+
+impl std::fmt::Display for Tagged {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{}({})", self.name(), self.item))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::cbor::test_util::test_cbor;
 
-    use super::Bytes;
+    use super::{Bytes, Tagged};
 
     #[test]
-    fn encode() {
+    fn encode_bytes() {
         // test_cbor(Bytes::new([0x11, 0x22, 0x33]), "Bytes(112233)", "43112233");
         test_cbor(
             Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
@@ -182,4 +285,21 @@ mod tests {
             "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
         );
     }
-}
+
+    #[cfg(test)]
+    mod tests {
+        use crate::cbor::{test_util::test_cbor, cbor::Value};
+
+        #[test]
+        fn encode_value() {
+            test_cbor(false, "Value(false)", "false", "f4");
+            test_cbor(true, "Value(true)", "true", "f5");
+            test_cbor(Value::new(100), "Value(100)", "simple(100)", "f864");
+        }
+    }
+
+    #[test]
+    fn encode_tagged() {
+        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(1, String("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
+    }
+    }

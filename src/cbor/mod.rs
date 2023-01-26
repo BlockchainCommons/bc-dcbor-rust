@@ -6,7 +6,5 @@ mod string;
 mod array;
 
 pub mod map;
-pub mod value;
 pub mod cbor;
-pub mod tagged;
 pub mod decode;
