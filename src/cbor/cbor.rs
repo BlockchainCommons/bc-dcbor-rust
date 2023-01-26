@@ -1,4 +1,5 @@
-use std::collections::{BTreeMap, btree_map::Values};
+use std::collections::BTreeMap;
+use std::collections::btree_map::Values as BTreeMapValues;
 
 use crate::util::{string_util::flanked, hex::{bytes_to_hex, hex_to_bytes}};
 
@@ -18,11 +19,11 @@ pub enum CBOR {
     /// Array (major type 4).
     Array(Vec<CBOR>),
     /// Map (major type 5).
-    Map(CBORMap),
+    Map(Map),
     /// Tagged value (major type 6).
     Tagged(Box<Tagged>),
     /// Simple value (majory type 7).
-    Value(Value)
+    Value(SimpleValue)
 }
 
 pub trait CBOREncodable {
@@ -84,7 +85,7 @@ fn format_array(a: &Vec<CBOR>) -> String {
     flanked(&s.join(", "), "[", "]")
 }
 
-fn format_map(m: &CBORMap) -> String {
+fn format_map(m: &Map) -> String {
     let s: Vec<String> = m.iter().map(|x| format!("{}: {}", x.0, x.1)).collect();
     flanked(&s.join(", "), "{", "}")
 }
@@ -169,15 +170,15 @@ impl std::fmt::Display for Bytes {
 }
 
 #[derive(Clone)]
-pub struct Value(u64);
+pub struct SimpleValue(u64);
 
-impl Value {
-    pub fn new(v: u64) -> Value {
-        Value(v)
+impl SimpleValue {
+    pub fn new(v: u64) -> SimpleValue {
+        SimpleValue(v)
     }
 }
 
-impl CBOREncodable for Value {
+impl CBOREncodable for SimpleValue {
     fn cbor(&self) -> CBOR {
         CBOR::Value(self.clone())
     }
@@ -190,26 +191,26 @@ impl CBOREncodable for Value {
 impl CBOREncodable for bool {
     fn cbor(&self) -> CBOR {
         match self {
-            false => CBOR::Value(Value::new(20)),
-            true => CBOR::Value(Value::new(21)),
+            false => CBOR::Value(SimpleValue::new(20)),
+            true => CBOR::Value(SimpleValue::new(21)),
         }
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
         match self {
-            false => Value::new(20).encode_cbor(),
-            true => Value::new(21).encode_cbor()
+            false => SimpleValue::new(20).encode_cbor(),
+            true => SimpleValue::new(21).encode_cbor()
         }
     }
 }
 
-impl PartialEq for Value {
+impl PartialEq for SimpleValue {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl std::fmt::Debug for Value {
+impl std::fmt::Debug for SimpleValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self.0 {
             20 => "false".to_owned(),
@@ -220,7 +221,7 @@ impl std::fmt::Debug for Value {
     }
 }
 
-impl std::fmt::Display for Value {
+impl std::fmt::Display for SimpleValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self.0 {
             20 => "false".to_owned(),
@@ -333,15 +334,15 @@ impl std::fmt::Debug for CBORMapKey {
     }
 }
 
-pub struct CBORMapIter<'a>(Values<'a, CBORMapKey, CBORMapValue>);
+pub struct MapValues<'a>(BTreeMapValues<'a, CBORMapKey, CBORMapValue>);
 
-impl<'a> CBORMapIter<'a> {
-    fn new(values: Values<'a, CBORMapKey, CBORMapValue>) -> CBORMapIter<'a> {
-        CBORMapIter(values)
+impl<'a> MapValues<'a> {
+    fn new(values: BTreeMapValues<'a, CBORMapKey, CBORMapValue>) -> MapValues<'a> {
+        MapValues(values)
     }
 }
 
-impl<'a> Iterator for CBORMapIter<'a> {
+impl<'a> Iterator for MapValues<'a> {
     type Item = (&'a CBOR, &'a CBOR);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -351,15 +352,15 @@ impl<'a> Iterator for CBORMapIter<'a> {
 }
 
 #[derive(Clone)]
-pub struct CBORMap(BTreeMap<CBORMapKey, CBORMapValue>);
+pub struct Map(BTreeMap<CBORMapKey, CBORMapValue>);
 
-impl CBORMap {
-    pub fn new() -> CBORMap {
-        CBORMap(BTreeMap::new())
+impl Map {
+    pub fn new() -> Map {
+        Map(BTreeMap::new())
     }
 
-    pub fn iter<'a>(&'a self) -> CBORMapIter<'a> {
-        CBORMapIter::new(self.0.values())
+    pub fn iter<'a>(&'a self) -> MapValues<'a> {
+        MapValues::new(self.0.values())
     }
 
     pub fn cbor_insert(&mut self, k: CBOR, v: CBOR) {
@@ -389,17 +390,17 @@ impl CBORMap {
     }
 }
 
-impl PartialEq for CBORMap {
+impl PartialEq for Map {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl Eq for CBORMap {
+impl Eq for Map {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-impl CBOREncodable for CBORMap {
+impl CBOREncodable for Map {
     fn cbor(&self) -> CBOR {
         CBOR::Map(self.clone())
     }
@@ -415,7 +416,7 @@ impl CBOREncodable for CBORMap {
     }
 }
 
-impl std::fmt::Debug for CBORMap {
+impl std::fmt::Debug for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{:?}", self.0))
     }
@@ -428,7 +429,7 @@ mod tests {
     use crate::util::hex::hex_to_bytes;
 
     use super::{Bytes, Tagged};
-    use super::CBORMap;
+    use super::Map;
 
     #[test]
     fn encode_bytes() {
@@ -443,13 +444,13 @@ mod tests {
 
     #[cfg(test)]
     mod tests {
-        use crate::cbor::{test_util::test_cbor, cbor::Value};
+        use crate::cbor::{test_util::test_cbor, cbor::SimpleValue};
 
         #[test]
         fn encode_value() {
             test_cbor(false, "Value(false)", "false", "f4");
             test_cbor(true, "Value(true)", "true", "f5");
-            test_cbor(Value::new(100), "Value(100)", "simple(100)", "f864");
+            test_cbor(SimpleValue::new(100), "Value(100)", "simple(100)", "f864");
         }
     }
 
@@ -460,7 +461,7 @@ mod tests {
 
     #[test]
     fn encode() {
-        let mut m = CBORMap::new();
+        let mut m = Map::new();
         m.cbor_insert_into(-1, 3);
         m.cbor_insert_into(vec![-1], 7);
         m.cbor_insert_into("z", 4);

@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, CBOREncodable, Bytes, Value, Tagged, CBORMap}, varint::MajorType};
+use super::{cbor::{CBOR, CBOREncodable, Bytes, SimpleValue, Tagged, Map}, varint::MajorType};
 
 #[derive(Debug)]
 pub enum Error {
@@ -146,7 +146,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         },
         MajorType::Map => {
             let mut pos = header_varint_len;
-            let mut map = CBORMap::new();
+            let mut map = Map::new();
             for _ in 0..value {
                 let (key, key_len) = decode_cbor_internal(&data[pos..])?;
                 pos += key_len;
@@ -163,7 +163,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
             let tagged = Tagged::new(value, item);
             Ok((tagged.cbor(), header_varint_len + item_len))
         },
-        MajorType::Value => Ok((Value::new(value).cbor(), header_varint_len)),
+        MajorType::Value => Ok((SimpleValue::new(value).cbor(), header_varint_len)),
     }
 }
 
@@ -178,7 +178,7 @@ pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, Bytes, Value, Tagged, CBORMap}, decode::Error}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::{CBOREncodable, Bytes, SimpleValue, Tagged, Map}, decode::Error}, util::hex::hex_to_bytes};
     use super::decode_cbor;
 
     fn test_decode<T>(value: T) where T: CBOREncodable {
@@ -206,7 +206,7 @@ mod test {
             test_decode(array);
         }
         {
-            let mut map = CBORMap::new();
+            let mut map = Map::new();
             map.cbor_insert_into(-1, 3);
             map.cbor_insert_into(vec![-1], 7);
             map.cbor_insert_into("z", 4);
@@ -219,7 +219,7 @@ mod test {
         }
         test_decode(false);
         test_decode(true);
-        test_decode(Value::new(32));
+        test_decode(SimpleValue::new(32));
     }
 
     #[test]
