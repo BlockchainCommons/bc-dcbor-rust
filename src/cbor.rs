@@ -37,7 +37,10 @@ impl CBOREncodable for CBOR {
     fn encode_cbor(&self) -> Vec<u8> {
         match self {
             CBOR::UInt(x) => x.encode_cbor(),
-            CBOR::NInt(x) => x.encode_cbor(),
+            CBOR::NInt(x) => {
+                assert!(x < &0);
+                x.encode_cbor()
+            },
             CBOR::Bytes(x) => x.encode_cbor(),
             CBOR::String(x) => x.encode_cbor(),
             CBOR::Array(x) => x.encode_cbor(),
@@ -95,8 +98,8 @@ impl std::fmt::Debug for CBOR {
             Self::String(x) => f.debug_tuple("String").field(x).finish(),
             Self::Array(x) => f.debug_tuple("Array").field(x).finish(),
             Self::Map(x) => f.debug_tuple("Map").field(x).finish(),
-            Self::Tagged(x) => f.write_fmt(format_args!("Tagged({}, {:?})", x.tag, x.item)),
-            Self::Value(x) => f.debug_tuple("Value").field(x).finish(),
+            Self::Tagged(x) => f.write_fmt(format_args!("Tagged({}, {:?})", x.tag(), x.item())),
+            Self::Value(x) => f.write_fmt(format_args!("Value({})", x.name())),
         }
     }
 }

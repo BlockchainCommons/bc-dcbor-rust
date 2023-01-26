@@ -6,8 +6,19 @@ use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
 pub struct Value(u64);
 
 impl Value {
+    /// Creates a new CBOR "simple" value.
     pub fn new(v: u64) -> Value {
         Value(v)
+    }
+
+    /// Returns the known name of the value, if it has been assigned one.
+    pub fn name(&self) -> String {
+        format!("{:?}", self)
+    }
+
+    /// Returns the raw value.
+    pub fn value(&self) -> u64 {
+        self.0
     }
 }
 

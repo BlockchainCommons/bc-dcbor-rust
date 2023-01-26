@@ -6,10 +6,15 @@ use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}, hex_
 pub struct Bytes(Vec<u8>);
 
 impl Bytes {
+    /// Creates a new CBOR byte string from the provided data.
     pub fn new<T>(data: T) -> Bytes where T: AsRef<[u8]> {
         Bytes(data.as_ref().to_owned())
     }
 
+    /// Creates a new CBOR byte string from the provided hexadecimal string.
+    ///
+    /// Panics if the string is not well-formed, lower case hex with no spaces or
+    /// other characters.
     pub fn from_hex<T>(hex: T) -> Bytes where T: AsRef<str> {
         Bytes(hex_to_bytes(hex))
     }

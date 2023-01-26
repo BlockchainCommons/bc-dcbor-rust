@@ -4,17 +4,29 @@ use super::{cbor::{CBOR, CBOREncodable}, varint::{MajorType, EncodeVarInt}};
 /// A CBOR tagged value.
 #[derive(Debug, Clone)]
 pub struct Tagged {
-    pub tag: u64,
-    pub item: CBOR,
+    tag: u64,
+    item: CBOR,
 }
 
 impl Tagged {
+    /// Creates a new tagged value.
     pub fn new<T>(tag: u64, item: T) -> Tagged where T: CBOREncodable {
         Tagged { tag, item: item.cbor() }
     }
 
+    /// Returns the known name of the tag, if it has been assigned one.
     pub fn name(&self) -> String {
-        format!("{}", self.tag)
+        format!("{}", self.tag())
+    }
+
+    /// Returns the tag.
+    pub fn tag(&self) -> u64 {
+        self.tag
+    }
+
+    /// Returns the CBOR item that was tagged.
+    pub fn item(&self) -> &CBOR {
+        &self.item
     }
 }
 
