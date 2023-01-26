@@ -1,9 +1,9 @@
 #[cfg(test)]
-pub mod test_util;
+mod test_util;
+mod varint;
+mod int;
 
-pub mod varint;
 pub mod bytes;
-pub mod int;
 pub mod string;
 pub mod array;
 pub mod map;
