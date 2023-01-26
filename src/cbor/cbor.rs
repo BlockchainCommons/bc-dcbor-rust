@@ -14,18 +14,9 @@ pub enum CBOR {
     Value(Value)
 }
 
-pub trait AsCBOR {
-    fn as_cbor(&self) -> CBOR;
-}
-
 pub trait CBOREncodable {
+    fn as_cbor(&self) -> CBOR;
     fn encode_cbor(&self) -> Vec<u8>;
-}
-
-impl AsCBOR for CBOR {
-    fn as_cbor(&self) -> CBOR {
-        self.clone()
-    }
 }
 
 impl CBOR {
@@ -44,6 +35,10 @@ impl CBOR {
 }
 
 impl CBOREncodable for CBOR {
+    fn as_cbor(&self) -> CBOR {
+        self.clone()
+    }
+
     fn encode_cbor(&self) -> Vec<u8> {
         self.encode()
     }

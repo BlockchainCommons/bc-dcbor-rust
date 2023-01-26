@@ -1,4 +1,4 @@
-use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 pub struct Value(u64);
@@ -10,22 +10,27 @@ impl Value {
 }
 
 impl CBOREncodable for Value {
+    fn as_cbor(&self) -> CBOR {
+        CBOR::Value(self.clone())
+    }
+
     fn encode_cbor(&self) -> Vec<u8> {
         self.0.encode_varint(MajorType::Value)
     }
 }
 
-impl AsCBOR for Value {
-    fn as_cbor(&self) -> CBOR {
-        CBOR::Value(self.clone())
-    }
-}
-
-impl AsCBOR for bool {
+impl CBOREncodable for bool {
     fn as_cbor(&self) -> CBOR {
         match self {
             false => CBOR::Value(Value::new(20)),
             true => CBOR::Value(Value::new(21)),
+        }
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        match self {
+            false => Value::new(20).encode_cbor(),
+            true => Value::new(21).encode_cbor()
         }
     }
 }

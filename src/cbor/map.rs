@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, btree_map::Values};
 
 use crate::util::hex::bytes_to_hex;
 
-use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 #[derive(Clone)]
 struct CBORMapValue {
@@ -98,7 +98,7 @@ impl CBORMap {
         self.0.insert(CBORMapKey::new(k.encode_cbor()), CBORMapValue::new(k, v));
     }
 
-    pub fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: AsCBOR, V: AsCBOR {
+    pub fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: CBOREncodable, V: CBOREncodable {
         self.cbor_insert(k.as_cbor(), v.as_cbor());
     }
 
@@ -132,6 +132,10 @@ impl Eq for CBORMap {
 }
 
 impl CBOREncodable for CBORMap {
+    fn as_cbor(&self) -> CBOR {
+        CBOR::Map(self.clone())
+    }
+
     fn encode_cbor(&self) -> Vec<u8> {
         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.encode_cbor())).collect();
         let mut buf = pairs.len().encode_varint(MajorType::Map);
@@ -140,12 +144,6 @@ impl CBOREncodable for CBORMap {
             buf.extend(pair.1);
         }
         buf
-    }
-}
-
-impl AsCBOR for CBORMap {
-    fn as_cbor(&self) -> CBOR {
-        CBOR::Map(self.clone())
     }
 }
 

@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, AsCBOR}, varint::MajorType, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap};
+use super::{cbor::{CBOR, CBOREncodable}, varint::MajorType, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap};
 
 #[derive(Debug)]
 pub enum Error {
@@ -178,11 +178,11 @@ pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, AsCBOR}, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap, decode::Error}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::CBOREncodable, bytes::Bytes, tagged::Tagged, value::Value, map::CBORMap, decode::Error}, util::hex::hex_to_bytes};
 
     use super::decode_cbor;
 
-    fn test_decode<T>(value: T) where T: AsCBOR {
+    fn test_decode<T>(value: T) where T: CBOREncodable {
         let cbor = value.as_cbor();
         let bytes = cbor.encode_cbor();
         //println!("{}", bytes_to_hex(&bytes));
@@ -200,7 +200,7 @@ mod test {
         test_decode(Tagged::new(32, "Hello".as_cbor()));
         test_decode([1, 2, 3]);
         {
-            let mut array: Vec<Box<dyn AsCBOR>> = Vec::new();
+            let mut array: Vec<Box<dyn CBOREncodable>> = Vec::new();
             array.push(Box::new(1));
             array.push(Box::new("Hello"));
             array.push(Box::new([1, 2, 3]));

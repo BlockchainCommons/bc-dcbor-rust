@@ -1,6 +1,10 @@
-use super::{cbor::{CBOREncodable, AsCBOR, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
+    fn as_cbor(&self) -> CBOR {
+        CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
+    }
+
     fn encode_cbor(&self) -> Vec<u8> {
         let mut buf = self.len().encode_varint(MajorType::Array);
         for item in self {
@@ -10,27 +14,45 @@ impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
     }
 }
 
-impl<T> AsCBOR for Vec<T> where T: AsCBOR {
+impl CBOREncodable for Vec<Box<dyn CBOREncodable>> {
     fn as_cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
     }
-}
 
-impl AsCBOR for Vec<Box<dyn AsCBOR>> {
-    fn as_cbor(&self) -> CBOR {
-        CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
+    fn encode_cbor(&self) -> Vec<u8> {
+        let mut buf = self.len().encode_varint(MajorType::Array);
+        for item in self {
+            buf.extend(item.encode_cbor());
+        }
+        buf
     }
 }
 
-impl<T, const N: usize> AsCBOR for [T; N] where T: AsCBOR {
+impl<T, const N: usize> CBOREncodable for [T; N] where T: CBOREncodable {
     fn as_cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
     }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        let mut buf = self.len().encode_varint(MajorType::Array);
+        for item in self {
+            buf.extend(item.encode_cbor());
+        }
+        buf
+    }
 }
 
-impl<T, const N: usize> AsCBOR for &[T; N] where T: AsCBOR {
+impl<T, const N: usize> CBOREncodable for &[T; N] where T: CBOREncodable {
     fn as_cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.as_cbor()).collect())
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        let mut buf = self.len().encode_varint(MajorType::Array);
+        for item in *self {
+            buf.extend(item.encode_cbor());
+        }
+        buf
     }
 }
 

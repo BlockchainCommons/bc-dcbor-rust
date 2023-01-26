@@ -1,8 +1,8 @@
 use crate::{util::hex::bytes_to_hex, cbor::decode::decode_cbor};
 
-use super::cbor::AsCBOR;
+use super::cbor::CBOREncodable;
 
-pub fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: AsCBOR {
+pub fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.as_cbor();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
