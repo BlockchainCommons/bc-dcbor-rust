@@ -4,7 +4,7 @@ pub mod cbor;
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, Tagged}, decode}, util::hex::IntoHex};
+    use crate::{cbor::{decode, Tagged, CBOREncodable}, util::hex::IntoHex};
 
     #[test]
     fn encode_cbor() {
