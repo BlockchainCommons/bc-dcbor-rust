@@ -99,7 +99,7 @@ impl CBORMap {
     }
 
     pub fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: CBOREncodable, V: CBOREncodable {
-        self.cbor_insert(k.as_cbor(), v.as_cbor());
+        self.cbor_insert(k.cbor(), v.cbor());
     }
 
     pub fn cbor_insert_next(&mut self, k: CBOR, v: CBOR) -> bool {
@@ -132,7 +132,7 @@ impl Eq for CBORMap {
 }
 
 impl CBOREncodable for CBORMap {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::Map(self.clone())
     }
 

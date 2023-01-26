@@ -15,12 +15,16 @@ pub enum CBOR {
 }
 
 pub trait CBOREncodable {
-    fn as_cbor(&self) -> CBOR;
+    fn cbor(&self) -> CBOR;
     fn encode_cbor(&self) -> Vec<u8>;
 }
 
-impl CBOR {
-    pub fn encode(&self) -> Vec<u8> {
+impl CBOREncodable for CBOR {
+    fn cbor(&self) -> CBOR {
+        self.clone()
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
         match self {
             CBOR::UInt(x) => x.encode_cbor(),
             CBOR::NInt(x) => x.encode_cbor(),
@@ -31,16 +35,6 @@ impl CBOR {
             CBOR::Tagged(x) => x.encode_cbor(),
             CBOR::Value(x) => x.encode_cbor(),
         }
-    }
-}
-
-impl CBOREncodable for CBOR {
-    fn as_cbor(&self) -> CBOR {
-        self.clone()
-    }
-
-    fn encode_cbor(&self) -> Vec<u8> {
-        self.encode()
     }
 }
 

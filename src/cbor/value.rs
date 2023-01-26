@@ -10,7 +10,7 @@ impl Value {
 }
 
 impl CBOREncodable for Value {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::Value(self.clone())
     }
 
@@ -20,7 +20,7 @@ impl CBOREncodable for Value {
 }
 
 impl CBOREncodable for bool {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         match self {
             false => CBOR::Value(Value::new(20)),
             true => CBOR::Value(Value::new(21)),

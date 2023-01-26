@@ -1,7 +1,7 @@
 use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl CBOREncodable for u8 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
     }
 
@@ -11,7 +11,7 @@ impl CBOREncodable for u8 {
 }
 
 impl CBOREncodable for u16 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
     }
 
@@ -21,7 +21,7 @@ impl CBOREncodable for u16 {
 }
 
 impl CBOREncodable for u32 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
     }
 
@@ -31,7 +31,7 @@ impl CBOREncodable for u32 {
 }
 
 impl CBOREncodable for u64 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::UInt(*self)
     }
 
@@ -41,7 +41,7 @@ impl CBOREncodable for u64 {
 }
 
 impl CBOREncodable for usize {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::UInt(*self as u64)
     }
 
@@ -51,7 +51,7 @@ impl CBOREncodable for usize {
 }
 
 impl CBOREncodable for i8 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::NInt(*self as i64)
         } else {
@@ -72,7 +72,7 @@ impl CBOREncodable for i8 {
 }
 
 impl CBOREncodable for i16 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::NInt(*self as i64)
         } else {
@@ -93,7 +93,7 @@ impl CBOREncodable for i16 {
 }
 
 impl CBOREncodable for i32 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::NInt(*self as i64)
         } else {
@@ -114,7 +114,7 @@ impl CBOREncodable for i32 {
 }
 
 impl CBOREncodable for i64 {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         if *self < 0 {
             CBOR::NInt(*self as i64)
         } else {

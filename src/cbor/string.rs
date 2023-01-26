@@ -1,7 +1,7 @@
 use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
 
 impl CBOREncodable for &str {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::String(self.to_string())
     }
 
@@ -15,7 +15,7 @@ impl CBOREncodable for &str {
 }
 
 impl CBOREncodable for String {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::String(self.to_string())
     }
 

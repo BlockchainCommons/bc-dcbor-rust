@@ -126,13 +126,13 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let bytes = Bytes::new(buf);
-            Ok((bytes.as_cbor(), header_varint_len + data_len))
+            Ok((bytes.cbor(), header_varint_len + data_len))
         },
         MajorType::String => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let string = from_utf8(buf).map_err(|x| Error::InvalidString(x))?;
-            Ok((string.as_cbor(), header_varint_len + data_len))
+            Ok((string.cbor(), header_varint_len + data_len))
         },
         MajorType::Array => {
             let mut pos = header_varint_len;
@@ -142,7 +142,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                 items.push(item);
                 pos += item_len;
             }
-            Ok((items.as_cbor(), pos))
+            Ok((items.cbor(), pos))
         },
         MajorType::Map => {
             let mut pos = header_varint_len;
@@ -156,14 +156,14 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                     return Err(Error::MisorderedMapKey);
                 }
             }
-            Ok((map.as_cbor(), pos))
+            Ok((map.cbor(), pos))
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
             let tagged = Tagged::new(value, item);
-            Ok((tagged.as_cbor(), header_varint_len + item_len))
+            Ok((tagged.cbor(), header_varint_len + item_len))
         },
-        MajorType::Value => Ok((Value::new(value).as_cbor(), header_varint_len)),
+        MajorType::Value => Ok((Value::new(value).cbor(), header_varint_len)),
     }
 }
 
@@ -183,7 +183,7 @@ mod test {
     use super::decode_cbor;
 
     fn test_decode<T>(value: T) where T: CBOREncodable {
-        let cbor = value.as_cbor();
+        let cbor = value.cbor();
         let bytes = cbor.encode_cbor();
         //println!("{}", bytes_to_hex(&bytes));
         let decoded_cbor = decode_cbor(&bytes).unwrap();
@@ -197,7 +197,7 @@ mod test {
         test_decode(Bytes::new([0x11, 0x22, 0x33]));
         test_decode("Hello, world!");
         test_decode("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-        test_decode(Tagged::new(32, "Hello".as_cbor()));
+        test_decode(Tagged::new(32, "Hello".cbor()));
         test_decode([1, 2, 3]);
         {
             let mut array: Vec<Box<dyn CBOREncodable>> = Vec::new();

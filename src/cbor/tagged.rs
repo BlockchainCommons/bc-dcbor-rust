@@ -8,7 +8,7 @@ pub struct Tagged {
 
 impl Tagged {
     pub fn new<T>(tag: u64, item: T) -> Tagged where T: CBOREncodable {
-        Tagged { tag, item: item.as_cbor() }
+        Tagged { tag, item: item.cbor() }
     }
 
     pub fn name(&self) -> String {
@@ -17,7 +17,7 @@ impl Tagged {
 }
 
 impl CBOREncodable for Tagged {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::Tagged(Box::new(self.clone()))
     }
 

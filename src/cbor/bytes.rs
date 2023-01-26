@@ -16,7 +16,7 @@ impl Bytes {
 }
 
 impl CBOREncodable for Bytes {
-    fn as_cbor(&self) -> CBOR {
+    fn cbor(&self) -> CBOR {
         CBOR::Bytes(self.to_owned())
     }
 
