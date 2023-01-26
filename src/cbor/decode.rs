@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, CBOREncodable, Value, Tagged, Map}, varint::MajorType, bytes::Bytes};
+use super::{cbor::{CBOR, CBOREncodable, Tagged, Map}, varint::MajorType, bytes::Bytes, Value};
 
 /// Decode CBOR binary representation to symbolic representation.
 pub fn decode(data: &[u8]) -> Result<CBOR, Error> {
@@ -179,7 +179,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, Value, Tagged, Map}, decode::Error, bytes::Bytes}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::{CBOREncodable, Tagged, Map}, decode::Error, bytes::Bytes, Value}, util::hex::hex_to_bytes};
     use super::decode;
 
     fn run_test<T>(value: T) where T: CBOREncodable {
