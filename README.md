@@ -25,10 +25,6 @@ Blockchain Commons apps do not phone home and do not run ads. Some are available
 
 `dcbor`  is currently under active development and in the alpha testing phase. It should not be used for production tasks until it has had further testing and auditing. See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
 
-### Version History
-
-### Roadmap
-
 ## Origin, Authors, Copyright & Licenses
 
 Unless otherwise noted (either in this [/README.md](./README.md) or in the file's header comments) the contents of this repository are Copyright © 2020 by Blockchain Commons, LLC, and are [licensed](./LICENSE) under the [spdx:BSD-2-Clause Plus Patent License](https://spdx.org/licenses/BSD-2-Clause-Patent.html).
@@ -40,30 +36,6 @@ This table below also establishes provenance (repository of origin, permalink, a
 | File      | From                                                         | Commit                                                       | Authors & Copyright (c)                                | License                                                     |
 | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------- |
 | exception-to-the-rule.c or exception-folder | [https://github.com/community/repo-name/PERMALINK](https://github.com/community/repo-name/PERMALINK) | [https://github.com/community/repo-name/commit/COMMITHASH]() | 2020 Exception Author  | [MIT](https://spdx.org/licenses/MIT)                        |
-
-### Dependencies
-
-To build `dcbor` you'll need to use the following tools:
-
-- autotools - Gnu Build System from Free Software Foundation ([intro](https://www.gnu.org/software/automake/manual/html_node/Autotools-Introduction.html)).
-
-Other prerequisites include:
-
-...
-
-### Libraries
-
-The following external libraries are used with `dcbor`:
-
-- [community/repo-name](https://github.com/community/repo-name) — What the library does (use OR fork [version] OR include [version]).
-
-Libraries may be marked as `use` (the current version of the library is used), `fork` (a specific version has been forked to the BCC repos for usage), or `include` (files from a specific version have been included).
-
-### Derived from ...
-
-This  `dcbor` project is either derived from or was inspired by:
-
-- [community/repo-name/](https://github.com/community/repo-name) — Repo that does what, by [developer](https://github.com/developer)  or from  [community](https://community.com).
 
 ## Subsequent Usage
 
