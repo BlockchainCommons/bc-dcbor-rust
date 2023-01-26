@@ -3,20 +3,20 @@ use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}, hex_
 
 /// A CBOR byte string.
 #[derive(Clone)]
-pub struct Bytes(Vec<u8>);
+pub struct Data(Vec<u8>);
 
-impl Bytes {
+impl Data {
     /// Creates a new CBOR byte string from the provided data.
-    pub fn new<T>(data: T) -> Bytes where T: AsRef<[u8]> {
-        Bytes(data.as_ref().to_owned())
+    pub fn new<T>(data: T) -> Data where T: AsRef<[u8]> {
+        Data(data.as_ref().to_owned())
     }
 
     /// Creates a new CBOR byte string from the provided hexadecimal string.
     ///
     /// Panics if the string is not well-formed, lower case hex with no spaces or
     /// other characters.
-    pub fn from_hex<T>(hex: T) -> Bytes where T: AsRef<str> {
-        Bytes(hex_to_bytes(hex))
+    pub fn from_hex<T>(hex: T) -> Data where T: AsRef<str> {
+        Data(hex_to_bytes(hex))
     }
 
     /// The wrapped data.
@@ -25,7 +25,7 @@ impl Bytes {
     }
 }
 
-impl CBOREncodable for Bytes {
+impl CBOREncodable for Data {
     fn cbor(&self) -> CBOR {
         CBOR::Bytes(self.to_owned())
     }
@@ -40,19 +40,19 @@ impl CBOREncodable for Bytes {
     }
 }
 
-impl PartialEq for Bytes {
+impl PartialEq for Data {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl std::fmt::Debug for Bytes {
+impl std::fmt::Debug for Data {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&bytes_to_hex(&self.0))
     }
 }
 
-impl std::fmt::Display for Bytes {
+impl std::fmt::Display for Data {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("h'")?;
         f.write_str(&bytes_to_hex(&self.0))?;

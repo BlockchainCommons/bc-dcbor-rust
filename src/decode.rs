@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, CBOREncodable}, varint::MajorType, bytes::Bytes, Value, Tagged, Map};
+use super::{cbor::{CBOR, CBOREncodable}, varint::MajorType, bytes::Data, Value, Tagged, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -144,7 +144,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), DecodeError> {
         MajorType::Bytes => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
-            let bytes = Bytes::new(buf);
+            let bytes = Data::new(buf);
             Ok((bytes.cbor(), header_varint_len + data_len))
         },
         MajorType::String => {

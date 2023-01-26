@@ -12,7 +12,7 @@
 mod array;
 
 mod bytes;
-pub use bytes::Bytes;
+pub use bytes::Data;
 
 mod cbor;
 pub use cbor::{CBOR, CBOREncodable};
@@ -42,7 +42,7 @@ mod varint;
 
 #[cfg(test)]
 mod test {
-    use crate::{Tagged, CBOREncodable, decode_cbor, bytes_to_hex, Bytes, Map, hex_to_bytes, DecodeError, Value};
+    use crate::{Tagged, CBOREncodable, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, DecodeError, Value};
 
     fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
         let cbor = t.cbor();
@@ -153,14 +153,13 @@ mod test {
 
     #[test]
     fn encode_bytes() {
-        // test_cbor(Bytes::new([0x11, 0x22, 0x33]), "Bytes(112233)", "43112233");
         test_cbor(
-            Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
+            Data::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
             "Bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)",
             "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
             "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
         );
-        test_cbor(Bytes::new([0x11, 0x22, 0x33]),
+        test_cbor(Data::new([0x11, 0x22, 0x33]),
         "Bytes(112233)",
         "h'112233'",
         "43112233"

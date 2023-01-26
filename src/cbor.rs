@@ -1,4 +1,4 @@
-use super::{bytes::Bytes, Value, Tagged, Map, string_util::flanked};
+use super::{bytes::Data, Value, Tagged, Map, string_util::flanked};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
@@ -8,7 +8,7 @@ pub enum CBOR {
     /// Negative integer (major type 1).
     NInt(i64),
     /// Byte string (major type 2).
-    Bytes(Bytes),
+    Bytes(Data),
     /// UTF-8 string (major type 3).
     String(String),
     /// Array (major type 4).
