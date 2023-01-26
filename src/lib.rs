@@ -1,8 +1,37 @@
-pub mod cbor;
+mod array;
+
+mod bytes;
+pub use bytes::Bytes;
+
+mod cbor;
+pub use cbor::{CBOR, CBOREncodable};
+
+mod decode;
+pub use decode::{decode, DecodeError};
+
+mod hex;
+pub use hex::{hex_to_bytes, bytes_to_hex};
+
+mod int;
+
+mod map;
+pub use map::{Map, Iter};
+
+mod string;
+
+mod string_util;
+
+mod tagged;
+pub use tagged::Tagged;
+
+mod value;
+pub use value::Value;
+
+mod varint;
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{Tagged, CBOREncodable, decode, bytes_to_hex, Bytes, Map, hex_to_bytes, DecodeError, Value}};
+    use crate::{Tagged, CBOREncodable, decode, bytes_to_hex, Bytes, Map, hex_to_bytes, DecodeError, Value};
 
     fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
         let cbor = t.cbor();
