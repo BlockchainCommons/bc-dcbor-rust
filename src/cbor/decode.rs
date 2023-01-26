@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, CBOREncodable, Bytes, SimpleValue, Tagged, Map}, varint::MajorType};
+use super::{cbor::{CBOR, CBOREncodable, Bytes, Value, Tagged, Map}, varint::MajorType};
 
 #[derive(Debug)]
 pub enum Error {
@@ -152,7 +152,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                 pos += key_len;
                 let (value, value_len) = decode_cbor_internal(&data[pos..])?;
                 pos += value_len;
-                if !map.cbor_insert_next(key, value) {
+                if !map.insert_next(key, value) {
                     return Err(Error::MisorderedMapKey);
                 }
             }
@@ -163,7 +163,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
             let tagged = Tagged::new(value, item);
             Ok((tagged.cbor(), header_varint_len + item_len))
         },
-        MajorType::Value => Ok((SimpleValue::new(value).cbor(), header_varint_len)),
+        MajorType::Value => Ok((Value::new(value).cbor(), header_varint_len)),
     }
 }
 
@@ -178,7 +178,7 @@ pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, Bytes, SimpleValue, Tagged, Map}, decode::Error}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::{CBOREncodable, Bytes, Value, Tagged, Map}, decode::Error}, util::hex::hex_to_bytes};
     use super::decode_cbor;
 
     fn test_decode<T>(value: T) where T: CBOREncodable {
@@ -207,19 +207,19 @@ mod test {
         }
         {
             let mut map = Map::new();
-            map.cbor_insert_into(-1, 3);
-            map.cbor_insert_into(vec![-1], 7);
-            map.cbor_insert_into("z", 4);
-            map.cbor_insert_into(10, 1);
-            map.cbor_insert_into(false, 8);
-            map.cbor_insert_into(100, 2);
-            map.cbor_insert_into("aa", 5);
-            map.cbor_insert_into(vec![100], 6);
+            map.insert_into(-1, 3);
+            map.insert_into(vec![-1], 7);
+            map.insert_into("z", 4);
+            map.insert_into(10, 1);
+            map.insert_into(false, 8);
+            map.insert_into(100, 2);
+            map.insert_into("aa", 5);
+            map.insert_into(vec![100], 6);
             test_decode(map);
         }
         test_decode(false);
         test_decode(true);
-        test_decode(SimpleValue::new(32));
+        test_decode(Value::new(32));
     }
 
     #[test]

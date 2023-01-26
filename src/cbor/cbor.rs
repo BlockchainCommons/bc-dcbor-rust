@@ -23,9 +23,10 @@ pub enum CBOR {
     /// Tagged value (major type 6).
     Tagged(Box<Tagged>),
     /// Simple value (majory type 7).
-    Value(SimpleValue)
+    Value(Value)
 }
 
+/// A value that can be encoded as CBOR.
 pub trait CBOREncodable {
     /// Returns the value in CBOR symbolic representation.
     fn cbor(&self) -> CBOR;
@@ -121,6 +122,7 @@ impl std::fmt::Display for CBOR {
     }
 }
 
+/// A CBOR byte string.
 #[derive(Clone)]
 pub struct Bytes(Vec<u8>);
 
@@ -169,16 +171,17 @@ impl std::fmt::Display for Bytes {
     }
 }
 
+/// A CBOR simple value.
 #[derive(Clone)]
-pub struct SimpleValue(u64);
+pub struct Value(u64);
 
-impl SimpleValue {
-    pub fn new(v: u64) -> SimpleValue {
-        SimpleValue(v)
+impl Value {
+    pub fn new(v: u64) -> Value {
+        Value(v)
     }
 }
 
-impl CBOREncodable for SimpleValue {
+impl CBOREncodable for Value {
     fn cbor(&self) -> CBOR {
         CBOR::Value(self.clone())
     }
@@ -191,26 +194,26 @@ impl CBOREncodable for SimpleValue {
 impl CBOREncodable for bool {
     fn cbor(&self) -> CBOR {
         match self {
-            false => CBOR::Value(SimpleValue::new(20)),
-            true => CBOR::Value(SimpleValue::new(21)),
+            false => CBOR::Value(Value::new(20)),
+            true => CBOR::Value(Value::new(21)),
         }
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
         match self {
-            false => SimpleValue::new(20).encode_cbor(),
-            true => SimpleValue::new(21).encode_cbor()
+            false => Value::new(20).encode_cbor(),
+            true => Value::new(21).encode_cbor()
         }
     }
 }
 
-impl PartialEq for SimpleValue {
+impl PartialEq for Value {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl std::fmt::Debug for SimpleValue {
+impl std::fmt::Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self.0 {
             20 => "false".to_owned(),
@@ -221,7 +224,7 @@ impl std::fmt::Debug for SimpleValue {
     }
 }
 
-impl std::fmt::Display for SimpleValue {
+impl std::fmt::Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self.0 {
             20 => "false".to_owned(),
@@ -232,6 +235,7 @@ impl std::fmt::Display for SimpleValue {
     }
 }
 
+/// A CBOR tagged value.
 #[derive(Debug, Clone)]
 pub struct Tagged {
     pub tag: u64,
@@ -334,15 +338,16 @@ impl std::fmt::Debug for CBORMapKey {
     }
 }
 
-pub struct MapValues<'a>(BTreeMapValues<'a, CBORMapKey, CBORMapValue>);
+/// An iterator over a CBOR map.
+pub struct Iter<'a>(BTreeMapValues<'a, CBORMapKey, CBORMapValue>);
 
-impl<'a> MapValues<'a> {
-    fn new(values: BTreeMapValues<'a, CBORMapKey, CBORMapValue>) -> MapValues<'a> {
-        MapValues(values)
+impl<'a> Iter<'a> {
+    fn new(values: BTreeMapValues<'a, CBORMapKey, CBORMapValue>) -> Iter<'a> {
+        Iter(values)
     }
 }
 
-impl<'a> Iterator for MapValues<'a> {
+impl<'a> Iterator for Iter<'a> {
     type Item = (&'a CBOR, &'a CBOR);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -351,30 +356,36 @@ impl<'a> Iterator for MapValues<'a> {
     }
 }
 
+/// A CBOR map. Keys are kept sorted by encoded CBOR form in
+/// ascending lexicographic order.
 #[derive(Clone)]
 pub struct Map(BTreeMap<CBORMapKey, CBORMapValue>);
 
 impl Map {
+    /// Makes a new, empty CBOR `Map`.
     pub fn new() -> Map {
         Map(BTreeMap::new())
     }
 
-    pub fn iter<'a>(&'a self) -> MapValues<'a> {
-        MapValues::new(self.0.values())
+    /// Gets an iterator over the entries of the CBOR map, sorted by key.
+    pub fn iter<'a>(&'a self) -> Iter<'a> {
+        Iter::new(self.0.values())
     }
 
-    pub fn cbor_insert(&mut self, k: CBOR, v: CBOR) {
+    /// Inserts a key-value pair into the map.
+    pub fn insert(&mut self, k: CBOR, v: CBOR) {
         self.0.insert(CBORMapKey::new(k.encode_cbor()), CBORMapValue::new(k, v));
     }
 
-    pub fn cbor_insert_into<K, V>(&mut self, k: K, v: V) where K: CBOREncodable, V: CBOREncodable {
-        self.cbor_insert(k.cbor(), v.cbor());
+    /// Inserts a key-value pair into the map.
+    pub fn insert_into<K, V>(&mut self, k: K, v: V) where K: CBOREncodable, V: CBOREncodable {
+        self.insert(k.cbor(), v.cbor());
     }
 
-    pub fn cbor_insert_next(&mut self, k: CBOR, v: CBOR) -> bool {
+    pub(crate) fn insert_next(&mut self, k: CBOR, v: CBOR) -> bool {
         match self.0.last_entry() {
             None => {
-                self.cbor_insert(k, v);
+                self.insert(k, v);
                 true
             },
             Some(entry) => {
@@ -444,13 +455,13 @@ mod tests {
 
     #[cfg(test)]
     mod tests {
-        use crate::cbor::{test_util::test_cbor, cbor::SimpleValue};
+        use crate::cbor::{test_util::test_cbor, cbor::Value};
 
         #[test]
         fn encode_value() {
             test_cbor(false, "Value(false)", "false", "f4");
             test_cbor(true, "Value(true)", "true", "f5");
-            test_cbor(SimpleValue::new(100), "Value(100)", "simple(100)", "f864");
+            test_cbor(Value::new(100), "Value(100)", "simple(100)", "f864");
         }
     }
 
@@ -462,14 +473,14 @@ mod tests {
     #[test]
     fn encode() {
         let mut m = Map::new();
-        m.cbor_insert_into(-1, 3);
-        m.cbor_insert_into(vec![-1], 7);
-        m.cbor_insert_into("z", 4);
-        m.cbor_insert_into(10, 1);
-        m.cbor_insert_into(false, 8);
-        m.cbor_insert_into(100, 2);
-        m.cbor_insert_into("aa", 5);
-        m.cbor_insert_into(vec![100], 6);
+        m.insert_into(-1, 3);
+        m.insert_into(vec![-1], 7);
+        m.insert_into("z", 4);
+        m.insert_into(10, 1);
+        m.insert_into(false, 8);
+        m.insert_into(100, 2);
+        m.insert_into("aa", 5);
+        m.insert_into(vec![100], 6);
         test_cbor(m,
             r#"Map({0x0a: (UInt(10), UInt(1)), 0x1864: (UInt(100), UInt(2)), 0x20: (NInt(-1), UInt(3)), 0x617a: (String("z"), UInt(4)), 0x626161: (String("aa"), UInt(5)), 0x811864: (Array([UInt(100)]), UInt(6)), 0x8120: (Array([NInt(-1)]), UInt(7)), 0xf4: (Value(false), UInt(8))})"#,
             r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
