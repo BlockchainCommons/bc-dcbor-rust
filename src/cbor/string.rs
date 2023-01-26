@@ -26,7 +26,7 @@ impl CBOREncodable for String {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::test_util::test_cbor;
+    use crate::util::test_util::test_cbor;
 
     #[test]
     fn encode() {

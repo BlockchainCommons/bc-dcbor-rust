@@ -4,7 +4,7 @@ pub mod cbor;
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{decode, Tagged, CBOREncodable}, util::hex::IntoHex};
+    use crate::cbor::{Tagged, CBOREncodable, decode, bytes_to_hex};
 
     #[test]
     fn encode_cbor() {
@@ -16,7 +16,7 @@ mod test {
         let cbor = envelope.cbor();
         assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
         let bytes = cbor.encode_cbor();
-        assert_eq!(format!("{}", bytes.hex()), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
+        assert_eq!(format!("{}", bytes_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
         let decoded_cbor = decode(&bytes).unwrap();
         assert_eq!(cbor, decoded_cbor);
     }

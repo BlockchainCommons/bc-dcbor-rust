@@ -1,6 +1,4 @@
-use crate::util::hex::{hex_to_bytes, bytes_to_hex};
-
-use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}, hex_to_bytes, bytes_to_hex};
 
 
 /// A CBOR byte string.
@@ -54,7 +52,7 @@ impl std::fmt::Display for Bytes {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::test_util::test_cbor;
+    use crate::util::test_util::test_cbor;
 
     use super::Bytes;
 

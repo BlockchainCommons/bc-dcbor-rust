@@ -58,7 +58,7 @@ impl<T, const N: usize> CBOREncodable for &[T; N] where T: CBOREncodable {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::test_util::test_cbor;
+    use crate::util::test_util::test_cbor;
 
     #[test]
     fn encode() {

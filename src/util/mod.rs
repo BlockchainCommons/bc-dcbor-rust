@@ -1,2 +1,2 @@
-pub mod hex;
-pub mod string_util;
+#[cfg(test)]
+pub mod test_util;

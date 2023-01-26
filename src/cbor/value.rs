@@ -69,7 +69,7 @@ impl std::fmt::Display for Value {
 mod tests {
     #[cfg(test)]
     mod tests {
-        use crate::cbor::{test_util::test_cbor, Value};
+        use crate::{util::test_util::test_cbor, cbor::Value};
 
         #[test]
         fn encode_value() {

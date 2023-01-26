@@ -186,7 +186,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), DecodeError> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::CBOREncodable, decode::DecodeError, bytes::Bytes, Value, Tagged, Map}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::CBOREncodable, decode::DecodeError, bytes::Bytes, Value, Tagged, Map, hex_to_bytes}};
     use super::decode;
 
     fn run_test<T>(value: T) where T: CBOREncodable {

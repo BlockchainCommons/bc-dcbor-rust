@@ -44,7 +44,7 @@ impl std::fmt::Display for Tagged {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::test_util::test_cbor;
+    use crate::util::test_util::test_cbor;
 
     use super::Tagged;
 

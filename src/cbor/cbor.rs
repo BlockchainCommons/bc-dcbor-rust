@@ -1,6 +1,4 @@
-use crate::util::string_util::flanked;
-
-use super::{bytes::Bytes, Value, Tagged, Map};
+use super::{bytes::Bytes, Value, Tagged, Map, string_util::flanked};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]

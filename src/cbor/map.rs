@@ -1,9 +1,6 @@
-use std::collections::BTreeMap;
-use std::collections::btree_map::Values as BTreeMapValues;
+use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues};
 
-use crate::util::hex::bytes_to_hex;
-
-use super::{cbor::{CBOR, CBOREncodable}, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOR, CBOREncodable}, varint::{EncodeVarInt, MajorType}, bytes_to_hex};
 
 /// A CBOR map.
 ///
@@ -166,7 +163,7 @@ impl std::fmt::Debug for MapKey {
 mod tests {
     use decode::DecodeError;
 
-    use crate::{cbor::{test_util::test_cbor, decode}, util::hex::hex_to_bytes};
+    use crate::{util::test_util::test_cbor, cbor::{decode, hex_to_bytes}};
 
     use super::Map;
 

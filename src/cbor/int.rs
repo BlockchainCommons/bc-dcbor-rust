@@ -136,7 +136,7 @@ impl CBOREncodable for i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::test_util::test_cbor;
+    use crate::util::test_util::test_cbor;
 
     #[test]
     fn encode_unsigned() {
