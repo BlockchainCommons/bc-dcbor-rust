@@ -1,4 +1,4 @@
-# Blockchain Commons Gordian Envelope for Rust
+# Blockchain Commons Deterministic CBOR ("DCBOR") for Rust
 
 <!--Guidelines: https://github.com/BlockchainCommons/secure-template/wiki -->
 
