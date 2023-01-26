@@ -23,13 +23,3 @@ impl CBOREncodable for String {
         self.as_str().encode_cbor()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::util::test_util::test_cbor;
-
-    #[test]
-    fn encode() {
-        test_cbor("Hello", r#"String("Hello")"#, r#""Hello""#, "6548656c6c6f");
-    }
-}

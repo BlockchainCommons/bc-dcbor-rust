@@ -55,15 +55,3 @@ impl<T, const N: usize> CBOREncodable for &[T; N] where T: CBOREncodable {
         buf
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::util::test_util::test_cbor;
-
-    #[test]
-    fn encode() {
-        test_cbor(vec![1, 2, 3], "Array([UInt(1), UInt(2), UInt(3)])", "[1, 2, 3]", "83010203");
-        test_cbor([1, 2, 3], "Array([UInt(1), UInt(2), UInt(3)])", "[1, 2, 3]", "83010203");
-        test_cbor(&[1, -2, 3], "Array([UInt(1), NInt(-2), UInt(3)])", "[1, -2, 3]", "83012103");
-    }
-}

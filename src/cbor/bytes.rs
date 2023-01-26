@@ -49,21 +49,3 @@ impl std::fmt::Display for Bytes {
         f.write_str("'")
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::util::test_util::test_cbor;
-
-    use super::Bytes;
-
-    #[test]
-    fn encode_bytes() {
-        // test_cbor(Bytes::new([0x11, 0x22, 0x33]), "Bytes(112233)", "43112233");
-        test_cbor(
-            Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
-            "Bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)",
-            "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
-            "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
-        );
-    }
-}

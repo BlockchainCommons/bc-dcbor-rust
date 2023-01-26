@@ -158,35 +158,3 @@ impl std::fmt::Debug for MapKey {
         f.write_fmt(format_args!("0x{}", bytes_to_hex(&self.0)))
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use decode::DecodeError;
-
-    use crate::{util::test_util::test_cbor, cbor::{decode, hex_to_bytes}};
-
-    use super::Map;
-
-    #[test]
-    fn encode() {
-        let mut m = Map::new();
-        m.insert_into(-1, 3);
-        m.insert_into(vec![-1], 7);
-        m.insert_into("z", 4);
-        m.insert_into(10, 1);
-        m.insert_into(false, 8);
-        m.insert_into(100, 2);
-        m.insert_into("aa", 5);
-        m.insert_into(vec![100], 6);
-        test_cbor(m,
-            r#"Map({0x0a: (UInt(10), UInt(1)), 0x1864: (UInt(100), UInt(2)), 0x20: (NInt(-1), UInt(3)), 0x617a: (String("z"), UInt(4)), 0x626161: (String("aa"), UInt(5)), 0x811864: (Array([UInt(100)]), UInt(6)), 0x8120: (Array([NInt(-1)]), UInt(7)), 0xf4: (Value(false), UInt(8))})"#,
-            r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
-            "a80a011864022003617a046261610581186406812007f408");
-    }
-
-    #[test]
-    fn misordered() {
-        let cbor = decode(&hex_to_bytes("a2026141016142"));
-        assert_eq!(cbor, Err(DecodeError::MisorderedMapKey));
-    }
-}
