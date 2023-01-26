@@ -5,6 +5,5 @@ mod int;
 mod string;
 mod array;
 
-pub mod map;
 pub mod cbor;
 pub mod decode;

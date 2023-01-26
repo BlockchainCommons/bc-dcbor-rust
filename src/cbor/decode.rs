@@ -1,6 +1,6 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, CBOREncodable, Bytes, Value, Tagged}, varint::MajorType, map::CBORMap};
+use super::{cbor::{CBOR, CBOREncodable, Bytes, Value, Tagged, CBORMap}, varint::MajorType};
 
 #[derive(Debug)]
 pub enum Error {
@@ -178,7 +178,7 @@ pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
 
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, Bytes, Value, Tagged}, map::CBORMap, decode::Error}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::{CBOREncodable, Bytes, Value, Tagged, CBORMap}, decode::Error}, util::hex::hex_to_bytes};
     use super::decode_cbor;
 
     fn test_decode<T>(value: T) where T: CBOREncodable {
