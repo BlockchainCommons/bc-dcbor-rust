@@ -1,6 +1,16 @@
 use std::str::{from_utf8, Utf8Error};
 
-use super::{cbor::{CBOR, CBOREncodable, Bytes, Value, Tagged, Map}, varint::MajorType};
+use super::{cbor::{CBOR, CBOREncodable, Value, Tagged, Map}, varint::MajorType, bytes::Bytes};
+
+/// Decode CBOR binary representation to symbolid representation.
+pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
+    let (cbor, len) = decode_cbor_internal(data)?;
+    let remaining = data.len() - len;
+    if remaining > 0 {
+        return Err(Error::UnusedData(remaining));
+    }
+    Ok(cbor)
+}
 
 #[derive(Debug)]
 pub enum Error {
@@ -167,18 +177,9 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
     }
 }
 
-pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
-    let (cbor, len) = decode_cbor_internal(data)?;
-    let remaining = data.len() - len;
-    if remaining > 0 {
-        return Err(Error::UnusedData(remaining));
-    }
-    Ok(cbor)
-}
-
 #[cfg(test)]
 mod test {
-    use crate::{cbor::{cbor::{CBOREncodable, Bytes, Value, Tagged, Map}, decode::Error}, util::hex::hex_to_bytes};
+    use crate::{cbor::{cbor::{CBOREncodable, Value, Tagged, Map}, decode::Error, bytes::Bytes}, util::hex::hex_to_bytes};
     use super::decode_cbor;
 
     fn test_decode<T>(value: T) where T: CBOREncodable {

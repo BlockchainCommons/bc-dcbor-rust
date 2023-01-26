@@ -5,5 +5,10 @@ mod int;
 mod string;
 mod array;
 
+mod bytes;
+pub use bytes::Bytes;
+
 pub mod cbor;
-pub mod decode;
+
+mod decode;
+pub use decode::decode_cbor;
