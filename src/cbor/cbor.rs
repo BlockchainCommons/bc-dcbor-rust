@@ -1,21 +1,32 @@
-use crate::util::string_util::flanked;
+use crate::util::{string_util::flanked, hex::{bytes_to_hex, hex_to_bytes}};
 
-use super::{bytes::Bytes, map::CBORMap, tagged::Tagged, value::Value};
+use super::{map::CBORMap, tagged::Tagged, value::Value, varint::{EncodeVarInt, MajorType}};
 
+/// A symbolic representation of CBOR data.
 #[derive(Clone)]
 pub enum CBOR {
+    /// Unsigned integer (major type 0).
     UInt(u64),
+    /// Negative integer (major type 1).
     NInt(i64),
+    /// Byte string (major type 2).
     Bytes(Bytes),
+    /// UTF-8 string (major type 3).
     String(String),
+    /// Array (major type 4).
     Array(Vec<CBOR>),
+    /// Map (major type 5).
     Map(CBORMap),
+    /// Tagged value (major type 6).
     Tagged(Box<Tagged>),
+    /// Simple value (majory type 7).
     Value(Value)
 }
 
 pub trait CBOREncodable {
+    /// Returns the value in CBOR symbolic representation.
     fn cbor(&self) -> CBOR;
+    /// Returns the value in CBOR binary representation.
     fn encode_cbor(&self) -> Vec<u8>;
 }
 
@@ -104,5 +115,71 @@ impl std::fmt::Display for CBOR {
             CBOR::Value(x) => format!("{}", x),
         };
         f.write_str(&s)
+    }
+}
+
+#[derive(Clone)]
+pub struct Bytes(Vec<u8>);
+
+impl Bytes {
+    pub fn new<T>(data: T) -> Bytes where T: AsRef<[u8]> {
+        Bytes(data.as_ref().to_owned())
+    }
+
+    pub fn from_hex<T>(hex: T) -> Bytes where T: AsRef<str> {
+        Bytes(hex_to_bytes(hex))
+    }
+}
+
+impl CBOREncodable for Bytes {
+    fn cbor(&self) -> CBOR {
+        CBOR::Bytes(self.to_owned())
+    }
+
+    fn encode_cbor(&self) -> Vec<u8> {
+        let a = &self.0;
+        let mut buf = a.len().encode_varint(MajorType::Bytes);
+        for b in a {
+            buf.push(*b);
+        }
+        buf
+    }
+}
+
+impl PartialEq for Bytes {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl std::fmt::Debug for Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&bytes_to_hex(&self.0))
+    }
+}
+
+impl std::fmt::Display for Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("h'")?;
+        f.write_str(&bytes_to_hex(&self.0))?;
+        f.write_str("'")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cbor::test_util::test_cbor;
+
+    use super::Bytes;
+
+    #[test]
+    fn encode() {
+        // test_cbor(Bytes::new([0x11, 0x22, 0x33]), "Bytes(112233)", "43112233");
+        test_cbor(
+            Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
+            "Bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)",
+            "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
+            "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
+        );
     }
 }
