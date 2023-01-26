@@ -386,7 +386,7 @@ impl std::fmt::Debug for Map {
 
 #[cfg(test)]
 mod tests {
-    use crate::cbor::decode::{decode_cbor, Error};
+    use crate::cbor::decode::{decode, Error};
     use crate::cbor::test_util::test_cbor;
     use crate::util::hex::hex_to_bytes;
 
@@ -429,7 +429,7 @@ mod tests {
 
     #[test]
     fn misordered() {
-        let cbor = decode_cbor(&hex_to_bytes("a2026141016142"));
+        let cbor = decode(&hex_to_bytes("a2026141016142"));
         assert_eq!(cbor, Err(Error::MisorderedMapKey));
     }
 }

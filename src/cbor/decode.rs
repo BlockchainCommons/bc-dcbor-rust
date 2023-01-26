@@ -2,8 +2,8 @@ use std::str::{from_utf8, Utf8Error};
 
 use super::{cbor::{CBOR, CBOREncodable, Value, Tagged, Map}, varint::MajorType, bytes::Bytes};
 
-/// Decode CBOR binary representation to symbolid representation.
-pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
+/// Decode CBOR binary representation to symbolic representation.
+pub fn decode(data: &[u8]) -> Result<CBOR, Error> {
     let (cbor, len) = decode_cbor_internal(data)?;
     let remaining = data.len() - len;
     if remaining > 0 {
@@ -180,31 +180,31 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
 #[cfg(test)]
 mod test {
     use crate::{cbor::{cbor::{CBOREncodable, Value, Tagged, Map}, decode::Error, bytes::Bytes}, util::hex::hex_to_bytes};
-    use super::decode_cbor;
+    use super::decode;
 
-    fn test_decode<T>(value: T) where T: CBOREncodable {
+    fn run_test<T>(value: T) where T: CBOREncodable {
         let cbor = value.cbor();
         let bytes = cbor.encode_cbor();
         //println!("{}", bytes_to_hex(&bytes));
-        let decoded_cbor = decode_cbor(&bytes).unwrap();
+        let decoded_cbor = decode(&bytes).unwrap();
         assert_eq!(cbor, decoded_cbor);
     }
 
     #[test]
-    fn decode() {
-        test_decode(32);
-        test_decode(-32);
-        test_decode(Bytes::new([0x11, 0x22, 0x33]));
-        test_decode("Hello, world!");
-        test_decode("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-        test_decode(Tagged::new(32, "Hello".cbor()));
-        test_decode([1, 2, 3]);
+    fn decode_tests() {
+        run_test(32);
+        run_test(-32);
+        run_test(Bytes::new([0x11, 0x22, 0x33]));
+        run_test("Hello, world!");
+        run_test("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+        run_test(Tagged::new(32, "Hello".cbor()));
+        run_test([1, 2, 3]);
         {
             let mut array: Vec<Box<dyn CBOREncodable>> = Vec::new();
             array.push(Box::new(1));
             array.push(Box::new("Hello"));
             array.push(Box::new([1, 2, 3]));
-            test_decode(array);
+            run_test(array);
         }
         {
             let mut map = Map::new();
@@ -216,16 +216,16 @@ mod test {
             map.insert_into(100, 2);
             map.insert_into("aa", 5);
             map.insert_into(vec![100], 6);
-            test_decode(map);
+            run_test(map);
         }
-        test_decode(false);
-        test_decode(true);
-        test_decode(Value::new(32));
+        run_test(false);
+        run_test(true);
+        run_test(Value::new(32));
     }
 
     #[test]
     fn unused_data() {
-        let cbor = decode_cbor(&hex_to_bytes("0001"));
+        let cbor = decode(&hex_to_bytes("0001"));
         assert_eq!(cbor, Err(Error::UnusedData(1)));
     }
 }

@@ -11,4 +11,4 @@ pub use bytes::Bytes;
 pub mod cbor;
 
 mod decode;
-pub use decode::decode_cbor;
+pub use decode::decode;
