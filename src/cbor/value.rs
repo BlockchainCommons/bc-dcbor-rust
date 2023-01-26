@@ -64,3 +64,18 @@ impl std::fmt::Display for Value {
         f.write_str(&s)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[cfg(test)]
+    mod tests {
+        use crate::cbor::{test_util::test_cbor, Value};
+
+        #[test]
+        fn encode_value() {
+            test_cbor(false, "Value(false)", "false", "f4");
+            test_cbor(true, "Value(true)", "true", "f5");
+            test_cbor(Value::new(100), "Value(100)", "simple(100)", "f864");
+        }
+    }
+}

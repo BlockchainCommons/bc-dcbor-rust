@@ -41,3 +41,15 @@ impl std::fmt::Display for Tagged {
         f.write_str(&format!("{}({})", self.name(), self.item))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::cbor::test_util::test_cbor;
+
+    use super::Tagged;
+
+    #[test]
+    fn encode_tagged() {
+        test_cbor(Tagged::new(1, "Hello"), r#"Tagged(1, String("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
+    }
+}
