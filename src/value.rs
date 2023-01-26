@@ -17,7 +17,7 @@ impl Value {
     }
 
     /// Returns the raw value.
-    pub fn value(&self) -> u64 {
+    pub fn raw_value(&self) -> u64 {
         self.0
     }
 }

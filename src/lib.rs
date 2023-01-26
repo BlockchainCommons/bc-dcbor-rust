@@ -18,7 +18,7 @@ mod cbor;
 pub use cbor::{CBOR, CBOREncodable};
 
 mod decode;
-pub use decode::{decode, DecodeError};
+pub use decode::{decode_cbor, DecodeError};
 
 mod hex;
 pub use hex::{hex_to_bytes, bytes_to_hex};
@@ -42,7 +42,7 @@ mod varint;
 
 #[cfg(test)]
 mod test {
-    use crate::{Tagged, CBOREncodable, decode, bytes_to_hex, Bytes, Map, hex_to_bytes, DecodeError, Value};
+    use crate::{Tagged, CBOREncodable, decode_cbor, bytes_to_hex, Bytes, Map, hex_to_bytes, DecodeError, Value};
 
     fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
         let cbor = t.cbor();
@@ -50,7 +50,7 @@ mod test {
         assert_eq!(format!("{}", cbor), expected_display);
         let data = cbor.encode_cbor();
         assert_eq!(bytes_to_hex(&data), expected_data);
-        let decoded_cbor = decode(&data).unwrap();
+        let decoded_cbor = decode_cbor(&data).unwrap();
         assert_eq!(cbor, decoded_cbor);
     }
 
@@ -210,7 +210,7 @@ mod test {
 
     #[test]
     fn encode_map_misordered() {
-        let cbor = decode(&hex_to_bytes("a2026141016142"));
+        let cbor = decode_cbor(&hex_to_bytes("a2026141016142"));
         assert_eq!(cbor, Err(DecodeError::MisorderedMapKey));
     }
 
@@ -237,13 +237,13 @@ mod test {
         assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
         let bytes = cbor.encode_cbor();
         assert_eq!(format!("{}", bytes_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
-        let decoded_cbor = decode(&bytes).unwrap();
+        let decoded_cbor = decode_cbor(&bytes).unwrap();
         assert_eq!(cbor, decoded_cbor);
     }
 
     #[test]
     fn unused_data() {
-        let cbor = decode(&hex_to_bytes("0001"));
+        let cbor = decode_cbor(&hex_to_bytes("0001"));
         assert_eq!(cbor, Err(DecodeError::UnusedData(1)));
     }
 }

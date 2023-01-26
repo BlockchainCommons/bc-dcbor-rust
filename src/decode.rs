@@ -3,7 +3,9 @@ use std::str::{from_utf8, Utf8Error};
 use super::{cbor::{CBOR, CBOREncodable}, varint::MajorType, bytes::Bytes, Value, Tagged, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
-pub fn decode(data: &[u8]) -> Result<CBOR, DecodeError> {
+///
+/// Returns an error if the data is not well-formed deterministic CBOR.
+pub fn decode_cbor(data: &[u8]) -> Result<CBOR, DecodeError> {
     let (cbor, len) = decode_cbor_internal(data)?;
     let remaining = data.len() - len;
     if remaining > 0 {

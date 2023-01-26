@@ -18,6 +18,11 @@ impl Bytes {
     pub fn from_hex<T>(hex: T) -> Bytes where T: AsRef<str> {
         Bytes(hex_to_bytes(hex))
     }
+
+    /// The wrapped data.
+    pub fn data(&self) -> &Vec<u8> {
+        &self.0
+    }
 }
 
 impl CBOREncodable for Bytes {
