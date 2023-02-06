@@ -7,7 +7,7 @@ impl CBOREncodable for u8 {
         CBOR::UInt(*self as u64)
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         self.encode_varint(MajorType::Unsigned)
     }
 }
@@ -17,7 +17,7 @@ impl CBOREncodable for u16 {
         CBOR::UInt(*self as u64)
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         self.encode_varint(MajorType::Unsigned)
     }
 }
@@ -27,7 +27,7 @@ impl CBOREncodable for u32 {
         CBOR::UInt(*self as u64)
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         self.encode_varint(MajorType::Unsigned)
     }
 }
@@ -37,7 +37,7 @@ impl CBOREncodable for u64 {
         CBOR::UInt(*self)
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         self.encode_varint(MajorType::Unsigned)
     }
 }
@@ -47,7 +47,7 @@ impl CBOREncodable for usize {
         CBOR::UInt(*self as u64)
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         self.encode_varint(MajorType::Unsigned)
     }
 }
@@ -61,7 +61,7 @@ impl CBOREncodable for i8 {
         }
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as i16;
             let a = (-b - 1) as u8;
@@ -82,7 +82,7 @@ impl CBOREncodable for i16 {
         }
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as i32;
             let a = (-b - 1) as u16;
@@ -103,7 +103,7 @@ impl CBOREncodable for i32 {
         }
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as i64;
             let a = (-b - 1) as u32;
@@ -124,7 +124,7 @@ impl CBOREncodable for i64 {
         }
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         if *self < 0 {
             let b = *self as u64;
             let a = (-(b as i128) - 1) as u64;

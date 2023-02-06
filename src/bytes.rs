@@ -32,7 +32,7 @@ impl CBOREncodable for Data {
         CBOR::Bytes(self.to_owned())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         let a = &self.0;
         let mut buf = a.len().encode_varint(MajorType::Bytes);
         for b in a {

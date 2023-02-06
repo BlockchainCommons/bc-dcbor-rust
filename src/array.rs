@@ -7,10 +7,10 @@ impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         let mut buf = self.len().encode_varint(MajorType::Array);
         for item in self {
-            buf.extend(item.encode_cbor());
+            buf.extend(item.cbor_data());
         }
         buf
     }
@@ -21,10 +21,10 @@ impl CBOREncodable for Vec<Box<dyn CBOREncodable>> {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         let mut buf = self.len().encode_varint(MajorType::Array);
         for item in self {
-            buf.extend(item.encode_cbor());
+            buf.extend(item.cbor_data());
         }
         buf
     }
@@ -35,10 +35,10 @@ impl<T, const N: usize> CBOREncodable for [T; N] where T: CBOREncodable {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         let mut buf = self.len().encode_varint(MajorType::Array);
         for item in self {
-            buf.extend(item.encode_cbor());
+            buf.extend(item.cbor_data());
         }
         buf
     }
@@ -49,10 +49,10 @@ impl<T, const N: usize> CBOREncodable for &[T; N] where T: CBOREncodable {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         let mut buf = self.len().encode_varint(MajorType::Array);
         for item in *self {
-            buf.extend(item.encode_cbor());
+            buf.extend(item.cbor_data());
         }
         buf
     }

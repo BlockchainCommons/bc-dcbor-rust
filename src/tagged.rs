@@ -1,4 +1,4 @@
-use crate::cbor_encodable::CBOREncodable;
+use crate::{cbor_encodable::CBOREncodable, tag::{Tag, IntoTag}};
 
 use super::{cbor::CBOR, varint::{MajorType, EncodeVarInt}};
 
@@ -6,14 +6,14 @@ use super::{cbor::CBOR, varint::{MajorType, EncodeVarInt}};
 /// A CBOR tagged value.
 #[derive(Debug, Clone)]
 pub struct Tagged {
-    tag: u64,
+    tag: Tag,
     item: CBOR,
 }
 
 impl Tagged {
     /// Creates a new tagged value.
-    pub fn new<T>(tag: u64, item: T) -> Tagged where T: CBOREncodable {
-        Tagged { tag, item: item.cbor() }
+    pub fn new<T, I>(value: T, item: I) -> Tagged where T: IntoTag, I: CBOREncodable {
+        Tagged { tag: value.into_tag(), item: item.cbor() }
     }
 
     /// Returns the known name of the tag, if it has been assigned one.
@@ -22,8 +22,8 @@ impl Tagged {
     }
 
     /// Returns the tag.
-    pub fn tag(&self) -> u64 {
-        self.tag
+    pub fn tag(&self) -> &Tag {
+        &self.tag
     }
 
     /// Returns the CBOR item that was tagged.
@@ -34,12 +34,14 @@ impl Tagged {
 
 impl CBOREncodable for Tagged {
     fn cbor(&self) -> CBOR {
-        CBOR::Tagged(Box::new(self.clone()))
+        let tag = self.tag().clone();
+        let item = Box::new(self.item().clone());
+        CBOR::Tagged(tag, item)
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
-        let mut buf = self.tag.encode_varint(MajorType::Tagged);
-        buf.extend(self.item.encode_cbor());
+    fn cbor_data(&self) -> Vec<u8> {
+        let mut buf = self.tag.value().encode_varint(MajorType::Tagged);
+        buf.extend(self.item.cbor_data());
         buf
     }
 }

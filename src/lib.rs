@@ -13,8 +13,9 @@ mod array;
 
 mod bytes;
 pub mod decode_error;
-pub mod tag;
 pub use bytes::Data;
+pub mod tag;
+pub use tag::IntoTag;
 
 mod cbor;
 pub use cbor::CBOR;
@@ -25,6 +26,13 @@ mod cbor_decodable;
 pub use cbor_decodable::CBORDecodable;
 mod cbor_codable;
 pub use cbor_codable::CBORCodable;
+
+mod cbor_tagged_encodable;
+pub use cbor_tagged_encodable::CBORTaggedEncodable;
+mod cbor_tagged_decodable;
+pub use cbor_tagged_decodable::CBORTaggedDecodable;
+mod cbor_tagged_codable;
+pub use cbor_tagged_codable::CBORTaggedCodable;
 
 mod decode;
 pub use decode::decode_cbor;
@@ -57,7 +65,7 @@ mod test {
         let cbor = t.cbor();
         assert_eq!(format!("{:?}", cbor), expected_debug);
         assert_eq!(format!("{}", cbor), expected_display);
-        let data = cbor.encode_cbor();
+        let data = cbor.cbor_data();
         assert_eq!(bytes_to_hex(&data), expected_data);
         let decoded_cbor = decode_cbor(&data).unwrap();
         assert_eq!(cbor, decoded_cbor);
@@ -243,7 +251,7 @@ mod test {
         let envelope = Tagged::new(200, [alice, knows_bob]);
         let cbor = envelope.cbor();
         assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
-        let bytes = cbor.encode_cbor();
+        let bytes = cbor.cbor_data();
         assert_eq!(format!("{}", bytes_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
         let decoded_cbor = decode_cbor(&bytes).unwrap();
         assert_eq!(cbor, decoded_cbor);

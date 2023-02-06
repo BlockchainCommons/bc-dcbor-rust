@@ -44,3 +44,25 @@ impl std::fmt::Display for Tag {
         write!(f, "{}", self.name().clone().unwrap_or_else(|| self.value().to_string()))
     }
 }
+
+pub trait IntoTag {
+    fn into_tag(self) -> Tag;
+}
+
+impl IntoTag for u64 {
+    fn into_tag(self) -> Tag {
+        Tag::new(self, None)
+    }
+}
+
+impl IntoTag for i32 {
+    fn into_tag(self) -> Tag {
+        Tag::new(self as u64, None)
+    }
+}
+
+impl IntoTag for Tag {
+    fn into_tag(self) -> Tag {
+        self
+    }
+}

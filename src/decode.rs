@@ -1,6 +1,6 @@
 use std::str::from_utf8;
 
-use crate::{decode_error::DecodeError, cbor_encodable::CBOREncodable};
+use crate::{decode_error::DecodeError, cbor_encodable::CBOREncodable, tag::Tag};
 
 use super::{cbor::CBOR, varint::MajorType, bytes::Data, Value, Tagged, Map};
 
@@ -136,7 +136,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), DecodeError> {
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
-            let tagged = Tagged::new(value, item);
+            let tagged = Tagged::new(Tag::new(value, None), item);
             Ok((tagged.cbor(), header_varint_len + item_len))
         },
         MajorType::Simple => Ok((Value::new(value).cbor(), header_varint_len)),

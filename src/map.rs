@@ -23,7 +23,7 @@ impl Map {
 
     /// Inserts a key-value pair into the map.
     pub fn insert(&mut self, k: CBOR, v: CBOR) {
-        self.0.insert(MapKey::new(k.encode_cbor()), MapValue::new(k, v));
+        self.0.insert(MapKey::new(k.cbor_data()), MapValue::new(k, v));
     }
 
     /// Inserts a key-value pair into the map.
@@ -38,7 +38,7 @@ impl Map {
                 true
             },
             Some(entry) => {
-                let new_key = MapKey::new(k.encode_cbor());
+                let new_key = MapKey::new(k.cbor_data());
                 let entry_key = entry.key();
                 if entry_key >= &new_key {
                     return false
@@ -65,8 +65,8 @@ impl CBOREncodable for Map {
         CBOR::Map(self.clone())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
-        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.encode_cbor())).collect();
+    fn cbor_data(&self) -> Vec<u8> {
+        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.cbor_data())).collect();
         let mut buf = pairs.len().encode_varint(MajorType::Map);
         for pair in pairs {
             buf.extend(pair.0);

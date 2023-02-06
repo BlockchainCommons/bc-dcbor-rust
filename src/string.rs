@@ -7,7 +7,7 @@ impl CBOREncodable for &str {
         CBOR::String(self.to_string())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         let mut buf = self.len().encode_varint(MajorType::Text);
         for byte in self.bytes() {
             buf.push(byte);
@@ -21,7 +21,7 @@ impl CBOREncodable for String {
         CBOR::String(self.to_string())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
-        self.as_str().encode_cbor()
+    fn cbor_data(&self) -> Vec<u8> {
+        self.as_str().cbor_data()
     }
 }

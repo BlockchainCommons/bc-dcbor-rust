@@ -29,7 +29,7 @@ impl CBOREncodable for Value {
         CBOR::Value(self.clone())
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         self.0.encode_varint(MajorType::Simple)
     }
 }
@@ -42,10 +42,10 @@ impl CBOREncodable for bool {
         }
     }
 
-    fn encode_cbor(&self) -> Vec<u8> {
+    fn cbor_data(&self) -> Vec<u8> {
         match self {
-            false => Value::new(20).encode_cbor(),
-            true => Value::new(21).encode_cbor()
+            false => Value::new(20).cbor_data(),
+            true => Value::new(21).cbor_data()
         }
     }
 }
