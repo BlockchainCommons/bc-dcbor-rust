@@ -12,13 +12,16 @@
 mod array;
 
 mod bytes;
+pub mod decode_error;
+pub mod tag;
 pub use bytes::Data;
 
 mod cbor;
-pub use cbor::{CBOR, CBOREncodable};
+mod cbor_encodable;
+pub use cbor::CBOR;
 
 mod decode;
-pub use decode::{decode_cbor, DecodeError};
+pub use decode::decode_cbor;
 
 mod hex;
 pub use hex::{hex_to_bytes, bytes_to_hex};
@@ -42,7 +45,7 @@ mod varint;
 
 #[cfg(test)]
 mod test {
-    use crate::{Tagged, CBOREncodable, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, DecodeError, Value};
+    use crate::{Tagged, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, Value, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable};
 
     fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
         let cbor = t.cbor();
@@ -244,5 +247,15 @@ mod test {
     fn unused_data() {
         let cbor = decode_cbor(&hex_to_bytes("0001"));
         assert_eq!(cbor, Err(DecodeError::UnusedData(1)));
+    }
+
+    #[test]
+    fn tag() {
+        let tag = Tag::new(1, Some(&"A"));
+        assert_eq!(format!("{}", tag), "A");
+        assert_eq!(format!("{:?}", tag), r#"Tag { value: 1, name: Some("A") }"#);
+        let tag = Tag::new(2, None);
+        assert_eq!(format!("{}", tag), "2");
+        assert_eq!(format!("{:?}", tag), "Tag { value: 2, name: None }");
     }
 }

@@ -1,4 +1,6 @@
-use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
+use crate::cbor_encodable::CBOREncodable;
+
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 impl CBOREncodable for u8 {
     fn cbor(&self) -> CBOR {
@@ -6,7 +8,7 @@ impl CBOREncodable for u8 {
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::UInt)
+        self.encode_varint(MajorType::Unsigned)
     }
 }
 
@@ -16,7 +18,7 @@ impl CBOREncodable for u16 {
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::UInt)
+        self.encode_varint(MajorType::Unsigned)
     }
 }
 
@@ -26,7 +28,7 @@ impl CBOREncodable for u32 {
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::UInt)
+        self.encode_varint(MajorType::Unsigned)
     }
 }
 
@@ -36,7 +38,7 @@ impl CBOREncodable for u64 {
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::UInt)
+        self.encode_varint(MajorType::Unsigned)
     }
 }
 
@@ -46,7 +48,7 @@ impl CBOREncodable for usize {
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::UInt)
+        self.encode_varint(MajorType::Unsigned)
     }
 }
 
@@ -63,10 +65,10 @@ impl CBOREncodable for i8 {
         if *self < 0 {
             let b = *self as i16;
             let a = (-b - 1) as u8;
-            a.encode_varint(MajorType::NInt)
+            a.encode_varint(MajorType::Negative)
         } else {
             let a = *self as u8;
-            a.encode_varint(MajorType::UInt)
+            a.encode_varint(MajorType::Unsigned)
         }
     }
 }
@@ -84,10 +86,10 @@ impl CBOREncodable for i16 {
         if *self < 0 {
             let b = *self as i32;
             let a = (-b - 1) as u16;
-            a.encode_varint(MajorType::NInt)
+            a.encode_varint(MajorType::Negative)
         } else {
             let a = *self as u16;
-            a.encode_varint(MajorType::UInt)
+            a.encode_varint(MajorType::Unsigned)
         }
     }
 }
@@ -105,10 +107,10 @@ impl CBOREncodable for i32 {
         if *self < 0 {
             let b = *self as i64;
             let a = (-b - 1) as u32;
-            a.encode_varint(MajorType::NInt)
+            a.encode_varint(MajorType::Negative)
         } else {
             let a = *self as u32;
-            a.encode_varint(MajorType::UInt)
+            a.encode_varint(MajorType::Unsigned)
         }
     }
 }
@@ -126,10 +128,10 @@ impl CBOREncodable for i64 {
         if *self < 0 {
             let b = *self as u64;
             let a = (-(b as i128) - 1) as u64;
-            a.encode_varint(MajorType::NInt)
+            a.encode_varint(MajorType::Negative)
         } else {
             let a = *self as u64;
-            a.encode_varint(MajorType::UInt)
+            a.encode_varint(MajorType::Unsigned)
         }
     }
 }

@@ -1,4 +1,6 @@
-use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}, hex_to_bytes, bytes_to_hex};
+use crate::cbor_encodable::CBOREncodable;
+
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex_to_bytes, bytes_to_hex};
 
 
 /// A CBOR byte string.

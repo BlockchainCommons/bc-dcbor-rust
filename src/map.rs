@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues};
 
-use super::{cbor::{CBOR, CBOREncodable}, varint::{EncodeVarInt, MajorType}, bytes_to_hex};
+use crate::cbor_encodable::CBOREncodable;
+
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, bytes_to_hex};
 
 /// A CBOR map.
 ///

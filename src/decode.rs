@@ -1,6 +1,8 @@
-use std::str::{from_utf8, Utf8Error};
+use std::str::from_utf8;
 
-use super::{cbor::{CBOR, CBOREncodable}, varint::MajorType, bytes::Data, Value, Tagged, Map};
+use crate::{decode_error::DecodeError, cbor_encodable::CBOREncodable};
+
+use super::{cbor::CBOR, varint::MajorType, bytes::Data, Value, Tagged, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -14,61 +16,16 @@ pub fn decode_cbor(data: &[u8]) -> Result<CBOR, DecodeError> {
     Ok(cbor)
 }
 
-/// An error encountered while decoding CBOR.
-#[derive(Debug)]
-pub enum DecodeError {
-    /// Early end of data.
-    Underrun,
-    /// Unsupported value in CBOR header.
-    UnsupportedHeaderValue(u8),
-    /// An integer was encoded in non-canonical form.
-    NonCanonicalInt,
-    /// An invalidly-encoded UTF-8 string was encountered.
-    InvalidString(Utf8Error),
-    /// The decoded CBOR had extra data at the end.
-    UnusedData(usize),
-    /// The decoded CBOR map has keys that are not in canonical order.
-    MisorderedMapKey,
-}
-
-impl std::fmt::Display for DecodeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            DecodeError::Underrun => format!("early end of data"),
-            DecodeError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
-            DecodeError::NonCanonicalInt => format!("non-canonical int format"),
-            DecodeError::InvalidString(err) => format!("invalid string format: {:?}", err),
-            DecodeError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
-            DecodeError::MisorderedMapKey => format!("mis-ordered map key")
-        };
-        f.write_str(&s)
-    }
-}
-
-impl std::error::Error for DecodeError {
-}
-
-impl PartialEq for DecodeError {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::UnsupportedHeaderValue(l0), Self::UnsupportedHeaderValue(r0)) => l0 == r0,
-            (Self::InvalidString(l0), Self::InvalidString(r0)) => l0 == r0,
-            (Self::UnusedData(l0), Self::UnusedData(r0)) => l0 == r0,
-            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
-        }
-    }
-}
-
 fn parse_header(header: u8) -> (MajorType, u8) {
     let major_type = match header >> 5 {
-        0 => MajorType::UInt,
-        1 => MajorType::NInt,
+        0 => MajorType::Unsigned,
+        1 => MajorType::Negative,
         2 => MajorType::Bytes,
-        3 => MajorType::String,
+        3 => MajorType::Text,
         4 => MajorType::Array,
         5 => MajorType::Map,
         6 => MajorType::Tagged,
-        7 => MajorType::Value,
+        7 => MajorType::Simple,
         _ => panic!()
     };
     let header_value = header & 31;
@@ -139,15 +96,15 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), DecodeError> {
     }
     let (major_type, value, header_varint_len) = parse_header_varint(&data)?;
     match major_type {
-        MajorType::UInt => Ok((CBOR::UInt(value), header_varint_len)),
-        MajorType::NInt => Ok((CBOR::NInt(-(value as i64) - 1), header_varint_len)),
+        MajorType::Unsigned => Ok((CBOR::UInt(value), header_varint_len)),
+        MajorType::Negative => Ok((CBOR::NInt(-(value as i64) - 1), header_varint_len)),
         MajorType::Bytes => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let bytes = Data::new(buf);
             Ok((bytes.cbor(), header_varint_len + data_len))
         },
-        MajorType::String => {
+        MajorType::Text => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let string = from_utf8(buf).map_err(|x| DecodeError::InvalidString(x))?;
@@ -182,6 +139,6 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), DecodeError> {
             let tagged = Tagged::new(value, item);
             Ok((tagged.cbor(), header_varint_len + item_len))
         },
-        MajorType::Value => Ok((Value::new(value).cbor(), header_varint_len)),
+        MajorType::Simple => Ok((Value::new(value).cbor(), header_varint_len)),
     }
 }

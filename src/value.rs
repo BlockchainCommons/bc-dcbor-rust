@@ -1,4 +1,6 @@
-use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
+use crate::cbor_encodable::CBOREncodable;
+
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 
 /// A CBOR simple value.
@@ -28,7 +30,7 @@ impl CBOREncodable for Value {
     }
 
     fn encode_cbor(&self) -> Vec<u8> {
-        self.0.encode_varint(MajorType::Value)
+        self.0.encode_varint(MajorType::Simple)
     }
 }
 

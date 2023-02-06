@@ -1,4 +1,6 @@
-use super::{cbor::{CBOREncodable, CBOR}, varint::{EncodeVarInt, MajorType}};
+use crate::cbor_encodable::CBOREncodable;
+
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
     fn cbor(&self) -> CBOR {

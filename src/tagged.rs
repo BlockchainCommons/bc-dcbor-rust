@@ -1,4 +1,6 @@
-use super::{cbor::{CBOR, CBOREncodable}, varint::{MajorType, EncodeVarInt}};
+use crate::cbor_encodable::CBOREncodable;
+
+use super::{cbor::CBOR, varint::{MajorType, EncodeVarInt}};
 
 
 /// A CBOR tagged value.
