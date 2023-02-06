@@ -17,8 +17,14 @@ pub mod tag;
 pub use bytes::Data;
 
 mod cbor;
-mod cbor_encodable;
 pub use cbor::CBOR;
+
+mod cbor_encodable;
+pub use cbor_encodable::CBOREncodable;
+mod cbor_decodable;
+pub use cbor_decodable::CBORDecodable;
+mod cbor_codable;
+pub use cbor_codable::CBORCodable;
 
 mod decode;
 pub use decode::decode_cbor;

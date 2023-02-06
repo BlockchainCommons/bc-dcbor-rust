@@ -1,6 +1,6 @@
 use crate::CBOR;
 
-/// A value that can be encoded as CBOR.
+/// A type that can be encoded as CBOR.
 pub trait CBOREncodable {
     /// Returns the value in CBOR symbolic representation.
     fn cbor(&self) -> CBOR;
