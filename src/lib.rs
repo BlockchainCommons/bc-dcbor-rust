@@ -11,14 +11,15 @@
 
 mod array;
 
-mod bytes;
 pub mod decode_error;
+
+mod bytes;
 pub use bytes::Data;
 pub mod tag;
-pub use tag::IntoTag;
+pub use tag::{Tag, IntoTag};
 
 mod cbor;
-pub use cbor::CBOR;
+pub use cbor::*;
 
 mod cbor_encodable;
 pub use cbor_encodable::CBOREncodable;

@@ -28,7 +28,7 @@ impl CBOREncodable for CBOR {
                 let x = Tagged::new(tag.clone(), *item.clone());
                 x.cbor_data()
             },
-            CBOR::Value(x) => x.cbor_data(),
+            CBOR::Simple(x) => x.cbor_data(),
         }
     }
 }

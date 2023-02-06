@@ -1,6 +1,7 @@
 use crate::tag::Tag;
+use crate::Value;
 
-use super::{bytes::Data, Value, Tagged, Map, string_util::flanked};
+use super::{bytes::Data, Tagged, Map, string_util::flanked};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
@@ -19,8 +20,14 @@ pub enum CBOR {
     Map(Map),
     /// Tagged value (major type 6).
     Tagged(Tag, Box<CBOR>),
-    /// Simple value (majory type 7).
-    Value(Value)
+    /// Simple value (major type 7).
+    Simple(Value)
+}
+
+impl CBOR {
+    pub const FALSE: CBOR = CBOR::Simple(Value(20));
+    pub const TRUE: CBOR = CBOR::Simple(Value(21));
+    pub const NULL: CBOR = CBOR::Simple(Value(22));
 }
 
 impl PartialEq for CBOR {
@@ -33,7 +40,7 @@ impl PartialEq for CBOR {
             (Self::Array(l0), Self::Array(r0)) => l0 == r0,
             (Self::Map(l0), Self::Map(r0)) => l0 == r0,
             (Self::Tagged(l0, l1), Self::Tagged(r0, r1)) => l0 == r0 && l1 == r1,
-            (Self::Value(l0), Self::Value(r0)) => l0 == r0,
+            (Self::Simple(l0), Self::Simple(r0)) => l0 == r0,
             _ => false,
         }
     }
@@ -71,7 +78,7 @@ impl std::fmt::Debug for CBOR {
             Self::Array(x) => f.debug_tuple("Array").field(x).finish(),
             Self::Map(x) => f.debug_tuple("Map").field(x).finish(),
             Self::Tagged(tag, item) => f.write_fmt(format_args!("Tagged({}, {:?})", tag, item)),
-            Self::Value(x) => f.write_fmt(format_args!("Value({})", x.name())),
+            Self::Simple(x) => f.write_fmt(format_args!("Value({})", x.name())),
         }
     }
 }
@@ -86,7 +93,7 @@ impl std::fmt::Display for CBOR {
             CBOR::Array(x) => format_array(x),
             CBOR::Map(x) => format_map(x),
             CBOR::Tagged(tag, item) => format!("{}", Tagged::new(tag.clone(), *item.clone())),
-            CBOR::Value(x) => format!("{}", x),
+            CBOR::Simple(x) => format!("{}", x),
         };
         f.write_str(&s)
     }

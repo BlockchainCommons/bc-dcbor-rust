@@ -5,12 +5,12 @@ use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 /// A CBOR simple value.
 #[derive(Clone)]
-pub struct Value(u64);
+pub struct Value(pub u64);
 
 impl Value {
     /// Creates a new CBOR "simple" value.
-    pub fn new(v: u64) -> Value {
-        Value(v)
+    pub fn new<T>(v: T) -> Value where T: IntoValue {
+        v.into_value()
     }
 
     /// Returns the known name of the value, if it has been assigned one.
@@ -26,7 +26,7 @@ impl Value {
 
 impl CBOREncodable for Value {
     fn cbor(&self) -> CBOR {
-        CBOR::Value(self.clone())
+        CBOR::Simple(self.clone())
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -37,8 +37,8 @@ impl CBOREncodable for Value {
 impl CBOREncodable for bool {
     fn cbor(&self) -> CBOR {
         match self {
-            false => CBOR::Value(Value::new(20)),
-            true => CBOR::Value(Value::new(21)),
+            false => CBOR::Simple(Value::new(20)),
+            true => CBOR::Simple(Value::new(21)),
         }
     }
 
@@ -75,5 +75,27 @@ impl std::fmt::Display for Value {
             _ => format!("simple({:?})", self.0),
         };
         f.write_str(&s)
+    }
+}
+
+pub trait IntoValue {
+    fn into_value(self) -> Value;
+}
+
+impl IntoValue for u64 {
+    fn into_value(self) -> Value {
+        Value(self)
+    }
+}
+
+impl IntoValue for i32 {
+    fn into_value(self) -> Value {
+        Value(self as u64)
+    }
+}
+
+impl IntoValue for Value {
+    fn into_value(self) -> Value {
+        self
     }
 }
