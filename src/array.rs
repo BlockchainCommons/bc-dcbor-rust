@@ -1,4 +1,4 @@
-use crate::cbor_encodable::CBOREncodable;
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORCodable, decode_error::DecodeError};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -15,6 +15,24 @@ impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
         buf
     }
 }
+
+impl<T> CBORDecodable for Vec<T> where T: CBORDecodable {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+        match cbor {
+            CBOR::Array(cbor_array) => {
+                let mut result = vec![];
+                for cbor in cbor_array {
+                    let element = T::from_cbor(cbor)?;
+                    result.push(*element);
+                }
+                Ok(Box::new(result))
+            },
+            _ => Err(DecodeError::WrongType)
+        }
+    }
+}
+
+impl<T> CBORCodable for Vec<T> where T: CBORCodable { }
 
 impl CBOREncodable for Vec<Box<dyn CBOREncodable>> {
     fn cbor(&self) -> CBOR {

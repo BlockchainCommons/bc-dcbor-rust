@@ -1,137 +1,71 @@
-use crate::cbor_encodable::CBOREncodable;
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, decode_error::DecodeError, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
-impl CBOREncodable for u8 {
-    fn cbor(&self) -> CBOR {
-        CBOR::UInt(*self as u64)
-    }
+macro_rules! impl_cbor {
+    ($type: ty) => {
+        impl From64 for $type { }
 
-    fn cbor_data(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::Unsigned)
-    }
+        impl CBOREncodable for $type {
+            fn cbor(&self) -> CBOR {
+                #[allow(unused_comparisons)]
+                if *self < 0 {
+                    CBOR::NInt(*self as i64)
+                } else {
+                    CBOR::UInt(*self as u64)
+                }
+            }
+
+            fn cbor_data(&self) -> Vec<u8> {
+                #[allow(unused_comparisons)]
+                if *self < 0 {
+                    let n = (!*self as u64);
+                    n.encode_varint(MajorType::Negative)
+                } else {
+                    let n = *self as u64;
+                    n.encode_varint(MajorType::Unsigned)
+                }
+            }
+        }
+
+        impl CBORDecodable for $type {
+            fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+                match cbor {
+                    CBOR::UInt(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
+                    CBOR::NInt(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
+                    _ => Err(DecodeError::WrongType),
+                }
+            }
+        }
+
+        impl CBORCodable for $type { }
+    };
 }
 
-impl CBOREncodable for u16 {
-    fn cbor(&self) -> CBOR {
-        CBOR::UInt(*self as u64)
-    }
+impl_cbor!(u8);
+impl_cbor!(u16);
+impl_cbor!(u32);
+impl_cbor!(u64);
+impl_cbor!(usize);
+impl_cbor!(i8);
+impl_cbor!(i16);
+impl_cbor!(i32);
+impl_cbor!(i64);
 
-    fn cbor_data(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::Unsigned)
-    }
-}
-
-impl CBOREncodable for u32 {
-    fn cbor(&self) -> CBOR {
-        CBOR::UInt(*self as u64)
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::Unsigned)
-    }
-}
-
-impl CBOREncodable for u64 {
-    fn cbor(&self) -> CBOR {
-        CBOR::UInt(*self)
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::Unsigned)
-    }
-}
-
-impl CBOREncodable for usize {
-    fn cbor(&self) -> CBOR {
-        CBOR::UInt(*self as u64)
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        self.encode_varint(MajorType::Unsigned)
-    }
-}
-
-impl CBOREncodable for i8 {
-    fn cbor(&self) -> CBOR {
-        if *self < 0 {
-            CBOR::NInt(*self as i64)
+trait From64 {
+    fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Box<Self>, DecodeError> where F: Fn(u64) -> Self, Self: Sized {
+        if n > max {
+            Err(DecodeError::IntegerOutOfRange)
         } else {
-            CBOR::UInt(*self as u64)
+            Ok(Box::new(f(n)))
         }
     }
 
-    fn cbor_data(&self) -> Vec<u8> {
-        if *self < 0 {
-            let b = *self as i16;
-            let a = (-b - 1) as u8;
-            a.encode_varint(MajorType::Negative)
+    fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> Result<Box<Self>, DecodeError> where F: Fn(i64) -> Self, Self: Sized {
+        if n > max || n > min {
+            Err(DecodeError::IntegerOutOfRange)
         } else {
-            let a = *self as u8;
-            a.encode_varint(MajorType::Unsigned)
-        }
-    }
-}
-
-impl CBOREncodable for i16 {
-    fn cbor(&self) -> CBOR {
-        if *self < 0 {
-            CBOR::NInt(*self as i64)
-        } else {
-            CBOR::UInt(*self as u64)
-        }
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        if *self < 0 {
-            let b = *self as i32;
-            let a = (-b - 1) as u16;
-            a.encode_varint(MajorType::Negative)
-        } else {
-            let a = *self as u16;
-            a.encode_varint(MajorType::Unsigned)
-        }
-    }
-}
-
-impl CBOREncodable for i32 {
-    fn cbor(&self) -> CBOR {
-        if *self < 0 {
-            CBOR::NInt(*self as i64)
-        } else {
-            CBOR::UInt(*self as u64)
-        }
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        if *self < 0 {
-            let b = *self as i64;
-            let a = (-b - 1) as u32;
-            a.encode_varint(MajorType::Negative)
-        } else {
-            let a = *self as u32;
-            a.encode_varint(MajorType::Unsigned)
-        }
-    }
-}
-
-impl CBOREncodable for i64 {
-    fn cbor(&self) -> CBOR {
-        if *self < 0 {
-            CBOR::NInt(*self as i64)
-        } else {
-            CBOR::UInt(*self as u64)
-        }
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        if *self < 0 {
-            let b = *self as u64;
-            let a = (-(b as i128) - 1) as u64;
-            a.encode_varint(MajorType::Negative)
-        } else {
-            let a = *self as u64;
-            a.encode_varint(MajorType::Unsigned)
+            Ok(Box::new(f(n)))
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::cbor_encodable::CBOREncodable;
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, decode_error::DecodeError, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex_to_bytes, bytes_to_hex};
 
@@ -41,6 +41,17 @@ impl CBOREncodable for Data {
         buf
     }
 }
+
+impl CBORDecodable for Data {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+        match cbor {
+            CBOR::Bytes(data) => Ok(Box::new(data.clone())),
+            _ => Err(DecodeError::WrongType),
+        }
+    }
+}
+
+impl CBORCodable for Data { }
 
 impl PartialEq for Data {
     fn eq(&self, other: &Self) -> bool {
