@@ -14,6 +14,7 @@ mod array;
 pub mod decode_error;
 
 mod bytes;
+pub mod diag;
 pub use bytes::Data;
 
 mod known_tags;
@@ -64,3 +65,6 @@ mod varint;
 
 #[cfg(test)]
 mod test_encode;
+
+#[cfg(test)]
+mod test_format;
