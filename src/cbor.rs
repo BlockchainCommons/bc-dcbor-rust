@@ -7,13 +7,13 @@ use super::{bytes::Data, Tagged, Map, string_util::flanked};
 #[derive(Clone)]
 pub enum CBOR {
     /// Unsigned integer (major type 0).
-    UInt(u64),
+    Unsigned(u64),
     /// Negative integer (major type 1).
-    NInt(i64),
+    Negative(i64),
     /// Byte string (major type 2).
     Bytes(Data),
     /// UTF-8 string (major type 3).
-    String(String),
+    Text(String),
     /// Array (major type 4).
     Array(Vec<CBOR>),
     /// Map (major type 5).
@@ -33,10 +33,10 @@ impl CBOR {
 impl PartialEq for CBOR {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::UInt(l0), Self::UInt(r0)) => l0 == r0,
-            (Self::NInt(l0), Self::NInt(r0)) => l0 == r0,
+            (Self::Unsigned(l0), Self::Unsigned(r0)) => l0 == r0,
+            (Self::Negative(l0), Self::Negative(r0)) => l0 == r0,
             (Self::Bytes(l0), Self::Bytes(r0)) => l0 == r0,
-            (Self::String(l0), Self::String(r0)) => l0 == r0,
+            (Self::Text(l0), Self::Text(r0)) => l0 == r0,
             (Self::Array(l0), Self::Array(r0)) => l0 == r0,
             (Self::Map(l0), Self::Map(r0)) => l0 == r0,
             (Self::Tagged(l0, l1), Self::Tagged(r0, r1)) => l0 == r0 && l1 == r1,
@@ -71,10 +71,10 @@ fn format_map(m: &Map) -> String {
 impl std::fmt::Debug for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::UInt(x) => f.debug_tuple("UInt").field(x).finish(),
-            Self::NInt(x) => f.debug_tuple("NInt").field(x).finish(),
+            Self::Unsigned(x) => f.debug_tuple("UInt").field(x).finish(),
+            Self::Negative(x) => f.debug_tuple("NInt").field(x).finish(),
             Self::Bytes(x) => f.debug_tuple("Bytes").field(x).finish(),
-            Self::String(x) => f.debug_tuple("String").field(x).finish(),
+            Self::Text(x) => f.debug_tuple("String").field(x).finish(),
             Self::Array(x) => f.debug_tuple("Array").field(x).finish(),
             Self::Map(x) => f.debug_tuple("Map").field(x).finish(),
             Self::Tagged(tag, item) => f.write_fmt(format_args!("Tagged({}, {:?})", tag, item)),
@@ -86,10 +86,10 @@ impl std::fmt::Debug for CBOR {
 impl std::fmt::Display for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            CBOR::UInt(x) => format!("{}", x),
-            CBOR::NInt(x) => format!("{}", x),
+            CBOR::Unsigned(x) => format!("{}", x),
+            CBOR::Negative(x) => format!("{}", x),
             CBOR::Bytes(x) => format!("{}", x),
-            CBOR::String(x) => format_string(x),
+            CBOR::Text(x) => format_string(x),
             CBOR::Array(x) => format_array(x),
             CBOR::Map(x) => format_map(x),
             CBOR::Tagged(tag, item) => format!("{}", Tagged::new(tag.clone(), *item.clone())),

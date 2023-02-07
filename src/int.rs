@@ -10,9 +10,9 @@ macro_rules! impl_cbor {
             fn cbor(&self) -> CBOR {
                 #[allow(unused_comparisons)]
                 if *self < 0 {
-                    CBOR::NInt(*self as i64)
+                    CBOR::Negative(*self as i64)
                 } else {
-                    CBOR::UInt(*self as u64)
+                    CBOR::Unsigned(*self as u64)
                 }
             }
 
@@ -31,8 +31,8 @@ macro_rules! impl_cbor {
         impl CBORDecodable for $type {
             fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
                 match cbor {
-                    CBOR::UInt(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
-                    CBOR::NInt(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
+                    CBOR::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
+                    CBOR::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
                     _ => Err(DecodeError::WrongType),
                 }
             }

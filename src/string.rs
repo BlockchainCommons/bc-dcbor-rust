@@ -4,7 +4,7 @@ use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 impl CBOREncodable for &str {
     fn cbor(&self) -> CBOR {
-        CBOR::String(self.to_string())
+        CBOR::Text(self.to_string())
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -18,7 +18,7 @@ impl CBOREncodable for &str {
 
 impl CBOREncodable for String {
     fn cbor(&self) -> CBOR {
-        CBOR::String(self.clone())
+        CBOR::Text(self.clone())
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -29,7 +29,7 @@ impl CBOREncodable for String {
 impl CBORDecodable for String {
     fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
         match cbor {
-            CBOR::String(s) => Ok(Box::new(s.clone())),
+            CBOR::Text(s) => Ok(Box::new(s.clone())),
             _ => Err(DecodeError::WrongType),
         }
     }
