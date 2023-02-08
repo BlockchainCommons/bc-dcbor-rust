@@ -1,15 +1,15 @@
 use crate::{CBOR, known_tags::KnownTags, string_util::flanked, Date};
 
 impl CBOR {
-    pub fn diagnostic_opt(&self, annotate: bool, known_tags: &Option<Box<dyn KnownTags>>) -> String {
+    pub fn diagnostic_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
         self.diag_item(annotate, known_tags).format(annotate)
     }
 
     pub fn diagnostic(&self) -> String {
-        self.diagnostic_opt(false, &None)
+        self.diagnostic_opt(false, None)
     }
 
-    fn diag_item(&self, annotate: bool, known_tags: &Option<Box<dyn KnownTags>>) -> DiagItem {
+    fn diag_item(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> DiagItem {
         match self {
             CBOR::Unsigned(_) | CBOR::Negative(_) | CBOR::Bytes(_) |
             CBOR::Text(_) | CBOR::Simple(_) => DiagItem::Item(format!("{}", self)),

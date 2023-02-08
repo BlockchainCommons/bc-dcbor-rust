@@ -1,18 +1,23 @@
-use crate::{CBOR, Simple, CBOREncodable, Map, Tagged, Date};
+use crate::{CBOR, Simple, CBOREncodable, Map, Tagged, Date, KnownTagsDict, Tag};
 use indoc::indoc;
 
 fn run(cbor: CBOR,
     description: &str,
     debug_description: &str,
     diagnostic: &str,
+    diagnostic_annotated: &str,
     dump: &str,
     dump_annotated: &str)
 {
+    let mut known_tags = KnownTagsDict::new();
+    known_tags.insert(&Tag::new_opt(1, Some("date")));
+
     assert_eq!(format!("{}", cbor), description);
     assert_eq!(format!("{:?}", cbor), debug_description);
     assert_eq!(format!("{}", cbor.diagnostic()), diagnostic);
+    assert_eq!(format!("{}", cbor.diagnostic_opt(true, Some(&known_tags))), diagnostic_annotated);
     assert_eq!(cbor.dump(), dump);
-    assert_eq!(cbor.dump_opt(true, None), dump_annotated);
+    assert_eq!(cbor.dump_opt(true, Some(&known_tags)), dump_annotated);
 }
 
 #[test]
@@ -21,12 +26,14 @@ fn format_simple() {
         "false",
         "simple(false)",
         "false",
+        "false",
         "f4",
         "f4 # false"
     );
     run(CBOR::TRUE,
         "true",
         "simple(true)",
+        "true",
         "true",
         "f5",
         "f5 # true"
@@ -35,10 +42,12 @@ fn format_simple() {
         "null",
         "simple(null)",
         "null",
+        "null",
         "f6",
         "f6 # null"
     );
     run(Simple::new(100).cbor(),
+        "simple(100)",
         "simple(100)",
         "simple(100)",
         "simple(100)",
@@ -53,6 +62,7 @@ fn format_unsigned() {
         "0",
         "unsigned(0)",
         "0",
+        "0",
         "00",
         "00 # unsigned(0)"
     );
@@ -60,6 +70,7 @@ fn format_unsigned() {
     run(23.cbor(),
         "23",
         "unsigned(23)",
+        "23",
         "23",
         "17",
         "17 # unsigned(23)"
@@ -69,6 +80,7 @@ fn format_unsigned() {
         "65546",
         "unsigned(65546)",
         "65546",
+        "65546",
         "1a0001000a",
         "1a0001000a # unsigned(65546)"
     );
@@ -76,6 +88,7 @@ fn format_unsigned() {
     run(1000000000.cbor(),
         "1000000000",
         "unsigned(1000000000)",
+        "1000000000",
         "1000000000",
         "1a3b9aca00",
         "1a3b9aca00 # unsigned(1000000000)"
@@ -88,6 +101,7 @@ fn format_negative() {
         "-1",
         "negative(-1)",
         "-1",
+        "-1",
         "20",
         "20 # negative(-1)"
     );
@@ -96,6 +110,7 @@ fn format_negative() {
         "-1000",
         "negative(-1000)",
         "-1000",
+        "-1000",
         "3903e7",
         "3903e7 # negative(-1000)"
     );
@@ -103,6 +118,7 @@ fn format_negative() {
     run((-1000000).cbor(),
         "-1000000",
         "negative(-1000000)",
+        "-1000000",
         "-1000000",
         "3a000f423f",
         "3a000f423f # negative(-1000000)"
@@ -114,6 +130,7 @@ fn format_string() {
     run("Test".cbor(),
         r#""Test""#,
         r#"text("Test")"#,
+        r#""Test""#,
         r#""Test""#,
         "6454657374",
         indoc! {r#"
@@ -128,6 +145,7 @@ fn format_simple_array() {
     run([1, 2, 3].cbor(),
         "[1, 2, 3]",
         "array([unsigned(1), unsigned(2), unsigned(3)])",
+        "[1, 2, 3]",
         "[1, 2, 3]",
         "83010203",
         indoc! {r#"
@@ -147,6 +165,12 @@ fn format_nested_array() {
     run(c,
         r#"[[1, 2, 3], ["A", "B", "C"]]"#,
         r#"array([array([unsigned(1), unsigned(2), unsigned(3)]), array([text("A"), text("B"), text("C")])])"#,
+        indoc! {r#"
+        [
+           [1, 2, 3],
+           ["A", "B", "C"]
+        ]
+        "#}.trim(),
         indoc! {r#"
         [
            [1, 2, 3],
@@ -180,6 +204,7 @@ fn format_map() {
         r#"{1: "A", 2: "B"}"#,
         r#"map({0x01: (unsigned(1), text("A")), 0x02: (unsigned(2), text("B"))})"#,
         r#"{1: "A", 2: "B"}"#,
+        r#"{1: "A", 2: "B"}"#,
         "a2016141026142",
         indoc! {r#"
         a2       # map(2)
@@ -200,6 +225,7 @@ fn format_tagged() {
         r#"100("Hello")"#,
         r#"tagged(100, text("Hello"))"#,
         r#"100("Hello")"#,
+        r#"100("Hello")"#,
         "d8646548656c6c6f",
         indoc! {r#"
         d8 64            # tag(100)
@@ -211,15 +237,27 @@ fn format_tagged() {
 
 #[test]
 fn format_date() {
-    let date = Date::from_timestamp(1675854714).cbor();
-    run(date,
+    run(Date::from_timestamp(-100).cbor(),
+        "1(-100)",
+        "tagged(1, negative(-100))",
+        "1(-100)",
+        "1(1969-12-31T23:58:20Z)   ; date",
+        "c13863",
+        indoc! {"
+        c1      # tag(1)   ; date
+           3863 # negative(-100)
+        "}.trim()
+    );
+
+    run(Date::from_timestamp(1675854714).cbor(),
         "1(1675854714)",
         "tagged(1, unsigned(1675854714))",
         "1(1675854714)",
+        "1(2023-02-08T11:11:54Z)   ; date",
         "c11a63e3837a",
         indoc! {"
-        c1            # tag(1)
+        c1            # tag(1)   ; date
            1a63e3837a # unsigned(1675854714)
         "}.trim()
-    )
+    );
 }

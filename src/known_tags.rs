@@ -34,20 +34,21 @@ impl KnownTagsDict {
         Self::_insert(tag, &mut self.0);
     }
 
-    pub fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String> {
+    fn _insert(tag: &Tag, dict: &mut HashMap<Tag, String>) {
+        let name = tag.name().to_owned().unwrap();
+        assert!(!name.is_empty());
+        dict.insert(tag.clone(), name);
+    }
+}
+
+impl KnownTags for KnownTagsDict {
+    fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String> {
         return match self.0.get(tag) {
             None => None,
             Some(name) => Some(name.to_string())
         }
     }
-
-    pub fn name_for_tag(&self, tag: &Tag) -> String {
+    fn name_for_tag(&self, tag: &Tag) -> String {
         self.assigned_name_for_tag(tag).unwrap_or_else(|| tag.value().to_string())
-    }
-
-    fn _insert(tag: &Tag, dict: &mut HashMap<Tag, String>) {
-        let name = tag.name().to_owned().unwrap();
-        assert!(!name.is_empty());
-        dict.insert(tag.clone(), name);
     }
 }

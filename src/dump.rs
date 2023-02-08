@@ -3,11 +3,11 @@ use std::str::from_utf8;
 use crate::{CBOR, known_tags::KnownTags, CBOREncodable, bytes_to_hex, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
 
 impl CBOR {
-    pub fn dump_opt(&self, annotate: bool, known_tags: Option<Box<dyn KnownTags>>) -> String {
+    pub fn dump_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
         if !annotate {
             return bytes_to_hex(self.cbor_data())
         }
-        let items = self.dump_items(0, &known_tags);
+        let items = self.dump_items(0, known_tags);
         let note_column = items.iter().fold(0, |largest, item| {
             largest.max(item.format_first_column().len())
         });
@@ -19,7 +19,7 @@ impl CBOR {
         self.dump_opt(false, None)
     }
 
-    fn dump_items(&self, level: usize, known_tags: &Option<Box<dyn KnownTags>>) -> Vec<DumpItem> {
+    fn dump_items(&self, level: usize, known_tags: Option<&dyn KnownTags>) -> Vec<DumpItem> {
         match self {
             CBOR::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
             CBOR::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),
