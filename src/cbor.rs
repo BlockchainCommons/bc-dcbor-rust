@@ -78,7 +78,7 @@ impl std::fmt::Debug for CBOR {
             Self::Array(x) => f.debug_tuple("array").field(x).finish(),
             Self::Map(x) => f.debug_tuple("map").field(x).finish(),
             Self::Tagged(tag, item) => f.write_fmt(format_args!("tagged({}, {:?})", tag, item)),
-            Self::Simple(x) => f.write_fmt(format_args!("value({})", x.name())),
+            Self::Simple(x) => f.write_fmt(format_args!("simple({})", x.name())),
         }
     }
 }

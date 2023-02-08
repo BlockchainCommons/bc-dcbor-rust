@@ -193,7 +193,7 @@ fn encode_map() {
     m.insert_into("aa", 5);
     m.insert_into(vec![100], 6);
     test_cbor(m,
-        r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (value(false), unsigned(8))})"#,
+        r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#,
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
         "a80a011864022003617a046261610581186406812007f408");
 }
@@ -211,9 +211,9 @@ fn encode_tagged() {
 
 #[test]
 fn encode_value() {
-    test_cbor(false, "value(false)", "false", "f4");
-    test_cbor(true, "value(true)", "true", "f5");
-    test_cbor(Simple::new(100), "value(100)", "simple(100)", "f864");
+    test_cbor(false, "simple(false)", "false", "f4");
+    test_cbor(true, "simple(true)", "true", "f5");
+    test_cbor(Simple::new(100), "simple(100)", "simple(100)", "f864");
 }
 
 #[test]

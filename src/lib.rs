@@ -14,8 +14,10 @@ mod array;
 pub mod decode_error;
 
 mod bytes;
-pub mod diag;
 pub use bytes::Data;
+
+pub mod diag;
+pub mod dump;
 
 mod known_tags;
 pub use known_tags::{name_for_tag, KnownTagsDict};

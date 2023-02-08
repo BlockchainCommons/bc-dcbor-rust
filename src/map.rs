@@ -16,6 +16,11 @@ impl Map {
         Map(BTreeMap::new())
     }
 
+    /// Returns the number of entries in the map.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
     /// Gets an iterator over the entries of the CBOR map, sorted by key.
     pub fn iter<'a>(&'a self) -> Iter<'a> {
         Iter::new(self.0.values())

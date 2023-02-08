@@ -25,6 +25,16 @@ impl Data {
     pub fn data(&self) -> &Vec<u8> {
         &self.0
     }
+
+    /// The length of the wrapped data in bytes.
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    /// Returns `true` if the wrapped data is empty, false otherwise.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl CBOREncodable for Data {
