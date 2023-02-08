@@ -261,3 +261,190 @@ fn format_date() {
         "}.trim()
     );
 }
+
+#[test]
+fn format_structure() {
+    let encoded_cbor_hex = &"d83183015829536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e82d902c3820158402b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710ad902c3820158400f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900";
+    let cbor = CBOR::from_hex(encoded_cbor_hex).unwrap();
+    let description = "49([1, h'536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e', [707([1, h'2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a']), 707([1, h'0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900'])]])";
+    let debug_description = "tagged(49, array([unsigned(1), bytes(536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e), array([tagged(707, array([unsigned(1), bytes(2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a)])), tagged(707, array([unsigned(1), bytes(0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900)]))])]))";
+    let diagnostic = indoc! {"
+    49(
+       [
+          1,
+          h'536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e',
+          [
+             707(
+                [
+                   1,
+                   h'2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a'
+                ]
+             ),
+             707(
+                [
+                   1,
+                   h'0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900'
+                ]
+             )
+          ]
+       ]
+    )
+    "}.trim();
+    let hex = &cbor.hex();
+    let dump_annotated = indoc! {r#"
+    d8 31                                    # tag(49)
+       83                                    # array(3)
+          01                                 # unsigned(1)
+          5829                               # bytes(41)
+             536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e # "Some mysteries aren't meant to be solved."
+          82                                 # array(2)
+             d9 02c3                         # tag(707)
+                82                           # array(2)
+                   01                        # unsigned(1)
+                   5840                      # bytes(64)
+                      2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a
+             d9 02c3                         # tag(707)
+                82                           # array(2)
+                   01                        # unsigned(1)
+                   5840                      # bytes(64)
+                      0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900
+    "#}.trim();
+    run(cbor,
+        description,
+        debug_description,
+        diagnostic,
+        diagnostic,
+        hex,
+        dump_annotated
+    );
+}
+
+#[test]
+fn format_structure_2() {
+    let encoded_cbor_hex = &"d9012ca4015059f2293a5bce7d4de59e71b4207ac5d202c11a6035970003754461726b20507572706c652041717561204c6f766504787b4c6f72656d20697073756d20646f6c6f722073697420616d65742c20636f6e73656374657475722061646970697363696e6720656c69742c2073656420646f20656975736d6f642074656d706f7220696e6369646964756e74207574206c61626f726520657420646f6c6f7265206d61676e6120616c697175612e";
+    let cbor = CBOR::from_hex(encoded_cbor_hex).unwrap();
+    let description = r#"300({1: h'59f2293a5bce7d4de59e71b4207ac5d2', 2: 1(1614124800), 3: "Dark Purple Aqua Love", 4: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."})"#;
+    let debug_description = r#"tagged(300, map({0x01: (unsigned(1), bytes(59f2293a5bce7d4de59e71b4207ac5d2)), 0x02: (unsigned(2), tagged(1, unsigned(1614124800))), 0x03: (unsigned(3), text("Dark Purple Aqua Love")), 0x04: (unsigned(4), text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."))}))"#;
+    let diagnostic = indoc! {r#"
+    300(
+       {
+          1:
+          h'59f2293a5bce7d4de59e71b4207ac5d2',
+          2:
+          1(1614124800),
+          3:
+          "Dark Purple Aqua Love",
+          4:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+       }
+    )
+    "#}.trim();
+    let diagnostic_annotated = indoc! {r#"
+    300(
+       {
+          1:
+          h'59f2293a5bce7d4de59e71b4207ac5d2',
+          2:
+          1(2021-02-24T00:00:00Z)   ; date,
+          3:
+          "Dark Purple Aqua Love",
+          4:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+       }
+    )
+    "#}.trim();
+    let hex = &cbor.hex();
+    let dump_annotated = indoc! {r#"
+    d9 012c                                  # tag(300)
+       a4                                    # map(4)
+          01                                 # unsigned(1)
+          50                                 # bytes(16)
+             59f2293a5bce7d4de59e71b4207ac5d2
+          02                                 # unsigned(2)
+          c1                                 # tag(1)   ; date
+             1a60359700                      # unsigned(1614124800)
+          03                                 # unsigned(3)
+          75                                 # text(21)
+             4461726b20507572706c652041717561204c6f7665 # "Dark Purple Aqua Love"
+          04                                 # unsigned(4)
+          78 7b                              # text(123)
+             4c6f72656d20697073756d20646f6c6f722073697420616d65742c20636f6e73656374657475722061646970697363696e6720656c69742c2073656420646f20656975736d6f642074656d706f7220696e6369646964756e74207574206c61626f726520657420646f6c6f7265206d61676e6120616c697175612e # "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    "#}.trim();
+    run(cbor,
+        description,
+        debug_description,
+        diagnostic,
+        diagnostic_annotated,
+        hex,
+        dump_annotated
+    );
+}
+
+#[test]
+fn format_key_order() {
+    let mut m = Map::new();
+    m.insert_into(-1, 3);
+    m.insert_into(vec![-1], 7);
+    m.insert_into("z", 4);
+    m.insert_into(10, 1);
+    m.insert_into(false, 8);
+    m.insert_into(100, 2);
+    m.insert_into("aa", 5);
+    m.insert_into(vec![100], 6);
+
+    let cbor = m.cbor();
+    let description = r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#;
+    let debug_description = r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#;
+    let diagnostic = indoc! {r#"
+    {
+       10:
+       1,
+       100:
+       2,
+       -1:
+       3,
+       "z":
+       4,
+       "aa":
+       5,
+       [100]:
+       6,
+       [-1]:
+       7,
+       false:
+       8
+    }
+    "#}.trim();
+    let hex = &cbor.hex();
+    let dump_annotated = indoc! {r#"
+    a8         # map(8)
+       0a      # unsigned(10)
+       01      # unsigned(1)
+       1864    # unsigned(100)
+       02      # unsigned(2)
+       20      # negative(-1)
+       03      # unsigned(3)
+       61      # text(1)
+          7a   # "z"
+       04      # unsigned(4)
+       62      # text(2)
+          6161 # "aa"
+       05      # unsigned(5)
+       81      # array(1)
+          1864 # unsigned(100)
+       06      # unsigned(6)
+       81      # array(1)
+          20   # negative(-1)
+       07      # unsigned(7)
+       f4      # false
+       08      # unsigned(8)
+    "#}.trim();
+    run(cbor,
+        description,
+        debug_description,
+        diagnostic,
+        diagnostic,
+        hex,
+        dump_annotated
+    );
+}

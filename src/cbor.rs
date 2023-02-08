@@ -1,4 +1,4 @@
-use crate::{tag::Tag, Simple};
+use crate::{tag::Tag, Simple, decode_error::DecodeError, hex_to_bytes, decode::decode_cbor, bytes_to_hex, CBOREncodable};
 
 use super::{bytes::Data, Tagged, Map, string_util::flanked};
 
@@ -27,6 +27,20 @@ impl CBOR {
     pub const FALSE: CBOR = CBOR::Simple(Simple(20));
     pub const TRUE: CBOR = CBOR::Simple(Simple(21));
     pub const NULL: CBOR = CBOR::Simple(Simple(22));
+}
+
+impl CBOR {
+    pub fn from_data(data: &[u8]) -> Result<CBOR, DecodeError> {
+        decode_cbor(data)
+    }
+
+    pub fn from_hex(hex: &str) -> Result<CBOR, DecodeError> {
+        Self::from_data(&hex_to_bytes(hex))
+    }
+
+    pub fn hex(&self) -> String {
+        bytes_to_hex(self.cbor_data())
+    }
 }
 
 impl PartialEq for CBOR {

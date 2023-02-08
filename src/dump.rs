@@ -33,8 +33,8 @@ impl CBOR {
                         if let Some(b) = sanitized(a) {
                             note = Some(flanked(&b, "\"", "\""));
                         }
-                        items.push(DumpItem::new(level + 1, vec!(d.data().to_owned()), note));
                     }
+                    items.push(DumpItem::new(level + 1, vec!(d.data().to_owned()), note));
                 }
                 items
             },
@@ -115,8 +115,8 @@ impl DumpItem {
         let column_1 = self.format_first_column();
         let (column_2, padding) = {
             if let Some(note) = &self.note {
-                let padding_count = 1.max(40.min(note_column) - column_1.len() + 1);
-                let padding = " ".repeat(padding_count);
+                let padding_count = 1.max(40.min(note_column as i64) - (column_1.len() as i64) + 1);
+                let padding = " ".repeat(padding_count.try_into().unwrap());
                 let column_2 = format!("# {}", note);
                 (column_2, padding)
             } else {

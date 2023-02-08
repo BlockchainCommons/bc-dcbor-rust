@@ -77,7 +77,7 @@ impl DiagItem {
     fn format_opt(&self, level: usize, separator: &str, annotate: bool) -> String {
         match self {
             DiagItem::Item(string) => {
-                self.format_line(level, string, "")
+                self.format_line(level, string, separator)
             },
             DiagItem::Group(_, _, _, _, _) => {
                 if self.contains_group() || self.total_strings_len() > 20 || self.greatest_strings_len() > 20 {

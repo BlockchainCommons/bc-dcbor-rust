@@ -46,7 +46,6 @@ mod cbor_tagged_codable;
 pub use cbor_tagged_codable::CBORTaggedCodable;
 
 mod decode;
-pub use decode::decode_cbor;
 
 mod hex;
 pub use hex::{hex_to_bytes, bytes_to_hex};
