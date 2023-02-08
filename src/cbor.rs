@@ -71,14 +71,14 @@ fn format_map(m: &Map) -> String {
 impl std::fmt::Debug for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Unsigned(x) => f.debug_tuple("UInt").field(x).finish(),
-            Self::Negative(x) => f.debug_tuple("NInt").field(x).finish(),
-            Self::Bytes(x) => f.debug_tuple("Bytes").field(x).finish(),
-            Self::Text(x) => f.debug_tuple("String").field(x).finish(),
-            Self::Array(x) => f.debug_tuple("Array").field(x).finish(),
-            Self::Map(x) => f.debug_tuple("Map").field(x).finish(),
-            Self::Tagged(tag, item) => f.write_fmt(format_args!("Tagged({}, {:?})", tag, item)),
-            Self::Simple(x) => f.write_fmt(format_args!("Value({})", x.name())),
+            Self::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
+            Self::Negative(x) => f.debug_tuple("negative").field(x).finish(),
+            Self::Bytes(x) => f.debug_tuple("bytes").field(x).finish(),
+            Self::Text(x) => f.debug_tuple("text").field(x).finish(),
+            Self::Array(x) => f.debug_tuple("array").field(x).finish(),
+            Self::Map(x) => f.debug_tuple("map").field(x).finish(),
+            Self::Tagged(tag, item) => f.write_fmt(format_args!("tagged({}, {:?})", tag, item)),
+            Self::Simple(x) => f.write_fmt(format_args!("value({})", x.name())),
         }
     }
 }

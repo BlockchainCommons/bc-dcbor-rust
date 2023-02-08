@@ -1,6 +1,6 @@
 use chrono::{Utc, TimeZone};
 
-use crate::{CBOR, known_tags::KnownTags};
+use crate::{CBOR, known_tags::KnownTags, string_util::flanked};
 
 impl CBOR {
     pub fn diagnostic_annotated(&self, annotate: bool, known_tags: &Option<Box<dyn KnownTags>>) -> String {
@@ -72,10 +72,126 @@ enum DiagItem {
 
 impl DiagItem {
     fn format(&self, annotate: bool) -> String {
-        self.format2(0, "", annotate)
+        self.format_2(0, "", annotate)
     }
 
-    fn format2(&self, level: i32, separator: &str, annotate: bool) -> String {
-        todo!()
+    fn format_2(&self, level: usize, separator: &str, annotate: bool) -> String {
+        match self {
+            DiagItem::Item(string) => {
+                self.format_line(level, string, "")
+            },
+            DiagItem::Group(_, _, _, _, _) => {
+                if self.contains_group() || self.total_strings_len() > 20 || self.greatest_strings_len() > 20 {
+                    self.multiline_composition(level, separator, annotate)
+                } else {
+                    self.single_line_composition(level, separator, annotate)
+                }
+            },
+        }
+    }
+
+    fn format_line(&self, level: usize, string: &str, separator: &str) -> String {
+        format!("{}{}{}", " ".repeat(level * 3), string, separator)
+    }
+
+    fn single_line_composition(&self, level: usize, separator: &str, annotate: bool) -> String {
+        let string = match self {
+            DiagItem::Item(s) => s.clone(),
+            DiagItem::Group(begin, end, items, is_pairs, comment) => {
+                let components: Vec<String> = items.into_iter().map(|item| {
+                    match item {
+                        DiagItem::Item(string) => string,
+                        DiagItem::Group(_, _, _, _, _) => "<group>",
+                    }.to_string()
+                }).collect();
+                let pair_separator = if *is_pairs { ": " } else { ", " };
+                let s = flanked(&Self::joined(&components, ", ", Some(pair_separator)), begin, end);
+                match (annotate, comment) {
+                    (true, Some(comment)) => format!("{}   ; {}", s, comment),
+                    _ => s,
+                }
+            },
+        };
+        self.format_line(level, &string, separator)
+    }
+
+    fn multiline_composition(&self, level: usize, separator: &str, annotate: bool) -> String {
+        match self {
+            DiagItem::Item(string) => string.to_owned(),
+            DiagItem::Group(begin, end, items, is_pairs, comment) => {
+                let mut lines: Vec<String> = vec![];
+                let b = match (annotate, comment) {
+                    (true, Some(comment)) => format!("{}   ; {}", begin, comment),
+                    _ => begin.to_owned()
+                };
+                lines.push(self.format_line(level, &b, ""));
+                for (index, item) in items.iter().enumerate() {
+                    let separator = if index == items.len() - 1 {
+                        ""
+                    } else {
+                        if *is_pairs && index & 1 == 0 {
+                            ":"
+                        } else {
+                            ","
+                        }
+                    };
+                    lines.push(item.format_line(level + 1, end, separator));
+                }
+                lines.push(self.format_line(level, end, separator));
+                lines.join("\n")
+            },
+        }
+    }
+
+    fn total_strings_len(&self) -> usize {
+        match self {
+            DiagItem::Item(string) => string.len(),
+            DiagItem::Group(_, _, items, _, _) => {
+                items.iter().fold(0, |acc, item| { acc + item.total_strings_len() })
+            },
+        }
+    }
+
+    fn greatest_strings_len(&self) -> usize {
+        match self {
+            DiagItem::Item(string) => string.len(),
+            DiagItem::Group(_, _, items, _, _) => {
+                items.iter().fold(0, |acc, item| { acc.max(item.total_strings_len()) })
+            },
+        }
+    }
+
+    fn is_group(&self) -> bool {
+        if let DiagItem::Group(_, _, _, _, _) = self {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn contains_group(&self) -> bool {
+        match self {
+            DiagItem::Item(_) => false,
+            DiagItem::Group(_, _, items, _, _) => {
+                items.iter().any(|x| x.is_group())
+            },
+        }
+    }
+
+    fn joined(elements: &[String], item_separator: &str, pair_separator: Option<&str>) -> String {
+        let pair_separator = pair_separator.unwrap_or(item_separator);
+        let mut result = String::new();
+        let len = elements.len();
+        for (index, item) in elements.iter().enumerate() {
+            result += item;
+            if index != len - 1 {
+                if index & 1 != 0 {
+                    result += item_separator;
+                } else {
+                    result += pair_separator;
+                }
+            }
+        }
+        result
     }
 }

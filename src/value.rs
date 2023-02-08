@@ -61,6 +61,7 @@ impl std::fmt::Debug for Value {
         let s = match self.0 {
             20 => "false".to_owned(),
             21 => "true".to_owned(),
+            22 => "null".to_owned(),
             _ => format!("{:?}", self.0),
         };
         f.write_str(&s)
@@ -72,6 +73,7 @@ impl std::fmt::Display for Value {
         let s = match self.0 {
             20 => "false".to_owned(),
             21 => "true".to_owned(),
+            22 => "null".to_owned(),
             _ => format!("simple({:?})", self.0),
         };
         f.write_str(&s)
