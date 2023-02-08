@@ -11,21 +11,22 @@
 
 mod array;
 
-pub mod decode_error;
+mod decode_error;
+pub use decode_error::DecodeError;
 
-mod bytes;
-pub use bytes::Data;
+mod data;
+pub use data::Data;
 
 mod date;
 pub use date::Date;
 
-pub mod diag;
-pub mod dump;
+mod diag;
+mod dump;
 
 mod known_tags;
 pub use known_tags::{name_for_tag, KnownTagsDict};
 
-pub mod tag;
+mod tag;
 pub use tag::{Tag, IntoTag};
 
 mod cbor;

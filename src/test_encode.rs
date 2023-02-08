@@ -133,7 +133,7 @@ fn encode_bytes() {
         "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
         "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
     );
-    test_cbor_codable(Data::new([0x11, 0x22, 0x33]),
+    test_cbor_codable(Data::from_data([0x11, 0x22, 0x33]),
     "bytes(112233)",
     "h'112233'",
     "43112233"

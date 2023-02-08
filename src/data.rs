@@ -9,7 +9,7 @@ pub struct Data(Vec<u8>);
 
 impl Data {
     /// Creates a new CBOR byte string from the provided data.
-    pub fn new<T>(data: T) -> Data where T: AsRef<[u8]> {
+    pub fn from_data<T>(data: T) -> Data where T: AsRef<[u8]> {
         Data(data.as_ref().to_owned())
     }
 
@@ -24,6 +24,11 @@ impl Data {
     /// The wrapped data.
     pub fn data(&self) -> &Vec<u8> {
         &self.0
+    }
+
+    /// The wrapped data as a hexadecimal string.
+    pub fn hex(&self) -> String {
+        bytes_to_hex(self.data())
     }
 
     /// The length of the wrapped data in bytes.
