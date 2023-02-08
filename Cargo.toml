@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.23"
+
+[dev-dependencies]
+indoc = "2.0.0"

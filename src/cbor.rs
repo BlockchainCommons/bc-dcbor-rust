@@ -1,5 +1,4 @@
-use crate::tag::Tag;
-use crate::Simple;
+use crate::{tag::Tag, Simple};
 
 use super::{bytes::Data, Tagged, Map, string_util::flanked};
 

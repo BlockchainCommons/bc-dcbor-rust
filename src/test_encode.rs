@@ -1,4 +1,4 @@
-use crate::{Tagged, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR};
+use crate::{Tagged, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR, Date};
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
@@ -239,10 +239,20 @@ fn unused_data() {
 
 #[test]
 fn tag() {
-    let tag = Tag::new(1, Some(&"A"));
+    let tag = Tag::new_opt(1, Some(&"A"));
     assert_eq!(format!("{}", tag), "A");
     assert_eq!(format!("{:?}", tag), r#"Tag { value: 1, name: Some("A") }"#);
-    let tag = Tag::new(2, None);
+    let tag = Tag::new_opt(2, None);
     assert_eq!(format!("{}", tag), "2");
     assert_eq!(format!("{:?}", tag), "Tag { value: 2, name: None }");
+}
+
+#[test]
+fn encode_date() {
+    test_cbor_codable(
+        Date::from_timestamp(1675854714),
+        "tagged(1, unsigned(1675854714))",
+        "1(1675854714)",
+        "c11a63e3837a"
+    )
 }

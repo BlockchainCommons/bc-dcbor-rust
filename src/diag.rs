@@ -1,6 +1,4 @@
-use chrono::{Utc, TimeZone};
-
-use crate::{CBOR, known_tags::KnownTags, string_util::flanked};
+use crate::{CBOR, known_tags::KnownTags, string_util::flanked, Date};
 
 impl CBOR {
     pub fn diagnostic_opt(&self, annotate: bool, known_tags: &Option<Box<dyn KnownTags>>) -> String {
@@ -31,7 +29,7 @@ impl CBOR {
                     key.diag_item(annotate, known_tags),
                     value.diag_item(annotate, known_tags)
                 ]).flat_map(|x| x).collect();
-                let is_pairs = false;
+                let is_pairs = true;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
             },
@@ -40,12 +38,12 @@ impl CBOR {
                 if annotate && tag.value() == 1 {
                     match **item {
                         CBOR::Unsigned(secs_after_epoch) => {
-                            let ts = Utc.timestamp_opt(secs_after_epoch as i64, 0).unwrap().to_rfc3339();
-                            diag_item = DiagItem::Item(ts);
+                            let date = Date::from_timestamp(secs_after_epoch as i64).to_string();
+                            diag_item = DiagItem::Item(date);
                         },
                         CBOR::Negative(secs_before_epoch) => {
-                            let ts = Utc.timestamp_opt(secs_before_epoch, 0).unwrap().to_rfc3339();
-                            diag_item = DiagItem::Item(ts);
+                            let date = Date::from_timestamp(secs_before_epoch).to_string();
+                            diag_item = DiagItem::Item(date);
                         },
                         _ => {
                             diag_item = item.diag_item(annotate, known_tags);
@@ -65,6 +63,7 @@ impl CBOR {
     }
 }
 
+#[derive(Debug)]
 enum DiagItem {
     Item(String),
     Group(String, String, Vec<DiagItem>, bool, Option<String>),
@@ -72,10 +71,10 @@ enum DiagItem {
 
 impl DiagItem {
     fn format(&self, annotate: bool) -> String {
-        self.format_2(0, "", annotate)
+        self.format_opt(0, "", annotate)
     }
 
-    fn format_2(&self, level: usize, separator: &str, annotate: bool) -> String {
+    fn format_opt(&self, level: usize, separator: &str, annotate: bool) -> String {
         match self {
             DiagItem::Item(string) => {
                 self.format_line(level, string, "")
@@ -135,7 +134,7 @@ impl DiagItem {
                             ","
                         }
                     };
-                    lines.push(item.format_line(level + 1, end, separator));
+                    lines.push(item.format_opt(level + 1, separator, annotate));
                 }
                 lines.push(self.format_line(level, end, separator));
                 lines.join("\n")

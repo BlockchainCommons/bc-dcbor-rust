@@ -8,12 +8,16 @@ pub struct Tag {
 }
 
 impl Tag {
-    pub fn new(value: u64, name: Option<&str>) -> Tag {
+    pub fn new_opt(value: u64, name: Option<&str>) -> Tag {
         let name = match name {
             None => None,
             Some(name) => Some(name.to_string())
         };
         Tag { value, name }
+    }
+
+    pub fn new(value: u64) -> Tag {
+        Self::new_opt(value, None)
     }
 
     pub fn value(&self) -> u64 {
@@ -51,13 +55,13 @@ pub trait IntoTag {
 
 impl IntoTag for u64 {
     fn into_tag(self) -> Tag {
-        Tag::new(self, None)
+        Tag::new(self)
     }
 }
 
 impl IntoTag for i32 {
     fn into_tag(self) -> Tag {
-        Tag::new(self as u64, None)
+        Tag::new(self as u64)
     }
 }
 

@@ -16,6 +16,9 @@ pub mod decode_error;
 mod bytes;
 pub use bytes::Data;
 
+mod date;
+pub use date::Date;
+
 pub mod diag;
 pub mod dump;
 
