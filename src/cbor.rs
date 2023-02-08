@@ -1,5 +1,5 @@
 use crate::tag::Tag;
-use crate::Value;
+use crate::Simple;
 
 use super::{bytes::Data, Tagged, Map, string_util::flanked};
 
@@ -21,13 +21,13 @@ pub enum CBOR {
     /// Tagged value (major type 6).
     Tagged(Tag, Box<CBOR>),
     /// Simple value (major type 7).
-    Simple(Value)
+    Simple(Simple)
 }
 
 impl CBOR {
-    pub const FALSE: CBOR = CBOR::Simple(Value(20));
-    pub const TRUE: CBOR = CBOR::Simple(Value(21));
-    pub const NULL: CBOR = CBOR::Simple(Value(22));
+    pub const FALSE: CBOR = CBOR::Simple(Simple(20));
+    pub const TRUE: CBOR = CBOR::Simple(Simple(21));
+    pub const NULL: CBOR = CBOR::Simple(Simple(22));
 }
 
 impl PartialEq for CBOR {

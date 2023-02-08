@@ -58,8 +58,8 @@ mod string_util;
 mod tagged;
 pub use tagged::Tagged;
 
-mod value;
-pub use value::Value;
+mod simple;
+pub use simple::Simple;
 
 mod varint;
 

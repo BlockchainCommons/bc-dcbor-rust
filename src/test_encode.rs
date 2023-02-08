@@ -1,4 +1,4 @@
-use crate::{Tagged, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, Value, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR};
+use crate::{Tagged, decode_cbor, bytes_to_hex, Data, Map, hex_to_bytes, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR};
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
@@ -213,7 +213,7 @@ fn encode_tagged() {
 fn encode_value() {
     test_cbor(false, "value(false)", "false", "f4");
     test_cbor(true, "value(true)", "true", "f5");
-    test_cbor(Value::new(100), "value(100)", "simple(100)", "f864");
+    test_cbor(Simple::new(100), "value(100)", "simple(100)", "f864");
 }
 
 #[test]
