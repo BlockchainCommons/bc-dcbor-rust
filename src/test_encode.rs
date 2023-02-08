@@ -1,4 +1,4 @@
-use crate::{Tagged, bytes_to_hex, Data, Map, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR, Date};
+use crate::{Tagged, bytes_to_hex, Bytes, Map, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR, Date};
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
@@ -128,12 +128,12 @@ fn encode_signed() {
 #[test]
 fn encode_bytes() {
     test_cbor_codable(
-        Data::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
+        Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
         "bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)",
         "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
         "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
     );
-    test_cbor_codable(Data::from_data([0x11, 0x22, 0x33]),
+    test_cbor_codable(Bytes::from_data([0x11, 0x22, 0x33]),
     "bytes(112233)",
     "h'112233'",
     "43112233"

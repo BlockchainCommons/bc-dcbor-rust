@@ -1,6 +1,6 @@
 use crate::{tag::Tag, Simple, decode_error::DecodeError, hex_to_bytes, decode::decode_cbor, bytes_to_hex, CBOREncodable};
 
-use super::{data::Data, Tagged, Map, string_util::flanked};
+use super::{bytes::Bytes, Tagged, Map, string_util::flanked};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
@@ -10,7 +10,7 @@ pub enum CBOR {
     /// Negative integer (major type 1).
     Negative(i64),
     /// Byte string (major type 2).
-    Bytes(Data),
+    Bytes(Bytes),
     /// UTF-8 string (major type 3).
     Text(String),
     /// Array (major type 4).

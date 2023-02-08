@@ -14,8 +14,8 @@ mod array;
 mod decode_error;
 pub use decode_error::DecodeError;
 
-mod data;
-pub use data::Data;
+mod bytes;
+pub use bytes::Bytes;
 
 mod date;
 pub use date::Date;
