@@ -1,4 +1,4 @@
-# Blockchain Commons Deterministic CBOR ("DCBOR") for Rust
+# Blockchain Commons Deterministic CBOR ("dCBOR") for Rust
 
 <!--Guidelines: https://github.com/BlockchainCommons/secure-template/wiki -->
 
