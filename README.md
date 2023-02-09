@@ -8,70 +8,15 @@
 
 `dcbor` is a [CBOR](https://cbor.io) codec that focuses on writing and parsing "deterministic" CBOR per [§4.2 of RFC-8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-deterministically-encoded-c). It does not support parts of the spec forbidden by deterministic CBOR (such as indefinite length arrays and maps). It also does not currently support encoding or decoding floating point values. It is strict in both what it writes and reads: in particular it will throw decoding errors if variable-length integers are not encoded in their minimal form, or CBOR map keys are not in lexicographic order, or there is extra data past the end of the decoded CBOR item.
 
-## Gordian Principles
-
-`dcbor` is a reference implementation meant to display the [Gordian Principles](https://github.com/BlockchainCommons/Gordian#gordian-principles), which are philosophical and technical underpinnings to Blockchain Commons' Gordian technology. This includes:
-
-* **Independence.** `how does it demonstrate independence`
-* **Privacy.** `how does it demonstrate privacy`
-* **Resilience.** `how does it demonstrate resilience`
-* **Openness.** `how does it demonstrate openness`
-
-Blockchain Commons apps do not phone home and do not run ads. Some are available through various app stores; all are available in our code repositories for your usage.
-
-`REMOVE THIS SECTION UNLESS THIS IS A REFERENCE APP MEANT TO DEMONSTRATE GORDIAN PRINCIPLES`
-
 ## Status - Alpha
 
 `dcbor`  is currently under active development and in the alpha testing phase. It should not be used for production tasks until it has had further testing and auditing. See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
-
-## Origin, Authors, Copyright & Licenses
-
-Unless otherwise noted (either in this [/README.md](./README.md) or in the file's header comments) the contents of this repository are Copyright © 2020 by Blockchain Commons, LLC, and are [licensed](./LICENSE) under the [spdx:BSD-2-Clause Plus Patent License](https://spdx.org/licenses/BSD-2-Clause-Patent.html).
-
-In most cases, the authors, copyright, and license for each file reside in header comments in the source code. When it does not, we have attempted to attribute it accurately in the table below.
-
-This table below also establishes provenance (repository of origin, permalink, and commit id) for files included from repositories that are outside of this repo. Contributors to these files are listed in the commit history for each repository, first with changes found in the commit history of this repo, then in changes in the commit history of their repo of their origin.
-
-| File      | From                                                         | Commit                                                       | Authors & Copyright (c)                                | License                                                     |
-| --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------- |
-| exception-to-the-rule.c or exception-folder | [https://github.com/community/repo-name/PERMALINK](https://github.com/community/repo-name/PERMALINK) | [https://github.com/community/repo-name/commit/COMMITHASH]() | 2020 Exception Author  | [MIT](https://spdx.org/licenses/MIT)                        |
-
-## Subsequent Usage
-
-### Adapted by ...
-
-These are adaptations, conversions, and wrappers that make `dcbor` available for other languages:
-
-- [community/repo-name/](https://github.com/community/repo-name) — Repo that does what, by [developer](https://github.com/developer)  or from  [community](https://community.com)(language).
-
-### Used by ...
-
-These are other projects that directly use `dcbor`:
-
-- [community/repo-name/](https://github.com/community/repo-name) — Repo that does what, by [developer](https://github.com/developer)  or from  [community](https://community.com)(use OR fork [version] OR include [version]).
-
-Libraries may be marked as `use` (the current version of our repo is used), `fork` (a specific version of our repo has been forked for usage), or `include` (files from a specific version of our repo have been included).
-
-### Used with ...
-
-These are other projects that work with or leverage `dcbor`:
-
-- [community/repo-name/](https://github.com/community/repo-name) — Repo that does what, by [developer](https://github.com/developer)  or from  [community](https://community.com).
 
 ## Financial Support
 
 `dcbor` is a project of [Blockchain Commons](https://www.blockchaincommons.com/). We are proudly a "not-for-profit" social benefit corporation committed to open source & open development. Our work is funded entirely by donations and collaborative partnerships with people like you. Every contribution will be spent on building open tools, technologies, and techniques that sustain and advance blockchain and internet security infrastructure and promote an open web.
 
 To financially support further development of `dcbor` and other projects, please consider becoming a Patron of Blockchain Commons through ongoing monthly patronage as a [GitHub Sponsor](https://github.com/sponsors/BlockchainCommons). You can also support Blockchain Commons with bitcoins at our [BTCPay Server](https://btcpay.blockchaincommons.com/).
-
-### Project Sponsors
-
-Thanks to our project sponsors for their support of `dcbor`:
-
-$sponsor-logo-with-link
-
-$sponsor-description
 
 ## Contributing
 
@@ -101,7 +46,7 @@ The following people directly contributed to this repository. You can add your n
 | Name              | Role                | Github                                            | Email                                 | GPG Fingerprint                                    |
 | ----------------- | ------------------- | ------------------------------------------------- | ------------------------------------- | -------------------------------------------------- |
 | Christopher Allen | Principal Architect | [@ChristopherA](https://github.com/ChristopherA)  | \<ChristopherA@LifeWithAlacrity.com\> | FDFE 14A5 4ECB 30FC 5D22  74EF F8D3 6C91 3574 05ED |
-| Wolf McNally      | Contributor         | [@WolfMcNally](https://github.com/wolfmcnally)    | \<Wolf@WolfMcNally.com\>              | 9436 52EE 3844 1760 C3DC  3536 4B6C 2FCF 8947 80AE |
+| Wolf McNally      | Lead Researcher/Engineer         | [@WolfMcNally](https://github.com/wolfmcnally)    | \<Wolf@WolfMcNally.com\>              | 9436 52EE 3844 1760 C3DC  3536 4B6C 2FCF 8947 80AE |
 
 ## Responsible Disclosure
 
