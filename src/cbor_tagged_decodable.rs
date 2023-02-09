@@ -5,18 +5,20 @@ use crate::{CBOR, CBORDecodable, tag::Tag, decode_error::DecodeError};
 /// Typically types that implement this trait will only provide the `CBOR_TAG`
 /// associated constant and implement the `from_untagged_cbor` function.
 pub trait CBORTaggedDecodable: CBORDecodable {
-    fn tag() -> Tag;
+    /// The CBOR tag associated with this type.
+    const CBOR_TAG: Tag;
 
+    /// Creates an instance of this type by decoding it from untagged CBOR.
     fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError>;
 
     /// Creates an instance of this type by decoding it from tagged CBOR.
     fn from_tagged_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
         match cbor {
             CBOR::Tagged(tag, item) => {
-                if *tag == Self::tag() {
+                if *tag == Self::CBOR_TAG {
                     return Ok(Self::from_untagged_cbor(item)?);
                 } else {
-                    return Err(DecodeError::WrongTag(Self::tag(), tag.clone()));
+                    return Err(DecodeError::WrongTag(Self::CBOR_TAG, tag.clone()));
                 }
             },
             _ => return Err(DecodeError::WrongType)

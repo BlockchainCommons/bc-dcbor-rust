@@ -1,4 +1,4 @@
-use crate::{cbor_encodable::CBOREncodable, tag::{Tag, IntoTag}};
+use crate::{cbor_encodable::CBOREncodable, tag::Tag};
 
 use super::{cbor::CBOR, varint::{MajorType, EncodeVarInt}};
 
@@ -12,8 +12,8 @@ pub struct Tagged {
 
 impl Tagged {
     /// Creates a new tagged value.
-    pub fn new<T, I>(value: T, item: I) -> Tagged where T: IntoTag, I: CBOREncodable {
-        Tagged { tag: value.into_tag(), item: item.cbor() }
+    pub fn new<T, I>(value: T, item: I) -> Tagged where T: Into<Tag>, I: CBOREncodable {
+        Tagged { tag: value.into(), item: item.cbor() }
     }
 
     /// Returns the known name of the tag, if it has been assigned one.

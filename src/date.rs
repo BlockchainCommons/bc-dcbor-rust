@@ -2,32 +2,37 @@ use chrono::{DateTime, Utc, TimeZone, SecondsFormat};
 
 use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, decode_error::DecodeError, CBORTaggedDecodable, CBORTaggedCodable};
 
+/// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone)]
 pub struct Date(DateTime<Utc>);
 
 impl Date {
-    /// Creates a new `Date` from the given `DateTime`.
-    pub fn from_datetime(dt: DateTime<Utc>) -> Self {
-        Date(dt)
+    /// Creates a new `Date` from the given chrono `DateTime`.
+    pub fn from_datetime(date_time: DateTime<Utc>) -> Self {
+        Date(date_time)
     }
 
     /// Creates a new `Date` from seconds since (or before) the Unix epoch.
-    pub fn from_timestamp(ts: i64) -> Self {
-        Self::from_datetime(Utc.timestamp_opt(ts, 0).unwrap())
+    pub fn from_timestamp(seconds_since_unix_epoch: i64) -> Self {
+        Self::from_datetime(Utc.timestamp_opt(seconds_since_unix_epoch, 0).unwrap())
     }
 
+    /// Creates a new `Date` containing the current date and time.
     pub fn now() -> Self {
         Self::from_datetime(Utc::now())
     }
 
+    /// Returns the underlying chrono `DateTime` struct.
     pub fn datetime(&self) -> DateTime<Utc> {
         self.0
     }
 
+    /// Returns the `Date` as the number of seconds since the Unix epoch.
     pub fn timestamp(&self) -> i64 {
         self.datetime().timestamp()
     }
 
+    /// Returns a string with the ISO-8601 (RFC-3339) representation of the date.
     pub fn to_string(&self) -> String {
         self.datetime().to_rfc3339_opts(SecondsFormat::Secs, true)
     }
@@ -52,9 +57,7 @@ impl CBORDecodable for Date {
 impl CBORCodable for Date { }
 
 impl CBORTaggedEncodable for Date {
-    fn tag() -> Tag {
-        Tag::new_opt(1, None)
-    }
+    const CBOR_TAG: Tag = Tag::new(1);
 
     fn untagged_cbor(&self) -> CBOR {
         self.timestamp().cbor()
@@ -62,9 +65,7 @@ impl CBORTaggedEncodable for Date {
 }
 
 impl CBORTaggedDecodable for Date {
-    fn tag() -> Tag {
-        Tag::new_opt(1, None)
-    }
+    const CBOR_TAG: Tag = Tag::new(1);
 
     fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
         let a = i64::from_cbor(cbor)?;

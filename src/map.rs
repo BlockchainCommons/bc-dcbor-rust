@@ -22,8 +22,10 @@ impl Map {
     }
 
     /// Gets an iterator over the entries of the CBOR map, sorted by key.
-    pub fn iter<'a>(&'a self) -> Iter<'a> {
-        Iter::new(self.0.values())
+    ///
+    /// Key sorting order is lexicographic by the key's binary-encoded CBOR.
+    pub fn iter<'a>(&'a self) -> MapIter<'a> {
+        MapIter::new(self.0.values())
     }
 
     /// Inserts a key-value pair into the map.
@@ -87,16 +89,19 @@ impl std::fmt::Debug for Map {
     }
 }
 
-/// An iterator over a CBOR map.
-pub struct Iter<'a>(BTreeMapValues<'a, MapKey, MapValue>);
+/// An iterator over the entries of a CBOR map.
+///
+/// This iterator always returns the entries in lexicographic order by the key's
+/// binary-encoded CBOR value.
+pub struct MapIter<'a>(BTreeMapValues<'a, MapKey, MapValue>);
 
-impl<'a> Iter<'a> {
-    fn new(values: BTreeMapValues<'a, MapKey, MapValue>) -> Iter<'a> {
-        Iter(values)
+impl<'a> MapIter<'a> {
+    fn new(values: BTreeMapValues<'a, MapKey, MapValue>) -> MapIter<'a> {
+        MapIter(values)
     }
 }
 
-impl<'a> Iterator for Iter<'a> {
+impl<'a> Iterator for MapIter<'a> {
     type Item = (&'a CBOR, &'a CBOR);
 
     fn next(&mut self) -> Option<Self::Item> {

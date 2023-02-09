@@ -6,8 +6,8 @@ fn run(cbor: CBOR,
     debug_description: &str,
     diagnostic: &str,
     diagnostic_annotated: &str,
-    dump: &str,
-    dump_annotated: &str)
+    hex: &str,
+    hex_annotated: &str)
 {
     let mut known_tags = KnownTagsDict::new();
     known_tags.insert(&Tag::new_opt(1, Some("date")));
@@ -16,8 +16,8 @@ fn run(cbor: CBOR,
     assert_eq!(format!("{:?}", cbor), debug_description);
     assert_eq!(format!("{}", cbor.diagnostic()), diagnostic);
     assert_eq!(format!("{}", cbor.diagnostic_opt(true, Some(&known_tags))), diagnostic_annotated);
-    assert_eq!(cbor.dump(), dump);
-    assert_eq!(cbor.dump_opt(true, Some(&known_tags)), dump_annotated);
+    assert_eq!(cbor.hex(), hex);
+    assert_eq!(cbor.hex_opt(true, Some(&known_tags)), hex_annotated);
 }
 
 #[test]

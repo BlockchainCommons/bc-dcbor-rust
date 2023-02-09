@@ -1,4 +1,4 @@
-use crate::{tag::Tag, Simple, decode_error::DecodeError, hex_to_bytes, decode::decode_cbor, bytes_to_hex, CBOREncodable};
+use crate::{tag::Tag, Simple, decode_error::DecodeError, hex_to_bytes, decode::decode_cbor};
 
 use super::{bytes::Bytes, Tagged, Map, string_util::flanked};
 
@@ -23,24 +23,30 @@ pub enum CBOR {
     Simple(Simple)
 }
 
+/// Affordances for decoding CBOR from binary representation.
 impl CBOR {
-    pub const FALSE: CBOR = CBOR::Simple(Simple(20));
-    pub const TRUE: CBOR = CBOR::Simple(Simple(21));
-    pub const NULL: CBOR = CBOR::Simple(Simple(22));
-}
-
-impl CBOR {
+    /// Decodes the given date into CBOR symbolic representation.
     pub fn from_data(data: &[u8]) -> Result<CBOR, DecodeError> {
         decode_cbor(data)
     }
 
+    /// Decodes the given date into CBOR symbolic representation given as a hexidecimal string.
+    ///
+    /// Panics if the string is not well-formed, lower case hex with no spaces or
+    /// other characters.
     pub fn from_hex(hex: &str) -> Result<CBOR, DecodeError> {
         Self::from_data(&hex_to_bytes(hex))
     }
+}
 
-    pub fn hex(&self) -> String {
-        bytes_to_hex(self.cbor_data())
-    }
+/// Associated constants for common CBOR simple values.
+impl CBOR {
+    /// The CBOR simple value representing `false`.
+    pub const FALSE: CBOR = CBOR::Simple(Simple::new_const(20));
+    /// The CBOR simple value representing `true`.
+    pub const TRUE: CBOR = CBOR::Simple(Simple::new_const(21));
+    /// The CBOR simple value representing `null` (`None`).
+    pub const NULL: CBOR = CBOR::Simple(Simple::new_const(22));
 }
 
 impl PartialEq for CBOR {

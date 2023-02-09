@@ -5,12 +5,12 @@ use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 /// A CBOR simple value.
 #[derive(Clone)]
-pub struct Simple(pub u64);
+pub struct Simple(u64);
 
 impl Simple {
-    /// Creates a new CBOR "simple" value.
-    pub fn new<T>(v: T) -> Simple where T: IntoValue {
-        v.into_value()
+    /// Creates a new CBOR simple value.
+    pub fn new<T>(v: T) -> Simple where T: Into<Simple> {
+        v.into()
     }
 
     /// Returns the known name of the value, if it has been assigned one.
@@ -18,9 +18,16 @@ impl Simple {
         format!("{:?}", self)
     }
 
-    /// Returns the raw value.
-    pub fn raw_value(&self) -> u64 {
+    /// Returns the wrapped value.
+    pub fn value(&self) -> u64 {
         self.0
+    }
+
+    /// Creates a new CBOR simple value from the provided integer.
+    ///
+    /// Can be used to initialize const expressions.
+    pub const fn new_const(v: u64) -> Simple {
+        Simple(v)
     }
 }
 
@@ -80,24 +87,14 @@ impl std::fmt::Display for Simple {
     }
 }
 
-pub trait IntoValue {
-    fn into_value(self) -> Simple;
-}
-
-impl IntoValue for u64 {
-    fn into_value(self) -> Simple {
-        Simple(self)
+impl From<u64> for Simple {
+    fn from(value: u64) -> Self {
+        Simple(value)
     }
 }
 
-impl IntoValue for i32 {
-    fn into_value(self) -> Simple {
-        Simple(self as u64)
-    }
-}
-
-impl IntoValue for Simple {
-    fn into_value(self) -> Simple {
-        self
+impl From<i32> for Simple {
+    fn from(value: i32) -> Self {
+        Simple(value as u64)
     }
 }

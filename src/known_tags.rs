@@ -15,13 +15,23 @@ pub fn name_for_tag<T>(tag: &Tag, known_tags: Option<&T>) -> String where T: Kno
     }
 }
 
+/// A concrete type that maps from tags to their known names.
+///
+/// Higher-level libraries may implement their own concrete types similar to or
+/// incorporating this type and implementing the `KnownTags` trait, in which
+/// case those types can also be passed to the methods that format CBOR as text.
 pub struct KnownTagsDict(HashMap<Tag, String>);
 
 impl KnownTagsDict {
+    /// Creates a new, empty `KnownTagsDict`.
     pub fn new() -> KnownTagsDict {
         KnownTagsDict(HashMap::new())
     }
 
+    /// Creates a new `KnownTagsDict` from the provided array of tags.
+    ///
+    /// Each of the provided tags must have an assigned name, or this function
+    /// panics.
     pub fn from_tags(tags: &[Tag]) -> KnownTagsDict {
         let mut dict: HashMap<Tag, String> = HashMap::new();
         for tag in tags {
@@ -30,6 +40,9 @@ impl KnownTagsDict {
         KnownTagsDict(dict)
     }
 
+    /// Inserts a new `Tag` into the dictionary.
+    ///
+    /// The provided `Tag` must have an assigned name, or this function panics.
     pub fn insert(&mut self, tag: &Tag) {
         Self::_insert(tag, &mut self.0);
     }

@@ -9,6 +9,9 @@
 //! keys are not in lexicographic order, or there is extra data past the end of
 //! the decoded CBOR item.
 
+mod cbor;
+pub use cbor::*;
+
 mod array;
 
 mod decode_error;
@@ -27,10 +30,7 @@ mod known_tags;
 pub use known_tags::{name_for_tag, KnownTagsDict};
 
 mod tag;
-pub use tag::{Tag, IntoTag};
-
-mod cbor;
-pub use cbor::*;
+pub use tag::Tag;
 
 mod cbor_encodable;
 pub use cbor_encodable::CBOREncodable;
@@ -54,7 +54,7 @@ pub use hex::{hex_to_bytes, bytes_to_hex};
 mod int;
 
 mod map;
-pub use map::{Map, Iter};
+pub use map::{Map, MapIter};
 
 mod string;
 

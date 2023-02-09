@@ -2,10 +2,21 @@ use std::str::from_utf8;
 
 use crate::{CBOR, known_tags::KnownTags, CBOREncodable, bytes_to_hex, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
 
+/// Affordances for viewing the encoded binary representation of CBOR as hexadecimal.
 impl CBOR {
-    pub fn dump_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
+    /// Returns the encoded hexadecimal representation of this CBOR.
+    pub fn hex(&self) -> String {
+        bytes_to_hex(self.cbor_data())
+    }
+
+    /// Returns the encoded hexadecimal representation of this CBOR.
+    ///
+    /// Optionally annotates the output, e.g. breaking the output up into
+    /// semantically meaningful lines, formatting dates, and adding names of
+    /// known tags.
+    pub fn hex_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
         if !annotate {
-            return bytes_to_hex(self.cbor_data())
+            return self.hex()
         }
         let items = self.dump_items(0, known_tags);
         let note_column = items.iter().fold(0, |largest, item| {
@@ -13,10 +24,6 @@ impl CBOR {
         });
         let lines: Vec<_> = items.iter().map(|x| x.format(note_column)).collect();
         lines.join("\n")
-    }
-
-    pub fn dump(&self) -> String {
-        self.dump_opt(false, None)
     }
 
     fn dump_items(&self, level: usize, known_tags: Option<&dyn KnownTags>) -> Vec<DumpItem> {

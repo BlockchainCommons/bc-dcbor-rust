@@ -1,10 +1,16 @@
 use crate::{CBOR, known_tags::KnownTags, string_util::flanked, Date};
 
+/// Affordances for viewing CBOR in diagnostic notation.
 impl CBOR {
+    /// Returns a representation of this CBOR in diagnostic notation.
+    ///
+    /// Optionally annotates the output, e.g. formatting dates and adding names
+    /// of known tags.
     pub fn diagnostic_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
         self.diag_item(annotate, known_tags).format(annotate)
     }
 
+    /// Returns a representation of this CBOR in diagnostic notation.
     pub fn diagnostic(&self) -> String {
         self.diagnostic_opt(false, None)
     }
