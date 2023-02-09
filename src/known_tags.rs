@@ -6,12 +6,12 @@ use crate::Tag;
 pub trait KnownTags {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String>;
     fn name_for_tag(&self, tag: &Tag) -> String;
-}
 
-pub fn name_for_tag<T>(tag: &Tag, known_tags: Option<&T>) -> String where T: KnownTags {
-    match known_tags {
-        None => tag.value().to_string(),
-        Some(tags) => tags.name_for_tag(tag)
+    fn name_for_tag_opt<T>(tag: &Tag, known_tags: Option<&T>) -> String where T: KnownTags, Self: Sized {
+        match known_tags {
+            None => tag.value().to_string(),
+            Some(tags) => tags.name_for_tag(tag)
+        }
     }
 }
 

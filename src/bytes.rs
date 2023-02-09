@@ -1,6 +1,6 @@
 use crate::{cbor_encodable::CBOREncodable, CBORDecodable, decode_error::DecodeError, CBORCodable};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex_to_bytes, bytes_to_hex};
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex::{hex_to_data, data_to_hex}};
 
 
 /// A CBOR byte string.
@@ -15,10 +15,10 @@ impl Bytes {
 
     /// Creates a new CBOR byte string from the provided hexadecimal string.
     ///
-    /// Panics if the string is not well-formed, lower case hex with no spaces or
+    /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
     pub fn from_hex<T>(hex: T) -> Bytes where T: AsRef<str> {
-        Bytes(hex_to_bytes(hex))
+        Bytes(hex_to_data(hex))
     }
 
     /// The wrapped data.
@@ -28,7 +28,7 @@ impl Bytes {
 
     /// The wrapped data as a hexadecimal string.
     pub fn hex(&self) -> String {
-        bytes_to_hex(self.data())
+        data_to_hex(self.data())
     }
 
     /// The length of the wrapped data in bytes.
@@ -76,14 +76,14 @@ impl PartialEq for Bytes {
 
 impl std::fmt::Debug for Bytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&bytes_to_hex(&self.0))
+        f.write_str(&data_to_hex(&self.0))
     }
 }
 
 impl std::fmt::Display for Bytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("h'")?;
-        f.write_str(&bytes_to_hex(&self.0))?;
+        f.write_str(&data_to_hex(&self.0))?;
         f.write_str("'")
     }
 }

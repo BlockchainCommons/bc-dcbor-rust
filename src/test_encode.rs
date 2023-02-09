@@ -1,11 +1,11 @@
-use crate::{Tagged, bytes_to_hex, Bytes, Map, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR, Date};
+use crate::{Tagged, hex::data_to_hex, Bytes, Map, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR, Date};
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
-    assert_eq!(bytes_to_hex(&data), expected_data);
+    assert_eq!(data_to_hex(&data), expected_data);
     let decoded_cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
 }
@@ -15,7 +15,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
-    assert_eq!(bytes_to_hex(&data), expected_data);
+    assert_eq!(data_to_hex(&data), expected_data);
 
     let decoded_cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
@@ -25,7 +25,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
-    assert_eq!(bytes_to_hex(&data), expected_data);
+    assert_eq!(data_to_hex(&data), expected_data);
 }
 
 #[test]
@@ -226,7 +226,7 @@ fn encode_envelope() {
     let cbor = envelope.cbor();
     assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
     let bytes = cbor.cbor_data();
-    assert_eq!(format!("{}", bytes_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
+    assert_eq!(format!("{}", data_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
     let decoded_cbor = CBOR::from_data(&bytes).unwrap();
     assert_eq!(cbor, decoded_cbor);
 }
@@ -255,4 +255,24 @@ fn encode_date() {
         "1(1675854714)",
         "c11a63e3837a"
     )
+}
+
+mod usage {
+    #[test]
+    fn usage_test_1() {
+        use crate::*;
+        let array = ["A", "B", "C"];
+        let cbor = array.cbor();
+        assert_eq!(cbor.hex(), "83614161426143");
+    }
+
+    #[test]
+    fn usage_test_2() {
+        use crate::*;
+        let data = hex::hex_to_data("83614161426143");
+        let cbor = CBOR::from_data(&data).unwrap();
+        assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
+        let array = Vec::<String>::from_cbor(&cbor).unwrap();
+        assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);
+    }
 }

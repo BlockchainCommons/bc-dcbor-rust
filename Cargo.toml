@@ -2,8 +2,12 @@
 name = "dcbor"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license-file = "LICENSE.md"
+description = "Deterministic CBOR (\"dCBOR\") for Rust."
+keywords = ["encoding", "cbor", "binary", "format", "serialization"]
+repository = "https://github.com/BlockchainCommons/bc-dcbor-rust"
+readme = "README.md"
+categories = ["data-structures", "encoding"]
 
 [dependencies]
 chrono = "0.4.23"

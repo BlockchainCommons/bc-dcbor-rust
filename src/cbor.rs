@@ -1,4 +1,4 @@
-use crate::{tag::Tag, Simple, decode_error::DecodeError, hex_to_bytes, decode::decode_cbor};
+use crate::{tag::Tag, Simple, decode_error::DecodeError, hex::hex_to_data, decode::decode_cbor};
 
 use super::{bytes::Bytes, Tagged, Map, string_util::flanked};
 
@@ -32,10 +32,18 @@ impl CBOR {
 
     /// Decodes the given date into CBOR symbolic representation given as a hexidecimal string.
     ///
-    /// Panics if the string is not well-formed, lower case hex with no spaces or
+    /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
     pub fn from_hex(hex: &str) -> Result<CBOR, DecodeError> {
-        Self::from_data(&hex_to_bytes(hex))
+        Self::from_data(&hex_to_data(hex))
+    }
+}
+
+impl TryFrom<&[u8]> for CBOR {
+    type Error = DecodeError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        CBOR::from_data(value)
     }
 }
 

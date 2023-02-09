@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues};
 
 use crate::cbor_encodable::CBOREncodable;
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, bytes_to_hex};
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex::data_to_hex};
 
 /// A CBOR map.
 ///
@@ -167,6 +167,6 @@ impl Ord for MapKey {
 
 impl std::fmt::Debug for MapKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("0x{}", bytes_to_hex(&self.0)))
+        f.write_fmt(format_args!("0x{}", data_to_hex(&self.0)))
     }
 }

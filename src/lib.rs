@@ -1,3 +1,5 @@
+//! # dCBOR: Deterministic CBOR Codec
+//!
 //! `dcbor` is a [CBOR](https://cbor.io) codec that focuses on writing and
 //! parsing "deterministic" CBOR per [§4.2 of
 //! RFC-8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-deterministically-encoded-c).
@@ -8,6 +10,51 @@
 //! variable-length integers are not encoded in their minimal form, or CBOR map
 //! keys are not in lexicographic order, or there is extra data past the end of
 //! the decoded CBOR item.
+//!
+//! # Getting Started
+//!
+//! Add the following to your `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies]
+//! dcbor = "0.1.0"
+//! ```
+//!
+//! # Usage
+//!
+//! Encode an array of strings as CBOR.
+//!
+//! ```
+//! # fn main() {
+//! # {
+//! use dcbor::*;
+//! let array = ["A", "B", "C"];
+//! let cbor = array.cbor();
+//! assert_eq!(cbor.hex(), "83614161426143")
+//! # }
+//! # }
+//! ```
+//!
+//! Decode CBOR binary back to an array of strings.
+//!
+//! ```
+//! # fn main() {
+//! # {
+//! use dcbor::*;
+//! let data = hex::hex_to_data("83614161426143");
+//! let cbor = CBOR::from_data(&data).unwrap();
+//! assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
+//! let array = Vec::<String>::from_cbor(&cbor).unwrap();
+//! assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);
+//! # }
+//! # }
+//! ```
+//!
+//! See the unit tests For further examples, including encoding and decoding
+//! arrays with heterogenous elements, maps, and user-defined types with custom
+//! CBOR tags.
+
+#![warn(rust_2018_idioms)]
 
 mod cbor;
 pub use cbor::*;
@@ -27,7 +74,7 @@ mod diag;
 mod dump;
 
 mod known_tags;
-pub use known_tags::{name_for_tag, KnownTagsDict};
+pub use known_tags::{KnownTags, KnownTagsDict};
 
 mod tag;
 pub use tag::Tag;
@@ -48,8 +95,7 @@ pub use cbor_tagged_codable::CBORTaggedCodable;
 
 mod decode;
 
-mod hex;
-pub use hex::{hex_to_bytes, bytes_to_hex};
+pub mod hex;
 
 mod int;
 
