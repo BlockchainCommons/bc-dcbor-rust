@@ -8,14 +8,22 @@ use crate::tag::Tag;
 pub enum DecodeError {
     /// Early end of data.
     Underrun,
+
     /// Unsupported value in CBOR header.
     UnsupportedHeaderValue(u8),
+
     /// An integer was encoded in non-canonical form.
     NonCanonicalInt,
+
+    /// A floating point value was encoded in non-canonical form.
+    NonCanonicalFloat,
+
     /// An invalidly-encoded UTF-8 string was encountered.
     InvalidString(Utf8Error),
+
     /// The decoded CBOR had extra data at the end.
     UnusedData(usize),
+
     /// The decoded CBOR map has keys that are not in canonical order.
     MisorderedMapKey,
 
@@ -43,6 +51,7 @@ impl std::fmt::Display for DecodeError {
             DecodeError::Underrun => format!("early end of data"),
             DecodeError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
             DecodeError::NonCanonicalInt => format!("non-canonical int format"),
+            DecodeError::NonCanonicalFloat => format!("non-canonical float format"),
             DecodeError::InvalidString(err) => format!("invalid string format: {:?}", err),
             DecodeError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
             DecodeError::MisorderedMapKey => format!("mis-ordered map key"),

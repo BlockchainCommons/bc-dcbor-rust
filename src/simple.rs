@@ -2,10 +2,20 @@ use crate::cbor_encodable::CBOREncodable;
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
-
 /// A CBOR simple value.
 #[derive(Clone)]
-pub struct Simple(u64);
+pub enum Simple {
+    /// A numeric value.
+    Value(u64),
+    /// The boolean value `false`.
+    False,
+    /// The boolean value `true`.
+    True,
+    /// The value representing `null` (`None`).
+    Null,
+    /// A floating point value.
+    Float(f64),
+}
 
 impl Simple {
     /// Creates a new CBOR simple value.
@@ -17,18 +27,6 @@ impl Simple {
     pub fn name(&self) -> String {
         format!("{:?}", self)
     }
-
-    /// Returns the wrapped value.
-    pub fn value(&self) -> u64 {
-        self.0
-    }
-
-    /// Creates a new CBOR simple value from the provided integer.
-    ///
-    /// Can be used to initialize const expressions.
-    pub const fn new_const(v: u64) -> Simple {
-        Simple(v)
-    }
 }
 
 impl CBOREncodable for Simple {
@@ -37,39 +35,37 @@ impl CBOREncodable for Simple {
     }
 
     fn cbor_data(&self) -> Vec<u8> {
-        self.0.encode_varint(MajorType::Simple)
-    }
-}
-
-impl CBOREncodable for bool {
-    fn cbor(&self) -> CBOR {
         match self {
-            false => CBOR::Simple(Simple::new(20)),
-            true => CBOR::Simple(Simple::new(21)),
-        }
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        match self {
-            false => Simple::new(20).cbor_data(),
-            true => Simple::new(21).cbor_data()
+            Self::Value(v) => v.encode_varint(MajorType::Simple),
+            Self::False => Simple::new(20).cbor_data(),
+            Self::True => Simple::new(21).cbor_data(),
+            Self::Null => Simple::new(22).cbor_data(),
+            Self::Float(v) => v.cbor_data(),
         }
     }
 }
 
 impl PartialEq for Simple {
     fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
+        match (self, other) {
+            (Self::Value(v1), Self::Value(v2)) => v1 == v2,
+            (Self::False, Self::False) => true,
+            (Self::True, Self::True) => true,
+            (Self::Null, Self::Null) => true,
+            (Self::Float(v1), Self::Float(v2)) => v1 == v2,
+            _ => false,
+        }
     }
 }
 
 impl std::fmt::Debug for Simple {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self.0 {
-            20 => "false".to_owned(),
-            21 => "true".to_owned(),
-            22 => "null".to_owned(),
-            _ => format!("{:?}", self.0),
+        let s = match self {
+            Self::Value(v) => format!("{:?}", v),
+            Self::False => "false".to_owned(),
+            Self::True => "true".to_owned(),
+            Self::Null => "null".to_owned(),
+            Self::Float(v) => format!("{:?}", v),
         };
         f.write_str(&s)
     }
@@ -77,11 +73,12 @@ impl std::fmt::Debug for Simple {
 
 impl std::fmt::Display for Simple {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self.0 {
-            20 => "false".to_owned(),
-            21 => "true".to_owned(),
-            22 => "null".to_owned(),
-            _ => format!("simple({:?})", self.0),
+        let s = match self {
+            Self::Value(v) => format!("simple({})", v),
+            Self::False => "false".to_owned(),
+            Self::True => "true".to_owned(),
+            Self::Null => "null".to_owned(),
+            Self::Float(v) => format!("{}", v),
         };
         f.write_str(&s)
     }
@@ -89,12 +86,12 @@ impl std::fmt::Display for Simple {
 
 impl From<u64> for Simple {
     fn from(value: u64) -> Self {
-        Simple(value)
+        Simple::Value(value)
     }
 }
 
 impl From<i32> for Simple {
     fn from(value: i32) -> Self {
-        Simple(value as u64)
+        Simple::Value(value as u64)
     }
 }

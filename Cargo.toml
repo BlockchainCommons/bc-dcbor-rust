@@ -4,6 +4,7 @@ version = "0.1.1"
 edition = "2021"
 license-file = "LICENSE.md"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
+author = "Blockchain Commons"
 keywords = ["encoding", "cbor", "binary", "format", "serialization"]
 repository = "https://github.com/BlockchainCommons/bc-dcbor-rust"
 readme = "README.md"
@@ -11,6 +12,7 @@ categories = ["data-structures", "encoding"]
 
 [dependencies]
 chrono = "0.4.23"
+half = "2.2.1"
 
 [dev-dependencies]
 indoc = "2.0.0"

@@ -1,6 +1,8 @@
 use std::str::from_utf8;
 
-use crate::{decode_error::DecodeError, cbor_encodable::CBOREncodable, tag::Tag};
+use half::f16;
+
+use crate::{decode_error::DecodeError, cbor_encodable::CBOREncodable, tag::Tag, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
 
 use super::{cbor::CBOR, varint::MajorType, bytes::Bytes, Simple, Tagged, Map};
 
@@ -139,6 +141,32 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), DecodeError> {
             let tagged = Tagged::new(Tag::new_opt(value, None), item);
             Ok((tagged.cbor(), header_varint_len + item_len))
         },
-        MajorType::Simple => Ok((Simple::new(value).cbor(), header_varint_len)),
+        MajorType::Simple => {
+            match header_varint_len {
+                3 => {
+                    let f = f16::from_bits(value as u16);
+                    validate_canonical_f16(f)?;
+                    Ok((f.cbor(), header_varint_len))
+                },
+                5 => {
+                    let f = f32::from_bits(value as u32);
+                    validate_canonical_f32(f)?;
+                    Ok((f.cbor(), header_varint_len))
+                },
+                9 => {
+                    let f = f64::from_bits(value);
+                    validate_canonical_f64(f)?;
+                    Ok((f.cbor(), header_varint_len))
+                },
+                _ => {
+                    match value {
+                        20 => Ok((CBOR::FALSE, header_varint_len)),
+                        21 => Ok((CBOR::TRUE, header_varint_len)),
+                        22 => Ok((CBOR::NULL, header_varint_len)),
+                        v => Ok((Simple::new(v).cbor(), header_varint_len)),
+                    }
+                }
+            }
+        }
     }
 }

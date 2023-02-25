@@ -232,9 +232,59 @@ fn encode_envelope() {
 }
 
 #[test]
+fn encode_float() {
+    // Floating point numbers get serialized as their shortest accurate representation.
+    test_cbor(1.5,              "simple(1.5)",          "1.5",          "f93e00");
+    test_cbor(2345678.25,       "simple(2345678.25)",   "2345678.25",   "fa4a0f2b39");
+    test_cbor(1.2,              "simple(1.2)",          "1.2",          "fb3ff3333333333333");
+    test_cbor(f64::INFINITY,    "simple(inf)",          "inf",          "f97c00");
+
+    // Floating point values that can be represented as integers get serialized as integers.
+    test_cbor(42.0f32,          "unsigned(42)",         "42",           "182a");
+    test_cbor(2345678.0,        "unsigned(2345678)",    "2345678",      "1a0023cace");
+    test_cbor(-2345678.0,       "negative(-2345678)",   "-2345678",     "3a0023cacd");
+
+    // Negative zero gets serialized as integer zero.
+    test_cbor(-0.0,             "unsigned(0)",          "0",            "00");
+}
+
+#[test]
+fn int_coerced_to_float() {
+    let n = 42;
+    let c = n.cbor();
+    let f: f64 = (&c).try_into().unwrap();
+    assert_eq!(f, n as f64);
+    let c2 = f.cbor();
+    assert_eq!(c2, c);
+    let i: i32 = (&c).try_into().unwrap();
+    assert_eq!(i, n);
+}
+
+#[test]
+fn fail_float_coerced_to_int() {
+    // Floating point values cannot be coerced to integer types.
+    let n = 42.5;
+    let c = n.cbor();
+    let f: f64 = (&c).try_into().unwrap();
+    assert_eq!(f, n);
+    assert_eq!(i32::try_from(&c).unwrap_err(), DecodeError::WrongType);
+}
+
+#[test]
+fn non_canonical_float_1() {
+    // Non-canonical representation of 1.5 that could be represented at a smaller width.
+    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), DecodeError::NonCanonicalFloat);
+}
+
+#[test]
+fn non_canonical_float_2() {
+    // Non-canonical representation of a floating point value that could be represented as an integer.
+    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), DecodeError::NonCanonicalFloat);
+}
+
+#[test]
 fn unused_data() {
-    let cbor = CBOR::from_hex("0001");
-    assert_eq!(cbor, Err(DecodeError::UnusedData(1)));
+    assert_eq!(CBOR::from_hex("0001").unwrap_err(), DecodeError::UnusedData(1));
 }
 
 #[test]

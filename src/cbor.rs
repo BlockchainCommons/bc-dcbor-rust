@@ -30,7 +30,7 @@ impl CBOR {
         decode_cbor(data)
     }
 
-    /// Decodes the given date into CBOR symbolic representation given as a hexidecimal string.
+    /// Decodes the given data into CBOR symbolic representation given as a hexadecimal string.
     ///
     /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
@@ -50,11 +50,11 @@ impl TryFrom<&[u8]> for CBOR {
 /// Associated constants for common CBOR simple values.
 impl CBOR {
     /// The CBOR simple value representing `false`.
-    pub const FALSE: CBOR = CBOR::Simple(Simple::new_const(20));
+    pub const FALSE: CBOR = CBOR::Simple(Simple::False);
     /// The CBOR simple value representing `true`.
-    pub const TRUE: CBOR = CBOR::Simple(Simple::new_const(21));
+    pub const TRUE: CBOR = CBOR::Simple(Simple::True);
     /// The CBOR simple value representing `null` (`None`).
-    pub const NULL: CBOR = CBOR::Simple(Simple::new_const(22));
+    pub const NULL: CBOR = CBOR::Simple(Simple::Null);
 }
 
 impl PartialEq for CBOR {

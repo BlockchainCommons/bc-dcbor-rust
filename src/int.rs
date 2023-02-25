@@ -39,6 +39,30 @@ macro_rules! impl_cbor {
         }
 
         impl CBORCodable for $type { }
+
+        impl TryFrom<&CBOR> for $type {
+            type Error = crate::decode_error::DecodeError;
+
+            fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
+                match value {
+                    CBOR::Unsigned(n) => {
+                        if n > &(<$type>::MAX as u64) {
+                            Err(DecodeError::IntegerOutOfRange)
+                        } else {
+                            Ok(*n as $type)
+                        }
+                    },
+                    CBOR::Negative(n) => {
+                        if n < &0 || n > &(<$type>::MAX as i64) {
+                            Err(DecodeError::IntegerOutOfRange)
+                        } else {
+                            Ok(*n as $type)
+                        }
+                    },
+                    _ => Err(DecodeError::WrongType)
+                }
+            }
+        }
     };
 }
 
