@@ -1,4 +1,4 @@
-use crate::{CBOR, Simple, CBOREncodable, Map, Tagged, Date, KnownTagsDict, Tag};
+use dcbor::*;
 use indoc::indoc;
 
 fn run(cbor: CBOR,

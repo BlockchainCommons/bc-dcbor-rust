@@ -1,6 +1,6 @@
 [package]
 name = "dcbor"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license-file = "LICENSE.md"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
@@ -9,6 +9,7 @@ keywords = ["encoding", "cbor", "binary", "format", "serialization"]
 repository = "https://github.com/BlockchainCommons/bc-dcbor-rust"
 readme = "README.md"
 categories = ["data-structures", "encoding"]
+documentation = "https://docs.rs/dcbor"
 
 [dependencies]
 chrono = "0.4.23"
@@ -16,3 +17,4 @@ half = "2.2.1"
 
 [dev-dependencies]
 indoc = "2.0.0"
+version-sync = "0.9"

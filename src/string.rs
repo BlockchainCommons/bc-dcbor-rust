@@ -36,3 +36,32 @@ impl CBORDecodable for String {
 }
 
 impl CBORCodable for String { }
+
+impl From<&str> for CBOR {
+    fn from(value: &str) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<String> for CBOR {
+    fn from(value: String) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<CBOR> for String {
+    fn from(value: CBOR) -> Self {
+        *Self::from_cbor(&value).unwrap()
+    }
+}
+
+impl TryFrom<&CBOR> for String {
+    type Error = DecodeError;
+
+    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
+        match value {
+            CBOR::Text(s) => Ok(s.clone()),
+            _ => Err(DecodeError::WrongType),
+        }
+    }
+}

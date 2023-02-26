@@ -40,27 +40,29 @@ macro_rules! impl_cbor {
 
         impl CBORCodable for $type { }
 
+        impl From<$type> for CBOR {
+            fn from(value: $type) -> Self {
+                value.cbor()
+            }
+        }
+
+        impl From<&$type> for CBOR {
+            fn from(value: &$type) -> Self {
+                value.cbor()
+            }
+        }
+
+        impl From<CBOR> for $type {
+            fn from(value: CBOR) -> Self {
+                *Self::from_cbor(&value).unwrap()
+            }
+        }
+
         impl TryFrom<&CBOR> for $type {
             type Error = crate::decode_error::DecodeError;
 
             fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
-                match value {
-                    CBOR::Unsigned(n) => {
-                        if n > &(<$type>::MAX as u64) {
-                            Err(DecodeError::IntegerOutOfRange)
-                        } else {
-                            Ok(*n as $type)
-                        }
-                    },
-                    CBOR::Negative(n) => {
-                        if n < &0 || n > &(<$type>::MAX as i64) {
-                            Err(DecodeError::IntegerOutOfRange)
-                        } else {
-                            Ok(*n as $type)
-                        }
-                    },
-                    _ => Err(DecodeError::WrongType)
-                }
+                Self::from_cbor(value).map(|x| *x)
             }
         }
     };

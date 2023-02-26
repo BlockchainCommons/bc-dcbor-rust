@@ -87,3 +87,32 @@ impl std::fmt::Display for Bytes {
         f.write_str("'")
     }
 }
+
+impl From<&Bytes> for CBOR {
+    fn from(value: &Bytes) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<Bytes> for CBOR {
+    fn from(value: Bytes) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<CBOR> for Bytes {
+    fn from(value: CBOR) -> Self {
+        *Self::from_cbor(&value).unwrap()
+    }
+}
+
+impl TryFrom<&CBOR> for Bytes {
+    type Error = DecodeError;
+
+    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
+        match value {
+            CBOR::Bytes(bytes) => Ok(bytes.clone()),
+            _ => Err(DecodeError::WrongType),
+        }
+    }
+}

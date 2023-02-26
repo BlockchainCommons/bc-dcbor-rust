@@ -1,4 +1,4 @@
-use crate::{Tagged, hex::data_to_hex, Bytes, Map, Simple, decode_error::DecodeError, tag::Tag, cbor_encodable::CBOREncodable, CBORCodable, CBOR, Date};
+use dcbor::{*, hex::*};
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
@@ -307,22 +307,40 @@ fn encode_date() {
     )
 }
 
-mod usage {
-    #[test]
-    fn usage_test_1() {
-        use crate::*;
-        let array = ["A", "B", "C"];
-        let cbor = array.cbor();
-        assert_eq!(cbor.hex(), "83614161426143");
-    }
+fn test_convert<T>(value: T)
+where
+    T: PartialEq + Clone + Into<CBOR> + From<CBOR> + TryFrom<CBOR> + std::fmt::Debug,
+    T::Error: std::fmt::Debug,
+{
+    let cbor = value.clone().into();
+    let value2 = cbor.try_into().unwrap();
+    assert_eq!(value, value2);
+    let value3 = T::from(value.clone().into());
+    assert_eq!(value, value3);
+}
 
-    #[test]
-    fn usage_test_2() {
-        use crate::*;
-        let data = hex::hex_to_data("83614161426143");
-        let cbor = CBOR::from_data(&data).unwrap();
-        assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
-        let array = Vec::<String>::from_cbor(&cbor).unwrap();
-        assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);
-    }
+#[test]
+fn convert_values() {
+    test_convert(10);
+    test_convert(-10i64);
+    test_convert(false);
+    test_convert("Hello".to_string());
+    test_convert(10.0);
+    test_convert(Bytes::from_hex("001122334455"))
+}
+
+#[test]
+fn usage_test_1() {
+    let array = ["A", "B", "C"];
+    let cbor = array.cbor();
+    assert_eq!(cbor.hex(), "83614161426143");
+}
+
+#[test]
+fn usage_test_2() {
+    let data = hex::hex_to_data("83614161426143");
+    let cbor = CBOR::from_data(&data).unwrap();
+    assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
+    let array = Vec::<String>::from_cbor(&cbor).unwrap();
+    assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);
 }

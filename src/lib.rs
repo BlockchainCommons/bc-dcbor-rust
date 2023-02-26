@@ -1,3 +1,6 @@
+#![doc(html_root_url = "https://docs.rs/dcbor/0.2.1")]
+#![warn(rust_2018_idioms)]
+
 //! # dCBOR: Deterministic CBOR Codec
 //!
 //! `dcbor` is a [CBOR](https://cbor.io) codec that focuses on writing and
@@ -16,7 +19,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.1.0"
+//! dcbor = "0.2.1"
 //! ```
 //!
 //! # Usage
@@ -52,8 +55,6 @@
 //! See the unit tests For further examples, including encoding and decoding
 //! arrays with heterogenous elements, maps, and user-defined types with custom
 //! CBOR tags.
-
-#![warn(rust_2018_idioms)]
 
 mod cbor;
 pub use cbor::*;
@@ -117,9 +118,3 @@ mod simple;
 pub use simple::Simple;
 
 mod varint;
-
-#[cfg(test)]
-mod test_encode;
-
-#[cfg(test)]
-mod test_format;

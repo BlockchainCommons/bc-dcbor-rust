@@ -40,18 +40,9 @@ impl CBOREncodable for f64 {
 impl CBORDecodable for f64 {
     fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::DecodeError> {
         match cbor {
-            CBOR::Unsigned(n) => {
-                Ok(Box::new(*n as f64))
-            },
-            CBOR::Negative(n) => {
-                Ok(Box::new(*n as f64))
-            },
-            CBOR::Simple(simple) => {
-                match simple {
-                    Simple::Float(n) => Ok(Box::new(*n)),
-                    _ => Err(crate::DecodeError::WrongType)
-                }
-            },
+            CBOR::Unsigned(n) => Ok(Box::new(*n as f64)),
+            CBOR::Negative(n) => Ok(Box::new(*n as f64)),
+            CBOR::Simple(Simple::Float(n)) => Ok(Box::new(*n)),
             _ => Err(crate::DecodeError::WrongType)
         }
     }
@@ -69,23 +60,32 @@ pub(crate) fn validate_canonical_f64(n: f64) -> Result<(), crate::DecodeError> {
     Ok(())
 }
 
+impl From<&f64> for CBOR {
+    fn from(value: &f64) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<f64> for CBOR {
+    fn from(value: f64) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<CBOR> for f64 {
+    fn from(value: CBOR) -> Self {
+        *Self::from_cbor(&value).unwrap()
+    }
+}
+
 impl TryFrom<&CBOR> for f64 {
     type Error = crate::DecodeError;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
         match cbor {
-            CBOR::Unsigned(n) => {
-                Ok(*n as f64)
-            },
-            CBOR::Negative(n) => {
-                Ok(*n as f64)
-            },
-            CBOR::Simple(simple) => {
-                match simple {
-                    Simple::Float(n) => Ok(*n),
-                    _ => Err(crate::DecodeError::WrongType)
-                }
-            },
+            CBOR::Unsigned(n) => Ok(*n as f64),
+            CBOR::Negative(n) => Ok(*n as f64),
+            CBOR::Simple(Simple::Float(n)) => Ok(*n),
             _ => Err(crate::DecodeError::WrongType)
         }
     }
@@ -130,18 +130,9 @@ impl CBOREncodable for f32 {
 impl CBORDecodable for f32 {
     fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::DecodeError> {
         match cbor {
-            CBOR::Unsigned(n) => {
-                Ok(Box::new(*n as f32))
-            },
-            CBOR::Negative(n) => {
-                Ok(Box::new(*n as f32))
-            },
-            CBOR::Simple(simple) => {
-                match simple {
-                    Simple::Float(n) => Ok(Box::new(*n as f32)),
-                    _ => Err(crate::DecodeError::WrongType)
-                }
-            },
+            CBOR::Unsigned(n) => Ok(Box::new(*n as f32)),
+            CBOR::Negative(n) => Ok(Box::new(*n as f32)),
+            CBOR::Simple(Simple::Float(n)) => Ok(Box::new(*n as f32)),
             _ => Err(crate::DecodeError::WrongType)
         }
     }
@@ -159,23 +150,32 @@ pub(crate) fn validate_canonical_f32(n: f32) -> Result<(), crate::DecodeError> {
     Ok(())
 }
 
+impl From<&f32> for CBOR {
+    fn from(value: &f32) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<f32> for CBOR {
+    fn from(value: f32) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<CBOR> for f32 {
+    fn from(value: CBOR) -> Self {
+        *Self::from_cbor(&value).unwrap()
+    }
+}
+
 impl TryFrom<&CBOR> for f32 {
     type Error = crate::DecodeError;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
         match cbor {
-            CBOR::Unsigned(n) => {
-                Ok(*n as f32)
-            },
-            CBOR::Negative(n) => {
-                Ok(*n as f32)
-            },
-            CBOR::Simple(simple) => {
-                match simple {
-                    Simple::Float(n) => Ok(*n as f32),
-                    _ => Err(crate::DecodeError::WrongType)
-                }
-            },
+            CBOR::Unsigned(n) => Ok(*n as f32),
+            CBOR::Negative(n) => Ok(*n as f32),
+            CBOR::Simple(Simple::Float(n)) => Ok(*n as f32),
             _ => Err(crate::DecodeError::WrongType)
         }
     }
@@ -216,18 +216,9 @@ impl CBOREncodable for f16 {
 impl CBORDecodable for f16 {
     fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::DecodeError> {
         match cbor {
-            CBOR::Unsigned(n) => {
-                Ok(Box::new(f16::from_f64(*n as f64)))
-            },
-            CBOR::Negative(n) => {
-                Ok(Box::new(f16::from_f64(*n as f64)))
-            },
-            CBOR::Simple(simple) => {
-                match simple {
-                    Simple::Float(n) => Ok(Box::new(f16::from_f64(*n))),
-                    _ => Err(crate::DecodeError::WrongType)
-                }
-            },
+            CBOR::Unsigned(n) => Ok(Box::new(f16::from_f64(*n as f64))),
+            CBOR::Negative(n) => Ok(Box::new(f16::from_f64(*n as f64))),
+            CBOR::Simple(Simple::Float(n)) => Ok(Box::new(f16::from_f64(*n))),
             _ => Err(crate::DecodeError::WrongType)
         }
     }
