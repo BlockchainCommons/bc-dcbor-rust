@@ -64,7 +64,7 @@ impl CBOR {
             CBOR::Tagged(tag, item) => {
                 let header = tag.value().encode_varint(MajorType::Tagged);
                 let header_data = vec![vec!(header[0]), header[1..].to_vec()];
-                let mut note_components: Vec<String> = vec![format!("tag({})", tag)];
+                let mut note_components: Vec<String> = vec![format!("tag({})", tag.value())];
                 if let Some(known_tags) = known_tags {
                     if let Some(name) = known_tags.assigned_name_for_tag(tag) {
                         note_components.push(format!("  ; {}", name));
