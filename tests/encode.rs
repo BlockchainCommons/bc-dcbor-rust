@@ -6,7 +6,7 @@ fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_dat
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
     assert_eq!(data_to_hex(&data), expected_data);
-    let decoded_cbor = CBOR::from_data(&data).unwrap();
+    let decoded_cbor = data.try_into().unwrap();
     assert_eq!(cbor, decoded_cbor);
 }
 
@@ -17,7 +17,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
     let data = cbor.cbor_data();
     assert_eq!(data_to_hex(&data), expected_data);
 
-    let decoded_cbor = CBOR::from_data(&data).unwrap();
+    let decoded_cbor = data.try_into().unwrap();
     assert_eq!(cbor, decoded_cbor);
     let t2 = T::from_cbor(&decoded_cbor).unwrap();
 
@@ -133,7 +133,7 @@ fn encode_bytes() {
         "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
         "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
     );
-    test_cbor_codable(Bytes::from_data([0x11, 0x22, 0x33]),
+    test_cbor_codable(Bytes::from(&[0x11, 0x22, 0x33]),
     "bytes(112233)",
     "h'112233'",
     "43112233"
@@ -165,7 +165,7 @@ fn encode_heterogenous_array() {
 
     let cbor = array.cbor();
     let data = cbor.cbor_data();
-    let decoded_cbor = CBOR::from_data(&data).unwrap();
+    let decoded_cbor: CBOR = data.try_into().unwrap();
     match decoded_cbor {
         CBOR::Array(a) => {
             assert_eq!(a[0], 1.cbor());
@@ -227,7 +227,7 @@ fn encode_envelope() {
     assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
     let bytes = cbor.cbor_data();
     assert_eq!(format!("{}", data_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
-    let decoded_cbor = CBOR::from_data(&bytes).unwrap();
+    let decoded_cbor = bytes.try_into().unwrap();
     assert_eq!(cbor, decoded_cbor);
 }
 
@@ -339,7 +339,7 @@ fn usage_test_1() {
 #[test]
 fn usage_test_2() {
     let data = hex::hex_to_data("83614161426143");
-    let cbor = CBOR::from_data(&data).unwrap();
+    let cbor: CBOR = data.try_into().unwrap();
     assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
     let array = Vec::<String>::from_cbor(&cbor).unwrap();
     assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);

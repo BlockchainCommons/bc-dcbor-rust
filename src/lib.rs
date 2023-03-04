@@ -44,7 +44,7 @@
 //! # {
 //! use dcbor::*;
 //! let data = hex::hex_to_data("83614161426143");
-//! let cbor = CBOR::from_data(&data).unwrap();
+//! let cbor: CBOR = data.try_into().unwrap();
 //! assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
 //! let array = Vec::<String>::from_cbor(&cbor).unwrap();
 //! assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);

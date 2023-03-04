@@ -27,13 +27,11 @@ pub trait CBORTaggedDecodable: CBORDecodable {
 
     /// Creates an instance of this type by decoding it from binary encoded tagged CBOR.
     fn from_tagged_cbor_data(data: &[u8]) -> Result<Box<Self>, DecodeError> {
-        let cbor = CBOR::from_data(data)?;
-        Self::from_tagged_cbor(&cbor)
+        Self::from_tagged_cbor(&data.try_into()?)
     }
 
     /// Creates an instance of this type by decoding it from binary encoded untagged CBOR.
     fn from_untagged_cbor_data(data: &[u8]) -> Result<Box<Self>, DecodeError> {
-        let cbor = CBOR::from_data(data)?;
-        Self::from_untagged_cbor(&cbor)
+        Self::from_untagged_cbor(&data.try_into()?)
     }
 }

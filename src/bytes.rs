@@ -116,3 +116,15 @@ impl TryFrom<&CBOR> for Bytes {
         }
     }
 }
+
+impl From<&[u8]> for Bytes {
+    fn from(value: &[u8]) -> Self {
+        Bytes::from_data(value)
+    }
+}
+
+impl<const L: usize> From<&[u8; L]> for Bytes {
+    fn from(value: &[u8; L]) -> Self {
+        Bytes::from_data(value)
+    }
+}
