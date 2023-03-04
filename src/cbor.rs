@@ -95,7 +95,7 @@ fn format_string(s: &str) -> String {
     flanked(&result, r#"""#, r#"""#)
 }
 
-fn format_array(a: &Vec<CBOR>) -> String {
+fn format_array(a: &[CBOR]) -> String {
     let s: Vec<String> = a.iter().map(|x| format!("{}", x)).collect();
     flanked(&s.join(", "), "[", "]")
 }

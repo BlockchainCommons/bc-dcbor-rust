@@ -331,16 +331,16 @@ fn convert_values() {
 
 #[test]
 fn usage_test_1() {
-    let array = ["A", "B", "C"];
+    let array = [1000, 2000, 3000];
     let cbor = array.cbor();
-    assert_eq!(cbor.hex(), "83614161426143");
+    assert_eq!(cbor.hex(), "831903e81907d0190bb8");
 }
 
 #[test]
 fn usage_test_2() {
-    let data = hex::hex_to_data("83614161426143");
+    let data = hex::hex_to_data("831903e81907d0190bb8");
     let cbor: CBOR = data.try_into().unwrap();
-    assert_eq!(cbor.diagnostic(), r#"["A", "B", "C"]"#);
-    let array = Vec::<String>::from_cbor(&cbor).unwrap();
-    assert_eq!(format!("{:?}", array), r#"["A", "B", "C"]"#);
+    assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
+    let array: Vec::<u32> = cbor.try_into().unwrap();
+    assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");
 }

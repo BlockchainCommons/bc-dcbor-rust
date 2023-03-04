@@ -16,6 +16,24 @@ impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
     }
 }
 
+impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable {
+    type Error = DecodeError;
+
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
+        match cbor {
+            CBOR::Array(cbor_array) => {
+                let mut result = vec![];
+                for cbor in cbor_array {
+                    let element = T::from_cbor(&cbor)?;
+                    result.push(*element);
+                }
+                Ok(result)
+            },
+            _ => Err(DecodeError::WrongType)
+        }
+    }
+}
+
 impl<T> CBORDecodable for Vec<T> where T: CBORDecodable {
     fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
         match cbor {
