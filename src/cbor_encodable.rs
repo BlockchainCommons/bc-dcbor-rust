@@ -5,7 +5,9 @@ pub trait CBOREncodable {
     /// Returns the value in CBOR symbolic representation.
     fn cbor(&self) -> CBOR;
     /// Returns the value in CBOR binary representation.
-    fn cbor_data(&self) -> Vec<u8>;
+    fn cbor_data(&self) -> Vec<u8> {
+        self.cbor().cbor_data()
+    }
 }
 
 impl CBOREncodable for CBOR {
@@ -30,5 +32,11 @@ impl CBOREncodable for CBOR {
             },
             CBOR::Simple(x) => x.cbor_data(),
         }
+    }
+}
+
+impl<T> CBOREncodable for &T where T: CBOREncodable {
+    fn cbor(&self) -> CBOR {
+        (*self).cbor()
     }
 }

@@ -35,25 +35,7 @@ impl CBOR {
     /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
     pub fn from_hex(hex: &str) -> Result<CBOR, DecodeError> {
-        hex_to_data(hex).try_into()
-    }
-}
-
-/// Affordance for decoding CBOR from binary representation.
-impl TryFrom<&[u8]> for CBOR {
-    type Error = DecodeError;
-
-    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
-        CBOR::from_data(data)
-    }
-}
-
-/// Affordance for decoding CBOR from binary representation.
-impl TryFrom<Vec<u8>> for CBOR {
-    type Error = DecodeError;
-
-    fn try_from(data: Vec<u8>) -> Result<Self, Self::Error> {
-        CBOR::from_data(&data)
+        decode_cbor(&hex_to_data(hex))
     }
 }
 

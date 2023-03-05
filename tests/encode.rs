@@ -1,3 +1,5 @@
+use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
+
 use dcbor::{*, hex::*};
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
@@ -6,7 +8,7 @@ fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_dat
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
     assert_eq!(data_to_hex(&data), expected_data);
-    let decoded_cbor = data.try_into().unwrap();
+    let decoded_cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
 }
 
@@ -17,7 +19,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
     let data = cbor.cbor_data();
     assert_eq!(data_to_hex(&data), expected_data);
 
-    let decoded_cbor = data.try_into().unwrap();
+    let decoded_cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
     let t2 = T::from_cbor(&decoded_cbor).unwrap();
 
@@ -126,6 +128,11 @@ fn encode_signed() {
 }
 
 #[test]
+fn encode_bytes_1() {
+    test_cbor_codable(Bytes::from_hex("00112233"), "bytes(00112233)", "h'00112233'", "4400112233");
+}
+
+#[test]
 fn encode_bytes() {
     test_cbor_codable(
         Bytes::from_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
@@ -165,7 +172,7 @@ fn encode_heterogenous_array() {
 
     let cbor = array.cbor();
     let data = cbor.cbor_data();
-    let decoded_cbor: CBOR = data.try_into().unwrap();
+    let decoded_cbor = CBOR::from_data(&data).unwrap();
     match decoded_cbor {
         CBOR::Array(a) => {
             assert_eq!(a[0], 1.cbor());
@@ -227,7 +234,7 @@ fn encode_envelope() {
     assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
     let bytes = cbor.cbor_data();
     assert_eq!(format!("{}", data_to_hex(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
-    let decoded_cbor = bytes.try_into().unwrap();
+    let decoded_cbor = CBOR::from_data(&bytes).unwrap();
     assert_eq!(cbor, decoded_cbor);
 }
 
@@ -330,6 +337,65 @@ fn convert_values() {
 }
 
 #[test]
+fn convert_hash_map() {
+    let mut h = HashMap::<i32, String>::new();
+    h.insert(1, "A".to_string());
+    h.insert(50, "B".to_string());
+    h.insert(25, "C".to_string());
+    let m = h.cbor();
+    assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
+    let h2: HashMap<i32, String> = m.try_into().unwrap();
+    assert_eq!(h, h2);
+}
+
+#[test]
+fn convert_btree_map() {
+    let mut h = BTreeMap::<i32, String>::new();
+    h.insert(1, "A".to_string());
+    h.insert(50, "B".to_string());
+    h.insert(25, "C".to_string());
+    let m = h.cbor();
+    assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
+    let h2: BTreeMap<i32, String> = m.try_into().unwrap();
+    assert_eq!(h, h2);
+}
+
+#[test]
+fn convert_vector() {
+    let mut v = Vec::<i32>::new();
+    v.push(1);
+    v.push(50);
+    v.push(25);
+    let c = v.cbor();
+    assert_eq!(c.diagnostic(), "[1, 50, 25]");
+    let v2: Vec<i32> = c.try_into().unwrap();
+    assert_eq!(v, v2);
+}
+
+#[test]
+fn convert_vecdeque() {
+    let mut v = VecDeque::<i32>::new();
+    v.push_back(1);
+    v.push_back(50);
+    v.push_back(25);
+    let c = v.cbor();
+    assert_eq!(c.diagnostic(), "[1, 50, 25]");
+    let v2: VecDeque<i32> = c.try_into().unwrap();
+    assert_eq!(v, v2);
+}
+
+#[test]
+fn convert_hashset() {
+    let mut v = HashSet::<i32>::new();
+    v.insert(1);
+    v.insert(50);
+    v.insert(25);
+    let c = v.cbor();
+    let v2: HashSet<i32> = c.try_into().unwrap();
+    assert_eq!(v, v2);
+}
+
+#[test]
 fn usage_test_1() {
     let array = [1000, 2000, 3000];
     let cbor = array.cbor();
@@ -339,7 +405,7 @@ fn usage_test_1() {
 #[test]
 fn usage_test_2() {
     let data = hex::hex_to_data("831903e81907d0190bb8");
-    let cbor: CBOR = data.try_into().unwrap();
+    let cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
     let array: Vec::<u32> = cbor.try_into().unwrap();
     assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");

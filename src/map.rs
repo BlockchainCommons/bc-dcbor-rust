@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues};
 
-use crate::cbor_encodable::CBOREncodable;
+use crate::{cbor_encodable::CBOREncodable, DecodeError, CBORDecodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex::data_to_hex};
 
@@ -170,3 +170,51 @@ impl std::fmt::Debug for MapKey {
         f.write_fmt(format_args!("0x{}", data_to_hex(&self.0)))
     }
 }
+
+/// Convert a container to a CBOR Map where the container's items are
+/// pairs of CBOREncodable values.
+impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: CBOREncodable, V: CBOREncodable {
+    fn from(container: T) -> Self {
+        let mut map = Map::new();
+        for (k, v) in container {
+            map.insert(k.cbor(), v.cbor());
+        }
+        map
+    }
+}
+
+macro_rules! impl_container {
+    ($type: ty, $constraint: ty) => {
+        impl<K, V> CBOREncodable for $type where K: CBOREncodable, V: CBOREncodable {
+            fn cbor(&self) -> CBOR {
+                CBOR::Map(Map::from(self.iter()))
+            }
+        }
+
+        impl<K, V> From<$type> for CBOR where K: CBOREncodable, V: CBOREncodable {
+            fn from(container: $type) -> Self {
+                CBOR::Map(Map::from(container.iter()))
+            }
+        }
+
+        impl<K, V> TryInto<$type> for CBOR where K: CBORDecodable + std::cmp::Eq + ($constraint), V: CBORDecodable {
+            type Error = DecodeError;
+
+            fn try_into(self) -> Result<$type, Self::Error> {
+                match self {
+                    CBOR::Map(map) => {
+                        let mut container = <$type>::new();
+                        for (k, v) in map.iter() {
+                            container.insert(*K::from_cbor(k)?, *V::from_cbor(v)?);
+                        }
+                        Ok(container)
+                    },
+                    _ => Err(DecodeError::WrongType)
+                }
+            }
+        }
+    }
+}
+
+impl_container!(std::collections::HashMap<K, V>, std::hash::Hash);
+impl_container!(std::collections::BTreeMap<K, V>, std::cmp::Ord);

@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.3.1")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.4.0")]
 #![warn(rust_2018_idioms)]
 
 //! # dCBOR: Deterministic CBOR Codec
@@ -19,7 +19,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.3.1"
+//! dcbor = "0.4.0"
 //! ```
 //!
 //! # Usage
@@ -44,7 +44,7 @@
 //! # {
 //! use dcbor::*;
 //! let data = hex::hex_to_data("831903e81907d0190bb8");
-//! let cbor: CBOR = data.try_into().unwrap();
+//! let cbor = CBOR::from_data(&data).unwrap();
 //! assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
 //! let array: Vec::<u32> = cbor.try_into().unwrap();
 //! assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");
