@@ -1,6 +1,7 @@
 use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
 
 use dcbor::{*, hex::*};
+use half::f16;
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
@@ -280,13 +281,13 @@ fn fail_float_coerced_to_int() {
 #[test]
 fn non_canonical_float_1() {
     // Non-canonical representation of 1.5 that could be represented at a smaller width.
-    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), DecodeError::NonCanonicalFloat);
+    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), DecodeError::NonCanonicalNumeric);
 }
 
 #[test]
 fn non_canonical_float_2() {
     // Non-canonical representation of a floating point value that could be represented as an integer.
-    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), DecodeError::NonCanonicalFloat);
+    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), DecodeError::NonCanonicalNumeric);
 }
 
 #[test]
@@ -409,4 +410,66 @@ fn usage_test_2() {
     assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
     let array: Vec::<u32> = cbor.try_into().unwrap();
     assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");
+}
+
+#[test]
+fn encode_nan() {
+    let canonical_nan_data = hex::hex_to_data("f97e00");
+
+    let nonstandard_f64_nan = f64::from_bits(0x7ff9100000000001);
+    assert!(nonstandard_f64_nan.is_nan());
+    assert_eq!(nonstandard_f64_nan.cbor_data(), canonical_nan_data);
+
+    let nonstandard_f32_nan = f32::from_bits(0xffc00001);
+    assert!(nonstandard_f32_nan.is_nan());
+    assert_eq!(nonstandard_f32_nan.cbor_data(), canonical_nan_data);
+
+    let nonstandard_f16_nan = f16::from_bits(0x7e01);
+    assert!(nonstandard_f16_nan.is_nan());
+    assert_eq!(nonstandard_f16_nan.cbor_data(), canonical_nan_data);
+}
+
+#[test]
+fn decode_nan() {
+    // Canonical NaN decodes
+    let canonical_nan_data = hex::hex_to_data("f97e00");
+    let d: f64 = CBOR::from_data(&canonical_nan_data).unwrap().into();
+    assert!(d.is_nan());
+
+    // Non-canonical NaNs of any size throw
+    CBOR::from_data(&hex::hex_to_data("f97e01")).err().unwrap();
+    CBOR::from_data(&hex::hex_to_data("faffc00001")).err().unwrap();
+    CBOR::from_data(&hex::hex_to_data("fb7ff9100000000001")).err().unwrap();
+}
+
+#[test]
+fn encode_infinit() {
+    let canonical_infinity_data = hex::hex_to_data("f97c00");
+    let canonical_neg_infinity_data = hex::hex_to_data("f9fc00");
+    assert_eq!(f64::INFINITY.cbor_data(), canonical_infinity_data);
+    assert_eq!(f32::INFINITY.cbor_data(), canonical_infinity_data);
+    assert_eq!(f16::INFINITY.cbor_data(), canonical_infinity_data);
+    assert_eq!(f64::NEG_INFINITY.cbor_data(), canonical_neg_infinity_data);
+    assert_eq!(f32::NEG_INFINITY.cbor_data(), canonical_neg_infinity_data);
+    assert_eq!(f16::NEG_INFINITY.cbor_data(), canonical_neg_infinity_data);
+}
+
+#[test]
+fn decode_infinity() {
+    let canonical_infinity_data = hex::hex_to_data("f97c00");
+    let canonical_neg_infinity_data = hex::hex_to_data("f9fc00");
+
+    // Canonical infinity decodes
+    let a: f64 = CBOR::from_data(&canonical_infinity_data).unwrap().into();
+    assert_eq!(a, f64::INFINITY);
+    let a: f64 = CBOR::from_data(&canonical_neg_infinity_data).unwrap().into();
+    assert_eq!(a, f64::NEG_INFINITY);
+
+    // Non-canonical +infinities return error
+    CBOR::from_data(&hex::hex_to_data("fa7f800000")).err().unwrap();
+    CBOR::from_data(&hex::hex_to_data("fb7ff0000000000000")).err().unwrap();
+
+    // Non-canonical -infinities return error
+    CBOR::from_data(&hex::hex_to_data("faff800000")).err().unwrap();
+    CBOR::from_data(&hex::hex_to_data("fbfff0000000000000")).err().unwrap();
 }

@@ -81,7 +81,7 @@ impl_cbor!(i64);
 trait From64 {
     fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Box<Self>, DecodeError> where F: Fn(u64) -> Self, Self: Sized {
         if n > max {
-            Err(DecodeError::IntegerOutOfRange)
+            Err(DecodeError::OutOfRange)
         } else {
             Ok(Box::new(f(n)))
         }
@@ -89,7 +89,7 @@ trait From64 {
 
     fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> Result<Box<Self>, DecodeError> where F: Fn(i64) -> Self, Self: Sized {
         if n > max || n > min {
-            Err(DecodeError::IntegerOutOfRange)
+            Err(DecodeError::OutOfRange)
         } else {
             Ok(Box::new(f(n)))
         }

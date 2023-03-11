@@ -45,7 +45,7 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), DecodeErr
         24 => {
             if data_remaining < 1 { return Err(DecodeError::Underrun); }
             let val = data[1] as u64;
-            if val < 24 { return Err(DecodeError::NonCanonicalInt) }
+            if val < 24 { return Err(DecodeError::NonCanonicalNumeric) }
             (val, 2)
         },
         25 => {
@@ -53,7 +53,7 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), DecodeErr
             let val =
                 ((data[1] as u64) << 8) |
                 (data[2] as u64);
-            if val <= u8::MAX as u64 { return Err(DecodeError::NonCanonicalInt) }
+            if val <= u8::MAX as u64 { return Err(DecodeError::NonCanonicalNumeric) }
             (val, 3)
         },
         26 => {
@@ -63,7 +63,7 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), DecodeErr
                 ((data[2] as u64) << 16) |
                 ((data[3] as u64) << 8) |
                 (data[4] as u64);
-            if val <= u16::MAX as u64 { return Err(DecodeError::NonCanonicalInt) }
+            if val <= u16::MAX as u64 { return Err(DecodeError::NonCanonicalNumeric) }
             (val, 5)
         },
         27 => {
@@ -77,7 +77,7 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), DecodeErr
                 ((data[6] as u64) << 16) |
                 ((data[7] as u64) << 8) |
                 (data[8] as u64);
-            if val <= u32::MAX as u64 { return Err(DecodeError::NonCanonicalInt) }
+            if val <= u32::MAX as u64 { return Err(DecodeError::NonCanonicalNumeric) }
             (val, 9)
         },
         v => return Err(DecodeError::UnsupportedHeaderValue(v))

@@ -12,11 +12,8 @@ pub enum DecodeError {
     /// Unsupported value in CBOR header.
     UnsupportedHeaderValue(u8),
 
-    /// An integer was encoded in non-canonical form.
-    NonCanonicalInt,
-
-    /// A floating point value was encoded in non-canonical form.
-    NonCanonicalFloat,
+    /// A numeric value was encoded in non-canonical form.
+    NonCanonicalNumeric,
 
     /// An invalidly-encoded UTF-8 string was encountered.
     InvalidString(Utf8Error),
@@ -30,8 +27,8 @@ pub enum DecodeError {
     /// The decoded CBOR map has a duplicate key.
     DuplicateMapKey,
 
-    /// The decoded integer could not be represented in the specified integer type.
-    IntegerOutOfRange,
+    /// The numeric value could not be represented in the specified numeric type.
+    OutOfRange,
 
     /// The decoded value was not the expected type.
     WrongType,
@@ -50,13 +47,12 @@ impl std::fmt::Display for DecodeError {
         let s = match self {
             DecodeError::Underrun => format!("early end of data"),
             DecodeError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
-            DecodeError::NonCanonicalInt => format!("non-canonical int format"),
-            DecodeError::NonCanonicalFloat => format!("non-canonical float format"),
+            DecodeError::NonCanonicalNumeric => format!("non-canonical numeric value"),
             DecodeError::InvalidString(err) => format!("invalid string format: {:?}", err),
             DecodeError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
             DecodeError::MisorderedMapKey => format!("mis-ordered map key"),
             DecodeError::DuplicateMapKey => format!("duplicate map key"),
-            DecodeError::IntegerOutOfRange => format!("integer out of range"),
+            DecodeError::OutOfRange => format!("integer out of range"),
             DecodeError::WrongType => format!("wrong type"),
             DecodeError::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
             DecodeError::InvalidFormat => format!("invalid CBOR format"),
