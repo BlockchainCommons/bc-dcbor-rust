@@ -12,7 +12,7 @@
 
 ```toml
 [dependencies]
-dcbor = "0.5.0"
+dcbor = "0.5.1"
 ```
 
 ## Specification
