@@ -1,4 +1,4 @@
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, decode_error::DecodeError, CBORCodable};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, cbor_error::CBORError, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -27,10 +27,10 @@ impl CBOREncodable for String {
 }
 
 impl CBORDecodable for String {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
         match cbor {
             CBOR::Text(s) => Ok(Box::new(s.clone())),
-            _ => Err(DecodeError::WrongType),
+            _ => Err(CBORError::WrongType),
         }
     }
 }
@@ -56,12 +56,12 @@ impl From<CBOR> for String {
 }
 
 impl TryFrom<&CBOR> for String {
-    type Error = DecodeError;
+    type Error = CBORError;
 
     fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
         match value {
             CBOR::Text(s) => Ok(s.clone()),
-            _ => Err(DecodeError::WrongType),
+            _ => Err(CBORError::WrongType),
         }
     }
 }

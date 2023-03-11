@@ -198,8 +198,8 @@ fn format_nested_array() {
 #[test]
 fn format_map() {
     let mut map = Map::new();
-    map.insert_into(1, "A");
-    map.insert_into(2, "B");
+    map.insert_into(1, "A").unwrap();
+    map.insert_into(2, "B").unwrap();
     run(map.cbor(),
         r#"{1: "A", 2: "B"}"#,
         r#"map({0x01: (unsigned(1), text("A")), 0x02: (unsigned(2), text("B"))})"#,
@@ -383,14 +383,14 @@ fn format_structure_2() {
 #[test]
 fn format_key_order() {
     let mut m = Map::new();
-    m.insert_into(-1, 3);
-    m.insert_into(vec![-1], 7);
-    m.insert_into("z", 4);
-    m.insert_into(10, 1);
-    m.insert_into(false, 8);
-    m.insert_into(100, 2);
-    m.insert_into("aa", 5);
-    m.insert_into(vec![100], 6);
+    m.insert_into(-1, 3).unwrap();
+    m.insert_into(vec![-1], 7).unwrap();
+    m.insert_into("z", 4).unwrap();
+    m.insert_into(10, 1).unwrap();
+    m.insert_into(false, 8).unwrap();
+    m.insert_into(100, 2).unwrap();
+    m.insert_into("aa", 5).unwrap();
+    m.insert_into(vec![100], 6).unwrap();
 
     let cbor = m.cbor();
     let description = r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#;

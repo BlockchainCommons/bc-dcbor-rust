@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues};
 
-use crate::{cbor_encodable::CBOREncodable, DecodeError, CBORDecodable};
+use crate::{cbor_encodable::CBOREncodable, CBORError, CBORDecodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex::data_to_hex};
 
@@ -29,29 +29,40 @@ impl Map {
     }
 
     /// Inserts a key-value pair into the map.
-    pub fn insert(&mut self, k: CBOR, v: CBOR) {
-        self.0.insert(MapKey::new(k.cbor_data()), MapValue::new(k, v));
+    pub fn insert(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {
+        if value == CBOR::NULL {
+            return Err(CBORError::NullMapValue)
+        }
+        self.0.insert(MapKey::new(key.cbor_data()), MapValue::new(key, value));
+        Ok(())
     }
 
     /// Inserts a key-value pair into the map.
-    pub fn insert_into<K, V>(&mut self, k: K, v: V) where K: CBOREncodable, V: CBOREncodable {
-        self.insert(k.cbor(), v.cbor());
+    pub fn insert_into<K, V>(&mut self, key: K, value: V) -> Result<(), CBORError>
+    where
+        K: CBOREncodable, V: CBOREncodable
+    {
+        self.insert(key.cbor(), value.cbor())
     }
 
-    pub(crate) fn insert_next(&mut self, k: CBOR, v: CBOR) -> bool {
-        match self.0.last_entry() {
+    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {
+        match self.0.last_key_value() {
             None => {
-                self.insert(k, v);
-                true
+                self.insert(key, value)
             },
             Some(entry) => {
-                let new_key = MapKey::new(k.cbor_data());
-                let entry_key = entry.key();
-                if entry_key >= &new_key {
-                    return false
+                let new_key = MapKey::new(key.cbor_data());
+                if self.0.contains_key(&new_key) {
+                    return Err(CBORError::DuplicateMapKey)
                 }
-                self.0.insert(new_key, MapValue::new(k, v));
-                true
+                if entry.0 >= &new_key {
+                    return Err(CBORError::MisorderedMapKey)
+                }
+                if value == CBOR::NULL {
+                    return Err(CBORError::NullMapValue)
+                }
+                self.0.insert(new_key, MapValue::new(key, value));
+                Ok(())
             }
         }
     }
@@ -177,7 +188,7 @@ impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: CBOREncodab
     fn from(container: T) -> Self {
         let mut map = Map::new();
         for (k, v) in container {
-            map.insert(k.cbor(), v.cbor());
+            map.insert(k.cbor(), v.cbor()).unwrap();
         }
         map
     }
@@ -198,7 +209,7 @@ macro_rules! impl_container {
         }
 
         impl<K, V> TryInto<$type> for CBOR where K: CBORDecodable + std::cmp::Eq + ($constraint), V: CBORDecodable {
-            type Error = DecodeError;
+            type Error = CBORError;
 
             fn try_into(self) -> Result<$type, Self::Error> {
                 match self {
@@ -209,7 +220,7 @@ macro_rules! impl_container {
                         }
                         Ok(container)
                     },
-                    _ => Err(DecodeError::WrongType)
+                    _ => Err(CBORError::WrongType)
                 }
             }
         }

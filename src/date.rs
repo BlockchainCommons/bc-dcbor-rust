@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat};
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, decode_error::DecodeError, CBORTaggedDecodable, CBORTaggedCodable, Simple};
+use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, cbor_error::CBORError, CBORTaggedDecodable, CBORTaggedCodable, Simple};
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone)]
@@ -49,7 +49,7 @@ impl CBOREncodable for Date {
 }
 
 impl CBORDecodable for Date {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         Self::from_tagged_cbor(cbor)
     }
 }
@@ -67,10 +67,10 @@ impl CBORTaggedEncodable for Date {
 impl CBORTaggedDecodable for Date {
     const CBOR_TAG: Tag = Tag::new(1);
 
-    fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
+    fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Unsigned(n) => {
-                let i = i64::try_from(*n).map_err(|_| DecodeError::WrongType)?;
+                let i = i64::try_from(*n).map_err(|_| CBORError::WrongType)?;
                 return Ok(Box::new(Date::from_timestamp(i)));
             },
             CBOR::Negative(n) => {
@@ -79,7 +79,7 @@ impl CBORTaggedDecodable for Date {
             CBOR::Simple(Simple::Float(n)) => {
                 return Ok(Box::new(Date::from_timestamp(*n as i64)));
             },
-            _ => { return Err(DecodeError::WrongType); }
+            _ => { return Err(CBORError::WrongType); }
         }
     }
 }

@@ -192,14 +192,14 @@ fn encode_heterogenous_array() {
 #[test]
 fn encode_map() {
     let mut m = Map::new();
-    m.insert_into(-1, 3);
-    m.insert_into(vec![-1], 7);
-    m.insert_into("z", 4);
-    m.insert_into(10, 1);
-    m.insert_into(false, 8);
-    m.insert_into(100, 2);
-    m.insert_into("aa", 5);
-    m.insert_into(vec![100], 6);
+    m.insert_into(-1, 3).unwrap();
+    m.insert_into(vec![-1], 7).unwrap();
+    m.insert_into("z", 4).unwrap();
+    m.insert_into(10, 1).unwrap();
+    m.insert_into(false, 8).unwrap();
+    m.insert_into(100, 2).unwrap();
+    m.insert_into("aa", 5).unwrap();
+    m.insert_into(vec![100], 6).unwrap();
     test_cbor(m,
         r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#,
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
@@ -207,9 +207,16 @@ fn encode_map() {
 }
 
 #[test]
+fn encode_map_with_null_valued_entry() {
+    let mut m = Map::new();
+    m.insert_into(2, CBOR::NULL).unwrap_err();
+    CBOR::from_hex("A3010102F60303").unwrap_err();
+}
+
+#[test]
 fn encode_map_misordered() {
     let cbor = CBOR::from_hex("a2026141016142");
-    assert_eq!(cbor, Err(DecodeError::MisorderedMapKey));
+    assert_eq!(cbor, Err(CBORError::MisorderedMapKey));
 }
 
 #[test]
@@ -275,24 +282,24 @@ fn fail_float_coerced_to_int() {
     let c = n.cbor();
     let f: f64 = (&c).try_into().unwrap();
     assert_eq!(f, n);
-    assert_eq!(i32::try_from(&c).unwrap_err(), DecodeError::WrongType);
+    assert_eq!(i32::try_from(&c).unwrap_err(), CBORError::WrongType);
 }
 
 #[test]
 fn non_canonical_float_1() {
     // Non-canonical representation of 1.5 that could be represented at a smaller width.
-    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), DecodeError::NonCanonicalNumeric);
+    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), CBORError::NonCanonicalNumeric);
 }
 
 #[test]
 fn non_canonical_float_2() {
     // Non-canonical representation of a floating point value that could be represented as an integer.
-    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), DecodeError::NonCanonicalNumeric);
+    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), CBORError::NonCanonicalNumeric);
 }
 
 #[test]
 fn unused_data() {
-    assert_eq!(CBOR::from_hex("0001").unwrap_err(), DecodeError::UnusedData(1));
+    assert_eq!(CBOR::from_hex("0001").unwrap_err(), CBORError::UnusedData(1));
 }
 
 #[test]
@@ -436,10 +443,10 @@ fn decode_nan() {
     let d: f64 = CBOR::from_data(&canonical_nan_data).unwrap().into();
     assert!(d.is_nan());
 
-    // Non-canonical NaNs of any size throw
-    CBOR::from_data(&hex::hex_to_data("f97e01")).err().unwrap();
-    CBOR::from_data(&hex::hex_to_data("faffc00001")).err().unwrap();
-    CBOR::from_data(&hex::hex_to_data("fb7ff9100000000001")).err().unwrap();
+    // Non-canonical NaNs of any size return an error
+    CBOR::from_data(&hex::hex_to_data("f97e01")).unwrap_err();
+    CBOR::from_data(&hex::hex_to_data("faffc00001")).unwrap_err();
+    CBOR::from_data(&hex::hex_to_data("fb7ff9100000000001")).unwrap_err();
 }
 
 #[test]

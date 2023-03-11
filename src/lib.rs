@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.5.0")]
 #![warn(rust_2018_idioms)]
 
 //! # dCBOR: Deterministic CBOR Codec
@@ -8,7 +8,7 @@
 //! RFC-8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-deterministically-encoded-c).
 //! It does not support parts of the spec forbidden by deterministic CBOR (such
 //! as indefinite length arrays and maps). It is strict in both what it
-//! writes and reads: in particular it will throw decoding errors if
+//! writes and reads: in particular it will return decoding errors if
 //! variable-length integers are not encoded in their minimal form, or CBOR map
 //! keys are not in lexicographic order, or there is extra data past the end of
 //! the decoded CBOR item.
@@ -19,7 +19,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.4.0"
+//! dcbor = "0.5.0"
 //! ```
 //!
 //! # Usage
@@ -66,8 +66,8 @@ mod float;
 
 mod array;
 
-mod decode_error;
-pub use decode_error::DecodeError;
+mod cbor_error;
+pub use cbor_error::CBORError;
 
 mod bytes;
 pub use bytes::Bytes;

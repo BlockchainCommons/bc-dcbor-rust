@@ -1,6 +1,6 @@
 use std::collections::{VecDeque, HashSet};
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORCodable, decode_error::DecodeError};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORCodable, cbor_error::CBORError};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -19,7 +19,7 @@ impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
 }
 
 impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable {
-    type Error = DecodeError;
+    type Error = CBORError;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor {
@@ -31,7 +31,7 @@ impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable {
                 }
                 Ok(result)
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
@@ -43,7 +43,7 @@ impl<T> From<&[T]> for CBOR where T: CBOREncodable {
 }
 
 impl<T> CBORDecodable for Vec<T> where T: CBORDecodable {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
         match cbor {
             CBOR::Array(cbor_array) => {
                 let mut result = Vec::new();
@@ -53,7 +53,7 @@ impl<T> CBORDecodable for Vec<T> where T: CBORDecodable {
                 }
                 Ok(Box::new(result))
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
@@ -103,7 +103,7 @@ impl<T> CBOREncodable for VecDeque<T> where T: CBOREncodable {
 }
 
 impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable {
-    type Error = DecodeError;
+    type Error = CBORError;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor {
@@ -115,13 +115,13 @@ impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable {
                 }
                 Ok(result)
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
 
 impl<T> CBORDecodable for VecDeque<T> where T: CBORDecodable {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
         match cbor {
             CBOR::Array(cbor_array) => {
                 let mut result = VecDeque::new();
@@ -131,7 +131,7 @@ impl<T> CBORDecodable for VecDeque<T> where T: CBORDecodable {
                 }
                 Ok(Box::new(result))
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
@@ -160,7 +160,7 @@ impl<T> CBOREncodable for HashSet<T> where T: CBOREncodable {
 }
 
 impl<T> TryFrom<CBOR> for HashSet<T> where T: CBORDecodable + Eq + std::hash::Hash {
-    type Error = DecodeError;
+    type Error = CBORError;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor {
@@ -172,13 +172,13 @@ impl<T> TryFrom<CBOR> for HashSet<T> where T: CBORDecodable + Eq + std::hash::Ha
                 }
                 Ok(result)
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
 
 impl<T> CBORDecodable for HashSet<T> where T: CBORDecodable + Eq + std::hash::Hash {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::decode_error::DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
         match cbor {
             CBOR::Array(cbor_array) => {
                 let mut result = HashSet::new();
@@ -188,7 +188,7 @@ impl<T> CBORDecodable for HashSet<T> where T: CBORDecodable + Eq + std::hash::Ha
                 }
                 Ok(Box::new(result))
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }

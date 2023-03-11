@@ -3,9 +3,9 @@ use std::str::Utf8Error;
 use crate::tag::Tag;
 
 
-/// An error encountered while decoding CBOR.
+/// An error encountered while decoding or parsing CBOR.
 #[derive(Debug)]
-pub enum DecodeError {
+pub enum CBORError {
     /// Early end of data.
     Underrun,
 
@@ -27,6 +27,9 @@ pub enum DecodeError {
     /// The decoded CBOR map has a duplicate key.
     DuplicateMapKey,
 
+    /// The decoded CBOR map has a null value.
+    NullMapValue,
+
     /// The numeric value could not be represented in the specified numeric type.
     OutOfRange,
 
@@ -38,33 +41,34 @@ pub enum DecodeError {
     /// The case includes the expected tag and encountered tag as associated data.
     WrongTag(Tag, Tag),
 
-    /// Invalid CBOR format. Frequently thrown by libraries depending on this one.
+    /// Invalid CBOR format. Frequently returned by libraries depending on this one.
     InvalidFormat,
 }
 
-impl std::fmt::Display for DecodeError {
+impl std::fmt::Display for CBORError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            DecodeError::Underrun => format!("early end of data"),
-            DecodeError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
-            DecodeError::NonCanonicalNumeric => format!("non-canonical numeric value"),
-            DecodeError::InvalidString(err) => format!("invalid string format: {:?}", err),
-            DecodeError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
-            DecodeError::MisorderedMapKey => format!("mis-ordered map key"),
-            DecodeError::DuplicateMapKey => format!("duplicate map key"),
-            DecodeError::OutOfRange => format!("integer out of range"),
-            DecodeError::WrongType => format!("wrong type"),
-            DecodeError::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
-            DecodeError::InvalidFormat => format!("invalid CBOR format"),
+            CBORError::Underrun => format!("early end of data"),
+            CBORError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
+            CBORError::NonCanonicalNumeric => format!("non-canonical numeric value"),
+            CBORError::InvalidString(err) => format!("invalid string format: {:?}", err),
+            CBORError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
+            CBORError::MisorderedMapKey => format!("mis-ordered map key"),
+            CBORError::DuplicateMapKey => format!("duplicate map key"),
+            CBORError::NullMapValue => format!("null map value"),
+            CBORError::OutOfRange => format!("integer out of range"),
+            CBORError::WrongType => format!("wrong type"),
+            CBORError::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
+            CBORError::InvalidFormat => format!("invalid CBOR format"),
         };
         f.write_str(&s)
     }
 }
 
-impl std::error::Error for DecodeError {
+impl std::error::Error for CBORError {
 }
 
-impl PartialEq for DecodeError {
+impl PartialEq for CBORError {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::UnsupportedHeaderValue(l0), Self::UnsupportedHeaderValue(r0)) => l0 == r0,

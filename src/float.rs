@@ -1,4 +1,4 @@
-use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, DecodeError};
+use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, CBORError};
 use half::f16;
 
 static CBOR_NAN: [u8; 3] = [0xf9, 0x7e, 0x00];
@@ -43,14 +43,14 @@ impl CBOREncodable for f64 {
 }
 
 impl CBORDecodable for f64 {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let f = *n as f64;
                 if f as u64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
             CBOR::Negative(n) => {
@@ -58,24 +58,24 @@ impl CBORDecodable for f64 {
                 if f as i64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
             CBOR::Simple(Simple::Float(n)) => Ok(Box::new(*n)),
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
 
 impl CBORCodable for f64 {}
 
-pub(crate) fn validate_canonical_f64(n: f64) -> Result<(), DecodeError> {
+pub(crate) fn validate_canonical_f64(n: f64) -> Result<(), CBORError> {
     if
         n == n as f32 as f64 ||
         n == n as i64 as f64 ||
         n.is_nan()
     {
-        return Err(DecodeError::NonCanonicalNumeric);
+        return Err(CBORError::NonCanonicalNumeric);
     }
     Ok(())
 }
@@ -99,14 +99,14 @@ impl From<CBOR> for f64 {
 }
 
 impl TryFrom<&CBOR> for f64 {
-    type Error = DecodeError;
+    type Error = CBORError;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
         match cbor {
             CBOR::Unsigned(n) => Ok(*n as f64),
             CBOR::Negative(n) => Ok(*n as f64),
             CBOR::Simple(Simple::Float(n)) => Ok(*n),
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
@@ -151,14 +151,14 @@ impl CBOREncodable for f32 {
 }
 
 impl CBORDecodable for f32 {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let f = *n as f32;
                 if f as u64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
             CBOR::Negative(n) => {
@@ -166,7 +166,7 @@ impl CBORDecodable for f32 {
                 if f as i64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
             CBOR::Simple(Simple::Float(n)) => {
@@ -174,23 +174,23 @@ impl CBORDecodable for f32 {
                 if f as f64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
 
 impl CBORCodable for f32 {}
 
-pub(crate) fn validate_canonical_f32(n: f32) -> Result<(), DecodeError> {
+pub(crate) fn validate_canonical_f32(n: f32) -> Result<(), CBORError> {
     if
         n == f16::from_f32(n).to_f32() ||
         n == n as i32 as f32 ||
         n.is_nan()
     {
-        return Err(DecodeError::NonCanonicalNumeric);
+        return Err(CBORError::NonCanonicalNumeric);
     }
     Ok(())
 }
@@ -214,14 +214,14 @@ impl From<CBOR> for f32 {
 }
 
 impl TryFrom<&CBOR> for f32 {
-    type Error = DecodeError;
+    type Error = CBORError;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
         match cbor {
             CBOR::Unsigned(n) => Ok(*n as f32),
             CBOR::Negative(n) => Ok(*n as f32),
             CBOR::Simple(Simple::Float(n)) => Ok(*n as f32),
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
@@ -262,14 +262,14 @@ impl CBOREncodable for f16 {
 }
 
 impl CBORDecodable for f16 {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, DecodeError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let f = f16::from_f64(*n as f64);
                 if f.to_f64() as u64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
             CBOR::Negative(n) => {
@@ -277,7 +277,7 @@ impl CBORDecodable for f16 {
                 if f.to_f64() as i64 == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
             CBOR::Simple(Simple::Float(n)) => {
@@ -285,23 +285,23 @@ impl CBORDecodable for f16 {
                 if f.to_f64() == *n {
                     Ok(Box::new(f))
                 } else {
-                    Err(DecodeError::OutOfRange)
+                    Err(CBORError::OutOfRange)
                 }
             },
-            _ => Err(DecodeError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 }
 
 impl CBORCodable for f16 {}
 
-pub(crate) fn validate_canonical_f16(n: f16) -> Result<(), DecodeError> {
+pub(crate) fn validate_canonical_f16(n: f16) -> Result<(), CBORError> {
     let f = n.to_f64();
     if
         f == f as i64 as f64 ||
         n.is_nan() && n.to_bits() != 0x7e00
     {
-        return Err(DecodeError::NonCanonicalNumeric);
+        return Err(CBORError::NonCanonicalNumeric);
     }
     Ok(())
 }
