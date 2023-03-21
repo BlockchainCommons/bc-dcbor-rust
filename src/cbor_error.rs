@@ -27,9 +27,6 @@ pub enum CBORError {
     /// The decoded CBOR map has a duplicate key.
     DuplicateMapKey,
 
-    /// The decoded CBOR map has a null value.
-    NullMapValue,
-
     /// The numeric value could not be represented in the specified numeric type.
     OutOfRange,
 
@@ -55,7 +52,6 @@ impl std::fmt::Display for CBORError {
             CBORError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
             CBORError::MisorderedMapKey => format!("mis-ordered map key"),
             CBORError::DuplicateMapKey => format!("duplicate map key"),
-            CBORError::NullMapValue => format!("null map value"),
             CBORError::OutOfRange => format!("integer out of range"),
             CBORError::WrongType => format!("wrong type"),
             CBORError::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),

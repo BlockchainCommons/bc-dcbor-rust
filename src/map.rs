@@ -29,26 +29,23 @@ impl Map {
     }
 
     /// Inserts a key-value pair into the map.
-    pub fn insert(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {
-        if value == CBOR::NULL {
-            return Err(CBORError::NullMapValue)
-        }
+    pub fn insert(&mut self, key: CBOR, value: CBOR) {
         self.0.insert(MapKey::new(key.cbor_data()), MapValue::new(key, value));
-        Ok(())
     }
 
     /// Inserts a key-value pair into the map.
-    pub fn insert_into<K, V>(&mut self, key: K, value: V) -> Result<(), CBORError>
+    pub fn insert_into<K, V>(&mut self, key: K, value: V)
     where
         K: CBOREncodable, V: CBOREncodable
     {
-        self.insert(key.cbor(), value.cbor())
+        self.insert(key.cbor(), value.cbor());
     }
 
     pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {
         match self.0.last_key_value() {
             None => {
-                self.insert(key, value)
+                self.insert(key, value);
+                Ok(())
             },
             Some(entry) => {
                 let new_key = MapKey::new(key.cbor_data());
@@ -57,9 +54,6 @@ impl Map {
                 }
                 if entry.0 >= &new_key {
                     return Err(CBORError::MisorderedMapKey)
-                }
-                if value == CBOR::NULL {
-                    return Err(CBORError::NullMapValue)
                 }
                 self.0.insert(new_key, MapValue::new(key, value));
                 Ok(())
@@ -188,7 +182,7 @@ impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: CBOREncodab
     fn from(container: T) -> Self {
         let mut map = Map::new();
         for (k, v) in container {
-            map.insert(k.cbor(), v.cbor()).unwrap();
+            map.insert(k.cbor(), v.cbor());
         }
         map
     }

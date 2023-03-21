@@ -192,25 +192,18 @@ fn encode_heterogenous_array() {
 #[test]
 fn encode_map() {
     let mut m = Map::new();
-    m.insert_into(-1, 3).unwrap();
-    m.insert_into(vec![-1], 7).unwrap();
-    m.insert_into("z", 4).unwrap();
-    m.insert_into(10, 1).unwrap();
-    m.insert_into(false, 8).unwrap();
-    m.insert_into(100, 2).unwrap();
-    m.insert_into("aa", 5).unwrap();
-    m.insert_into(vec![100], 6).unwrap();
+    m.insert_into(-1, 3);
+    m.insert_into(vec![-1], 7);
+    m.insert_into("z", 4);
+    m.insert_into(10, 1);
+    m.insert_into(false, 8);
+    m.insert_into(100, 2);
+    m.insert_into("aa", 5);
+    m.insert_into(vec![100], 6);
     test_cbor(m,
         r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#,
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
         "a80a011864022003617a046261610581186406812007f408");
-}
-
-#[test]
-fn encode_map_with_null_valued_entry() {
-    let mut m = Map::new();
-    m.insert_into(2, CBOR::NULL).unwrap_err();
-    CBOR::from_hex("A3010102F60303").unwrap_err();
 }
 
 #[test]
