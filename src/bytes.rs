@@ -1,6 +1,6 @@
 use crate::{cbor_encodable::CBOREncodable, CBORDecodable, cbor_error::CBORError, CBORCodable};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}, hex::{hex_to_data, data_to_hex}};
+use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 
 /// A CBOR byte string.
@@ -18,7 +18,7 @@ impl Bytes {
     /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
     pub fn from_hex<T>(hex: T) -> Bytes where T: AsRef<str> {
-        Bytes(hex_to_data(hex))
+        Bytes(hex::decode(hex.as_ref()).unwrap())
     }
 
     /// The wrapped data.
@@ -28,7 +28,7 @@ impl Bytes {
 
     /// The wrapped data as a hexadecimal string.
     pub fn hex(&self) -> String {
-        data_to_hex(self.data())
+        hex::encode(&self.0)
     }
 
     /// The length of the wrapped data in bytes.
@@ -76,14 +76,14 @@ impl PartialEq for Bytes {
 
 impl std::fmt::Debug for Bytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&data_to_hex(&self.0))
+        f.write_str(&hex::encode(&self.0))
     }
 }
 
 impl std::fmt::Display for Bytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("h'")?;
-        f.write_str(&data_to_hex(&self.0))?;
+        f.write_str(&hex::encode(&self.0))?;
         f.write_str("'")
     }
 }

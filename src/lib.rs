@@ -48,7 +48,7 @@
 //! # fn main() {
 //! # {
 //! use dcbor::*;
-//! let data = hex::hex_to_data("831903e81907d0190bb8");
+//! let data = hex_literal::hex!("831903e81907d0190bb8");
 //! let cbor = CBOR::from_data(&data).unwrap();
 //! assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
 //! let array: Vec::<u32> = cbor.try_into().unwrap();
@@ -104,8 +104,6 @@ mod cbor_tagged_codable;
 pub use cbor_tagged_codable::CBORTaggedCodable;
 
 mod decode;
-
-pub mod hex;
 
 mod int;
 

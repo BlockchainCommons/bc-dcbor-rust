@@ -14,7 +14,9 @@ documentation = "https://docs.rs/dcbor"
 [dependencies]
 chrono = "0.4.23"
 half = "2.2.1"
+hex = "0.4.3"
 
 [dev-dependencies]
 indoc = "2.0.0"
 version-sync = "0.9"
+hex-literal = "0.4.1"

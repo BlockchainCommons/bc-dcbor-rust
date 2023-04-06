@@ -135,7 +135,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
-            let tagged = Tagged::new(Tag::new_opt(value, None), item);
+            let tagged = Tagged::new(Tag::new(value), item);
             Ok((tagged.cbor(), header_varint_len + item_len))
         },
         MajorType::Simple => {

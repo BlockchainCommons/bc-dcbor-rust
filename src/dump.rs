@@ -1,12 +1,12 @@
 use std::str::from_utf8;
 
-use crate::{CBOR, known_tags::KnownTags, CBOREncodable, hex::data_to_hex, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
+use crate::{CBOR, known_tags::KnownTags, CBOREncodable, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
 
 /// Affordances for viewing the encoded binary representation of CBOR as hexadecimal.
 impl CBOR {
     /// Returns the encoded hexadecimal representation of this CBOR.
     pub fn hex(&self) -> String {
-        data_to_hex(self.cbor_data())
+        hex::encode(self.cbor_data())
     }
 
     /// Returns the encoded hexadecimal representation of this CBOR.
@@ -136,7 +136,7 @@ impl DumpItem {
     fn format_first_column(&self) -> String {
         let indent = " ".repeat(self.level * 3);
         let hex: Vec<_> = self.data.iter()
-            .map(|x| data_to_hex(x))
+            .map(|x| hex::encode(x))
             .filter(|x| !x.is_empty())
             .collect();
         let hex = hex.join(" ");

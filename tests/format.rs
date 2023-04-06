@@ -10,7 +10,7 @@ fn run(cbor: CBOR,
     hex_annotated: &str)
 {
     let mut known_tags = KnownTagsDict::new();
-    known_tags.insert(&Tag::new_opt(1, Some("date")));
+    known_tags.insert(&Tag::new_with_name(1, "date"));
 
     assert_eq!(format!("{}", cbor), description);
     assert_eq!(format!("{:?}", cbor), debug_description);

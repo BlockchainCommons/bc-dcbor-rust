@@ -1,4 +1,4 @@
-use crate::{tag::Tag, Simple, cbor_error::CBORError, hex::hex_to_data, decode::decode_cbor};
+use crate::{tag::Tag, Simple, cbor_error::CBORError, decode::decode_cbor};
 
 use super::{bytes::Bytes, Tagged, Map, string_util::flanked};
 
@@ -35,7 +35,8 @@ impl CBOR {
     /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
     pub fn from_hex(hex: &str) -> Result<CBOR, CBORError> {
-        decode_cbor(&hex_to_data(hex))
+        let data = hex::decode(hex).unwrap();
+        Self::from_data(&data)
     }
 }
 
