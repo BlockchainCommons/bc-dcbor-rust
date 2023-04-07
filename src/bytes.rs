@@ -58,9 +58,18 @@ impl CBOREncodable for Bytes {
 }
 
 impl CBORDecodable for Bytes {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Bytes(data) => Ok(Box::new(data.clone())),
+            _ => Err(CBORError::WrongType),
+        }
+    }
+}
+
+impl Bytes {
+    pub fn from_cbor_bytes(cbor: &CBOR) -> Result<Vec<u8>, CBORError> {
+        match cbor {
+            CBOR::Bytes(bytes) => Ok(bytes.data().clone()),
             _ => Err(CBORError::WrongType),
         }
     }

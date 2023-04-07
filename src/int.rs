@@ -29,7 +29,7 @@ macro_rules! impl_cbor {
         }
 
         impl CBORDecodable for $type {
-            fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
+            fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
                 match cbor {
                     CBOR::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
                     CBOR::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
@@ -59,7 +59,7 @@ macro_rules! impl_cbor {
         }
 
         impl TryFrom<&CBOR> for $type {
-            type Error = crate::cbor_error::CBORError;
+            type Error = CBORError;
 
             fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
                 Self::from_cbor(value).map(|x| *x)
