@@ -96,6 +96,9 @@ pub use cbor_decodable::CBORDecodable;
 mod cbor_codable;
 pub use cbor_codable::CBORCodable;
 
+mod cbor_tagged;
+pub use cbor_tagged::CBORTagged;
+
 mod cbor_tagged_encodable;
 pub use cbor_tagged_encodable::CBORTaggedEncodable;
 mod cbor_tagged_decodable;

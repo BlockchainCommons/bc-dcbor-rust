@@ -1,13 +1,10 @@
-use crate::{CBOR, CBORDecodable, tag::Tag, cbor_error::CBORError};
+use crate::{CBOR, CBORDecodable, cbor_error::CBORError, CBORTagged};
 
 /// A type that can be decoded from CBOR with a specific tag.
 ///
 /// Typically types that implement this trait will only provide the `CBOR_TAG`
 /// associated constant and implement the `from_untagged_cbor` function.
-pub trait CBORTaggedDecodable: CBORDecodable {
-    /// The CBOR tag associated with this type.
-    const CBOR_TAG: Tag;
-
+pub trait CBORTaggedDecodable: CBORDecodable + CBORTagged {
     /// Creates an instance of this type by decoding it from untagged CBOR.
     fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError>;
 

@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat};
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, cbor_error::CBORError, CBORTaggedDecodable, CBORTaggedCodable, Simple};
+use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, cbor_error::CBORError, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone)]
@@ -56,17 +56,17 @@ impl CBORDecodable for Date {
 
 impl CBORCodable for Date { }
 
-impl CBORTaggedEncodable for Date {
+impl CBORTagged for Date {
     const CBOR_TAG: Tag = Tag::new(1);
+}
 
+impl CBORTaggedEncodable for Date {
     fn untagged_cbor(&self) -> CBOR {
         self.timestamp().cbor()
     }
 }
 
 impl CBORTaggedDecodable for Date {
-    const CBOR_TAG: Tag = Tag::new(1);
-
     fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Unsigned(n) => {
