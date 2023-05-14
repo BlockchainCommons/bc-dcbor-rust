@@ -43,7 +43,7 @@ impl<T> From<&[T]> for CBOR where T: CBOREncodable {
 }
 
 impl<T> CBORDecodable for Vec<T> where T: CBORDecodable {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Array(cbor_array) => {
                 let mut result = Vec::new();
@@ -121,7 +121,7 @@ impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable {
 }
 
 impl<T> CBORDecodable for VecDeque<T> where T: CBORDecodable {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Array(cbor_array) => {
                 let mut result = VecDeque::new();
@@ -178,7 +178,7 @@ impl<T> TryFrom<CBOR> for HashSet<T> where T: CBORDecodable + Eq + std::hash::Ha
 }
 
 impl<T> CBORDecodable for HashSet<T> where T: CBORDecodable + Eq + std::hash::Hash {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Array(cbor_array) => {
                 let mut result = HashSet::new();

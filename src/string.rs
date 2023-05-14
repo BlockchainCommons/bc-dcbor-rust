@@ -27,7 +27,7 @@ impl CBOREncodable for String {
 }
 
 impl CBORDecodable for String {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, crate::cbor_error::CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
         match cbor {
             CBOR::Text(s) => Ok(Box::new(s.clone())),
             _ => Err(CBORError::WrongType),
