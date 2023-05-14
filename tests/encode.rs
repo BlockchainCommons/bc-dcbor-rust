@@ -2,6 +2,7 @@ use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
 
 use dcbor::*;
 use half::f16;
+use hex_literal::hex;
 
 fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
     let cbor = t.cbor();
@@ -405,7 +406,7 @@ fn usage_test_1() {
 
 #[test]
 fn usage_test_2() {
-    let data = hex_literal::hex!("831903e81907d0190bb8");
+    let data = hex!("831903e81907d0190bb8");
     let cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
     let array: Vec::<u32> = cbor.try_into().unwrap();
@@ -414,7 +415,7 @@ fn usage_test_2() {
 
 #[test]
 fn encode_nan() {
-    let canonical_nan_data = hex_literal::hex!("f97e00");
+    let canonical_nan_data = hex!("f97e00");
 
     let nonstandard_f64_nan = f64::from_bits(0x7ff9100000000001);
     assert!(nonstandard_f64_nan.is_nan());
@@ -432,20 +433,20 @@ fn encode_nan() {
 #[test]
 fn decode_nan() {
     // Canonical NaN decodes
-    let canonical_nan_data = hex_literal::hex!("f97e00");
+    let canonical_nan_data = hex!("f97e00");
     let d: f64 = CBOR::from_data(&canonical_nan_data).unwrap().into();
     assert!(d.is_nan());
 
     // Non-canonical NaNs of any size return an error
-    CBOR::from_data(&hex_literal::hex!("f97e01")).unwrap_err();
-    CBOR::from_data(&hex_literal::hex!("faffc00001")).unwrap_err();
-    CBOR::from_data(&hex_literal::hex!("fb7ff9100000000001")).unwrap_err();
+    CBOR::from_data(&hex!("f97e01")).unwrap_err();
+    CBOR::from_data(&hex!("faffc00001")).unwrap_err();
+    CBOR::from_data(&hex!("fb7ff9100000000001")).unwrap_err();
 }
 
 #[test]
 fn encode_infinit() {
-    let canonical_infinity_data = hex_literal::hex!("f97c00");
-    let canonical_neg_infinity_data = hex_literal::hex!("f9fc00");
+    let canonical_infinity_data = hex!("f97c00");
+    let canonical_neg_infinity_data = hex!("f9fc00");
     assert_eq!(f64::INFINITY.cbor_data(), canonical_infinity_data);
     assert_eq!(f32::INFINITY.cbor_data(), canonical_infinity_data);
     assert_eq!(f16::INFINITY.cbor_data(), canonical_infinity_data);
@@ -456,8 +457,8 @@ fn encode_infinit() {
 
 #[test]
 fn decode_infinity() {
-    let canonical_infinity_data = hex_literal::hex!("f97c00");
-    let canonical_neg_infinity_data = hex_literal::hex!("f9fc00");
+    let canonical_infinity_data = hex!("f97c00");
+    let canonical_neg_infinity_data = hex!("f9fc00");
 
     // Canonical infinity decodes
     let a: f64 = CBOR::from_data(&canonical_infinity_data).unwrap().into();
@@ -466,10 +467,10 @@ fn decode_infinity() {
     assert_eq!(a, f64::NEG_INFINITY);
 
     // Non-canonical +infinities return error
-    CBOR::from_data(&hex_literal::hex!("fa7f800000")).err().unwrap();
-    CBOR::from_data(&hex_literal::hex!("fb7ff0000000000000")).err().unwrap();
+    CBOR::from_data(&hex!("fa7f800000")).err().unwrap();
+    CBOR::from_data(&hex!("fb7ff0000000000000")).err().unwrap();
 
     // Non-canonical -infinities return error
-    CBOR::from_data(&hex_literal::hex!("faff800000")).err().unwrap();
-    CBOR::from_data(&hex_literal::hex!("fbfff0000000000000")).err().unwrap();
+    CBOR::from_data(&hex!("faff800000")).err().unwrap();
+    CBOR::from_data(&hex!("fbfff0000000000000")).err().unwrap();
 }

@@ -38,6 +38,16 @@ impl CBOR {
         let data = hex::decode(hex).unwrap();
         Self::from_data(&data)
     }
+
+    /// Extract the CBOR value as an array.
+    ///
+    /// Returns `Ok` if the value is an array, `Err` otherwise.
+    pub fn as_array(&self) -> Result<&Vec<CBOR>, CBORError> {
+        match self {
+            Self::Array(a) => Ok(a),
+            _ => Err(CBORError::WrongType)
+        }
+    }
 }
 
 /// Associated constants for common CBOR simple values.

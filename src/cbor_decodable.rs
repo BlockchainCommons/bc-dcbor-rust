@@ -1,7 +1,7 @@
 use crate::{CBOR, cbor_error::CBORError};
 
 /// A type that can be decoded from CBOR.
-pub trait CBORDecodable {
+pub trait CBORDecodable: 'static {
     /// Creates an instance of this type from CBOR symbolic representation.
     fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError>;
 

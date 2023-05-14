@@ -1,5 +1,3 @@
-use std::hash::Hash;
-
 #[derive(Debug, Clone)]
 enum TagName {
     Static(&'static str),
@@ -16,16 +14,17 @@ pub struct Tag {
 impl Tag {
     /// Creates a new CBOR tag with the given value and no name.
     pub const fn new(value: u64) -> Tag {
-        Tag { value, name: None }
+        Self { value, name: None }
     }
 
-    /// Creates a new CBOR tag with the given value and an optional associated name.
-    pub fn new_with_name<T: Into<String>>(value: u64, name: T) -> Tag {
-        Tag { value, name: Some(TagName::Dynamic(name.into())) }
+    /// Creates a new CBOR tag with the given value and associated name.
+    pub fn new_with_name<N: Into<String>>(value: u64, name: N) -> Tag {
+        Self { value, name: Some(TagName::Dynamic(name.into())) }
     }
 
+    /// Creates a new CBOR tag at compile time with the given value and associated name.
     pub const fn new_with_static_name(value: u64, name: &'static str) -> Tag {
-        Tag { value, name: Some(TagName::Static(name)) }
+        Self { value, name: Some(TagName::Static(name)) }
     }
 
     /// Returns the wrapped tag value.
@@ -51,31 +50,19 @@ impl PartialEq for Tag {
 
 impl Eq for Tag { }
 
-impl Hash for Tag {
+impl std::hash::Hash for Tag {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.value.hash(state);
     }
 }
 
-// impl std::fmt::Debug for Tag {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         if let Some(name) = self.name() {
-//             return f.write_str(&format!("Tag(value: {} name: {})", self.value, name));
-//         } else {
-//             return f.write_str(&format!("Tag(value: {})", self.value));
-//         }
-//     }
-// }
-
-// impl Clone for Tag {
-//     fn clone(&self) -> Self {
-//         Tag { value: self.value, name: self.name.clone() }
-//     }
-// }
-
 impl std::fmt::Display for Tag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.name().clone().unwrap_or_else(|| self.value().to_string()))
+        match &self.name {
+            Some(TagName::Static(name)) => write!(f, "{}", name),
+            Some(TagName::Dynamic(name)) => write!(f, "{}", name),
+            None => write!(f, "{}", self.value),
+        }
     }
 }
 
