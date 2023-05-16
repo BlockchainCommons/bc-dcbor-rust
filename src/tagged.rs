@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{cbor_encodable::CBOREncodable, tag::Tag};
 
 use super::{cbor::CBOR, varint::{MajorType, EncodeVarInt}};
@@ -35,7 +37,7 @@ impl Tagged {
 impl CBOREncodable for Tagged {
     fn cbor(&self) -> CBOR {
         let tag = self.tag().clone();
-        let item = Box::new(self.item().clone());
+        let item = Rc::new(self.item().clone());
         CBOR::Tagged(tag, item)
     }
 

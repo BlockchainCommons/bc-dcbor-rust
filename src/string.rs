@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{cbor_encodable::CBOREncodable, CBORDecodable, cbor_error::CBORError, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
@@ -27,9 +29,9 @@ impl CBOREncodable for String {
 }
 
 impl CBORDecodable for String {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
         match cbor {
-            CBOR::Text(s) => Ok(Box::new(s.clone())),
+            CBOR::Text(s) => Ok(Rc::new(s.clone())),
             _ => Err(CBORError::WrongType),
         }
     }
@@ -51,7 +53,7 @@ impl From<String> for CBOR {
 
 impl From<CBOR> for String {
     fn from(value: CBOR) -> Self {
-        *Self::from_cbor(&value).unwrap()
+        Self::from_cbor(&value).unwrap().as_ref().clone()
     }
 }
 

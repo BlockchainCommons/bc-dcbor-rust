@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{CBOR, Tagged};
 
 /// A type that can be encoded as CBOR.
@@ -27,7 +29,7 @@ impl CBOREncodable for CBOR {
             CBOR::Array(x) => x.cbor_data(),
             CBOR::Map(x) => x.cbor_data(),
             CBOR::Tagged(tag, item) => {
-                let x = Tagged::new(tag.clone(), *item.clone());
+                let x = Tagged::new(tag.clone(), item);
                 x.cbor_data()
             },
             CBOR::Simple(x) => x.cbor_data(),
@@ -38,5 +40,11 @@ impl CBOREncodable for CBOR {
 impl<T> CBOREncodable for &T where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
         (*self).cbor()
+    }
+}
+
+impl<T> CBOREncodable for Rc<T> where T: CBOREncodable {
+    fn cbor(&self) -> CBOR {
+        (**self).cbor()
     }
 }

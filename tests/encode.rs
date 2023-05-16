@@ -1,4 +1,4 @@
-use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
+use std::{collections::{HashMap, BTreeMap, VecDeque, HashSet}, rc::Rc};
 
 use dcbor::*;
 use half::f16;
@@ -167,10 +167,10 @@ fn encode_array() {
 
 #[test]
 fn encode_heterogenous_array() {
-    let mut array: Vec<Box<dyn CBOREncodable>> = Vec::new();
-    array.push(Box::new(1));
-    array.push(Box::new("Hello"));
-    array.push(Box::new([1, 2, 3]));
+    let mut array: Vec<Rc<dyn CBOREncodable>> = Vec::new();
+    array.push(Rc::new(1));
+    array.push(Rc::new("Hello"));
+    array.push(Rc::new([1, 2, 3]));
 
     let cbor = array.cbor();
     let data = cbor.cbor_data();

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat};
 
 use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, cbor_error::CBORError, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
@@ -49,7 +51,7 @@ impl CBOREncodable for Date {
 }
 
 impl CBORDecodable for Date {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
         Self::from_tagged_cbor(cbor)
     }
 }
@@ -67,17 +69,17 @@ impl CBORTaggedEncodable for Date {
 }
 
 impl CBORTaggedDecodable for Date {
-    fn from_untagged_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
+    fn from_untagged_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let i = i64::try_from(*n).map_err(|_| CBORError::WrongType)?;
-                return Ok(Box::new(Date::from_timestamp(i)));
+                return Ok(Rc::new(Date::from_timestamp(i)));
             },
             CBOR::Negative(n) => {
-                return Ok(Box::new(Date::from_timestamp(*n)));
+                return Ok(Rc::new(Date::from_timestamp(*n)));
             },
             CBOR::Simple(Simple::Float(n)) => {
-                return Ok(Box::new(Date::from_timestamp(*n as i64)));
+                return Ok(Rc::new(Date::from_timestamp(*n as i64)));
             },
             _ => { return Err(CBORError::WrongType); }
         }

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{CBOREncodable, CBOR, Simple, CBORDecodable, CBORCodable, CBORError};
 
 impl CBOREncodable for bool {
@@ -17,10 +19,10 @@ impl CBOREncodable for bool {
 }
 
 impl CBORDecodable for bool {
-    fn from_cbor(cbor: &CBOR) -> Result<Box<Self>, CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
         match cbor {
-            CBOR::Simple(Simple::False) => Ok(Box::new(false)),
-            CBOR::Simple(Simple::True) => Ok(Box::new(true)),
+            CBOR::Simple(Simple::False) => Ok(Rc::new(false)),
+            CBOR::Simple(Simple::True) => Ok(Rc::new(true)),
             _ => Err(CBORError::WrongType),
         }
     }
