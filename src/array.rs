@@ -60,6 +60,22 @@ impl<T> From<&[T]> for CBOR where T: CBOREncodable {
     }
 }
 
+impl<T> CBORDecodable for Vec<T> where T: CBORDecodable + Clone {
+    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
+        match cbor {
+            CBOR::Array(cbor_array) => {
+                let mut result = Vec::new();
+                for cbor in cbor_array {
+                    let element = T::from_cbor(cbor)?;
+                    result.push(element.as_ref().clone());
+                }
+                Ok(Rc::new(result))
+            },
+            _ => Err(CBORError::WrongType)
+        }
+    }
+}
+
 impl<T> CBORDecodable for Vec<Rc<T>> where T: CBORDecodable {
     fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
         match cbor {
