@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use chrono::{DateTime, Utc, TimeZone, SecondsFormat};
+use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime};
 
 use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, cbor_error::CBORError, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
 
@@ -17,6 +17,22 @@ impl Date {
     /// Creates a new `Date` from seconds since (or before) the Unix epoch.
     pub fn from_timestamp(seconds_since_unix_epoch: i64) -> Self {
         Self::from_datetime(Utc.timestamp_opt(seconds_since_unix_epoch, 0).unwrap())
+    }
+
+    /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
+    pub fn from_str(value: &str) -> Option<Self> {
+        // try parsing as DateTime
+        if let Ok(dt) = DateTime::parse_from_rfc3339(value) {
+            return Some(Self::from_datetime(dt.with_timezone(&Utc)));
+        }
+
+        // try parsing as just a date (with assumed zero time)
+        if let Ok(d) = NaiveDate::parse_from_str(value, "%Y-%m-%d") {
+            let dt = NaiveDateTime::new(d, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
+            return Some(Self::from_datetime(DateTime::from_utc(dt, Utc)));
+        }
+
+        None
     }
 
     /// Creates a new `Date` containing the current date and time.
@@ -37,6 +53,17 @@ impl Date {
     /// Returns a string with the ISO-8601 (RFC-3339) representation of the date.
     pub fn to_string(&self) -> String {
         self.datetime().to_rfc3339_opts(SecondsFormat::Secs, true)
+    }
+}
+
+impl TryFrom<&str> for Date {
+    type Error = String;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match Self::from_str(value) {
+            Some(date) => Ok(date),
+            None => Err("Invalid date string".into())
+        }
     }
 }
 
