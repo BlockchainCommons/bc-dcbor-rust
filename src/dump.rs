@@ -36,7 +36,7 @@ impl CBOR {
                 ];
                 if !d.is_empty() {
                     let mut note: Option<String> = None;
-                    if let Some(a) = from_utf8(d.data()).ok() {
+                    if let Ok(a) = from_utf8(d.data()) {
                         if let Some(b) = sanitized(a) {
                             note = Some(flanked(&b, "\"", "\""));
                         }
@@ -76,7 +76,7 @@ impl CBOR {
                         DumpItem::new(level, header_data, Some(tag_note))
                     ],
                     item.dump_items(level + 1, known_tags)
-                ].into_iter().flat_map(|x| x).collect()
+                ].into_iter().flatten().collect()
             },
             CBOR::Array(array) => {
                 let header = array.len().encode_varint(MajorType::Array);
@@ -86,7 +86,7 @@ impl CBOR {
                         DumpItem::new(level, header_data, Some(format!("array({})", array.len())))
                     ],
                     array.iter().flat_map(|x| x.dump_items(level + 1, known_tags)).collect()
-                ].into_iter().flat_map(|x| x).collect()
+                ].into_iter().flatten().collect()
             },
             CBOR::Map(m) => {
                 let header = m.len().encode_varint(MajorType::Map);
@@ -99,9 +99,9 @@ impl CBOR {
                         vec![
                             x.0.dump_items(level + 1, known_tags),
                             x.1.dump_items(level + 1, known_tags)
-                        ].into_iter().flat_map(|x| x).collect::<Vec<DumpItem>>()
+                        ].into_iter().flatten().collect::<Vec<DumpItem>>()
                     }).collect()
-                ].into_iter().flat_map(|x| x).collect()
+                ].into_iter().flatten().collect()
             },
         }
     }
@@ -136,7 +136,7 @@ impl DumpItem {
     fn format_first_column(&self) -> String {
         let indent = " ".repeat(self.level * 3);
         let hex: Vec<_> = self.data.iter()
-            .map(|x| hex::encode(x))
+            .map(hex::encode)
             .filter(|x| !x.is_empty())
             .collect();
         let hex = hex.join(" ");

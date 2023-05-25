@@ -45,17 +45,17 @@ pub enum CBORError {
 impl std::fmt::Display for CBORError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            CBORError::Underrun => format!("early end of data"),
+            CBORError::Underrun => "early end of data".to_string(),
             CBORError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
-            CBORError::NonCanonicalNumeric => format!("non-canonical numeric value"),
+            CBORError::NonCanonicalNumeric => "non-canonical numeric value".to_string(),
             CBORError::InvalidString(err) => format!("invalid string format: {:?}", err),
             CBORError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
-            CBORError::MisorderedMapKey => format!("mis-ordered map key"),
-            CBORError::DuplicateMapKey => format!("duplicate map key"),
-            CBORError::OutOfRange => format!("integer out of range"),
-            CBORError::WrongType => format!("wrong type"),
+            CBORError::MisorderedMapKey => "mis-ordered map key".to_string(),
+            CBORError::DuplicateMapKey => "duplicate map key".to_string(),
+            CBORError::OutOfRange => "integer out of range".to_string(),
+            CBORError::WrongType => "wrong type".to_string(),
             CBORError::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
-            CBORError::InvalidFormat => format!("invalid CBOR format"),
+            CBORError::InvalidFormat => "invalid CBOR format".to_string(),
         };
         f.write_str(&s)
     }

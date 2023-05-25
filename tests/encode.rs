@@ -29,7 +29,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
-    assert_eq!(hex::encode(&data), expected_data);
+    assert_eq!(hex::encode(data), expected_data);
 }
 
 #[test]
@@ -38,25 +38,25 @@ fn encode_unsigned() {
     test_cbor_codable(0u16,       "unsigned(0)", "0", "00");
     test_cbor_codable(0u32,       "unsigned(0)", "0", "00");
     test_cbor_codable(0u64,       "unsigned(0)", "0", "00");
-    test_cbor_codable(0 as usize, "unsigned(0)", "0", "00");
+    test_cbor_codable(0_usize, "unsigned(0)", "0", "00");
 
     test_cbor_codable(1u8,        "unsigned(1)", "1", "01");
     test_cbor_codable(1u16,       "unsigned(1)", "1", "01");
     test_cbor_codable(1u32,       "unsigned(1)", "1", "01");
     test_cbor_codable(1u64,       "unsigned(1)", "1", "01");
-    test_cbor_codable(1 as usize, "unsigned(1)", "1", "01");
+    test_cbor_codable(1_usize, "unsigned(1)", "1", "01");
 
     test_cbor_codable(23u8,        "unsigned(23)", "23", "17");
     test_cbor_codable(23u16,       "unsigned(23)", "23", "17");
     test_cbor_codable(23u32,       "unsigned(23)", "23", "17");
     test_cbor_codable(23u64,       "unsigned(23)", "23", "17");
-    test_cbor_codable(23 as usize, "unsigned(23)", "23", "17");
+    test_cbor_codable(23_usize, "unsigned(23)", "23", "17");
 
     test_cbor_codable(24u8,        "unsigned(24)", "24", "1818");
     test_cbor_codable(24u16,       "unsigned(24)", "24", "1818");
     test_cbor_codable(24u32,       "unsigned(24)", "24", "1818");
     test_cbor_codable(24u64,       "unsigned(24)", "24", "1818");
-    test_cbor_codable(24 as usize, "unsigned(24)", "24", "1818");
+    test_cbor_codable(24_usize, "unsigned(24)", "24", "1818");
 
     test_cbor_codable(u8::MAX,          "unsigned(255)", "255", "18ff");
     test_cbor_codable(u8::MAX as u16,   "unsigned(255)", "255", "18ff");
@@ -162,15 +162,16 @@ fn encode_string() {
 fn encode_array() {
     test_cbor(vec![1, 2, 3], "array([unsigned(1), unsigned(2), unsigned(3)])", "[1, 2, 3]", "83010203");
     test_cbor([1, 2, 3], "array([unsigned(1), unsigned(2), unsigned(3)])", "[1, 2, 3]", "83010203");
-    test_cbor(&[1, -2, 3], "array([unsigned(1), negative(-2), unsigned(3)])", "[1, -2, 3]", "83012103");
+    test_cbor([1, -2, 3], "array([unsigned(1), negative(-2), unsigned(3)])", "[1, -2, 3]", "83012103");
 }
 
 #[test]
 fn encode_heterogenous_array() {
-    let mut array: Vec<Rc<dyn CBOREncodable>> = Vec::new();
-    array.push(Rc::new(1));
-    array.push(Rc::new("Hello"));
-    array.push(Rc::new([1, 2, 3]));
+    let array: Vec<Rc<dyn CBOREncodable>> = vec![
+        Rc::new(1),
+        Rc::new("Hello"),
+        Rc::new([1, 2, 3]),
+    ];
 
     let cbor = array.cbor();
     let data = cbor.cbor_data();
@@ -364,10 +365,7 @@ fn convert_btree_map() {
 
 #[test]
 fn convert_vector() {
-    let mut v = Vec::<i32>::new();
-    v.push(1);
-    v.push(50);
-    v.push(25);
+    let v: Vec<i32> = vec![1, 50, 25];
     let c = v.cbor();
     assert_eq!(c.diagnostic(), "[1, 50, 25]");
     let v2: Vec<i32> = c.try_into().unwrap();

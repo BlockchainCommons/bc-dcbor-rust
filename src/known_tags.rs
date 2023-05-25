@@ -45,13 +45,13 @@ impl KnownTagsDict {
         let name = tag.name().unwrap();
         assert!(!name.is_empty());
         tags_by_value.insert(tag.value(), tag.clone());
-        tags_by_name.insert(name.to_string(), tag);
+        tags_by_name.insert(name, tag);
     }
 }
 
 impl KnownTags for KnownTagsDict {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String> {
-        self.tag_for_value(tag.value()).map(|tag| tag.name().unwrap().to_string())
+        self.tag_for_value(tag.value()).map(|tag| tag.name().unwrap())
     }
 
     fn name_for_tag(&self, tag: &Tag) -> String {

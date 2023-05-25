@@ -15,12 +15,12 @@ pub trait CBORTaggedDecodable: CBORDecodable + CBORTagged {
         match cbor {
             CBOR::Tagged(tag, item) => {
                 if *tag == Self::CBOR_TAG {
-                    return Ok(Self::from_untagged_cbor(item)?);
+                    Self::from_untagged_cbor(item)
                 } else {
-                    return Err(CBORError::WrongTag(Self::CBOR_TAG, tag.clone()));
+                    Err(CBORError::WrongTag(Self::CBOR_TAG, tag.clone()))
                 }
             },
-            _ => return Err(CBORError::WrongType)
+            _ => Err(CBORError::WrongType)
         }
     }
 

@@ -85,7 +85,7 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), CBORError
     Ok((major_type, value, varint_len))
 }
 
-fn parse_bytes<'a>(data: &'a [u8], len: usize) -> Result<&'a [u8], CBORError> {
+fn parse_bytes(data: &[u8], len: usize) -> Result<&[u8], CBORError> {
     if data.len() < len {
         return Err(CBORError::Underrun);
     }
@@ -96,7 +96,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
     if data.is_empty() {
         return Err(CBORError::Underrun)
     }
-    let (major_type, value, header_varint_len) = parse_header_varint(&data)?;
+    let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
         MajorType::Unsigned => Ok((CBOR::Unsigned(value), header_varint_len)),
         MajorType::Negative => Ok((CBOR::Negative(-(value as i64) - 1), header_varint_len)),
@@ -108,7 +108,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
         MajorType::Text => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
-            let string = from_utf8(buf).map_err(|x| CBORError::InvalidString(x))?;
+            let string = from_utf8(buf).map_err(CBORError::InvalidString)?;
             Ok((string.cbor(), header_varint_len + data_len))
         },
         MajorType::Array => {

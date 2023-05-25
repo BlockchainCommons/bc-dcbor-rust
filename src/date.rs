@@ -20,7 +20,7 @@ impl Date {
     }
 
     /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
-    pub fn from_str(value: &str) -> Option<Self> {
+    pub fn new_from_string(value: &str) -> Option<Self> {
         // try parsing as DateTime
         if let Ok(dt) = DateTime::parse_from_rfc3339(value) {
             return Some(Self::from_datetime(dt.with_timezone(&Utc)));
@@ -49,18 +49,13 @@ impl Date {
     pub fn timestamp(&self) -> i64 {
         self.datetime().timestamp()
     }
-
-    /// Returns a string with the ISO-8601 (RFC-3339) representation of the date.
-    pub fn to_string(&self) -> String {
-        self.datetime().to_rfc3339_opts(SecondsFormat::Secs, true)
-    }
 }
 
 impl TryFrom<&str> for Date {
     type Error = String;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match Self::from_str(value) {
+        match Self::new_from_string(value) {
             Some(date) => Ok(date),
             None => Err("Invalid date string".into())
         }
@@ -100,15 +95,15 @@ impl CBORTaggedDecodable for Date {
         match cbor {
             CBOR::Unsigned(n) => {
                 let i = i64::try_from(*n).map_err(|_| CBORError::WrongType)?;
-                return Ok(Rc::new(Date::from_timestamp(i)));
+                Ok(Rc::new(Date::from_timestamp(i)))
             },
             CBOR::Negative(n) => {
-                return Ok(Rc::new(Date::from_timestamp(*n)));
+                Ok(Rc::new(Date::from_timestamp(*n)))
             },
             CBOR::Simple(Simple::Float(n)) => {
-                return Ok(Rc::new(Date::from_timestamp(*n as i64)));
+                Ok(Rc::new(Date::from_timestamp(*n as i64)))
             },
-            _ => { return Err(CBORError::WrongType); }
+            _ => { Err(CBORError::WrongType)}
         }
     }
 }
@@ -117,6 +112,6 @@ impl CBORTaggedCodable for Date { }
 
 impl std::fmt::Display for Date {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_string())
+        f.write_str(self.datetime().to_rfc3339_opts(SecondsFormat::Secs, true).as_str())
     }
 }

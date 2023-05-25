@@ -21,10 +21,14 @@ impl Map {
         self.0.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
     /// Gets an iterator over the entries of the CBOR map, sorted by key.
     ///
     /// Key sorting order is lexicographic by the key's binary-encoded CBOR.
-    pub fn iter<'a>(&'a self) -> MapIter<'a> {
+    pub fn iter(&self) -> MapIter<'_> {
         MapIter::new(self.0.values())
     }
 
@@ -59,6 +63,12 @@ impl Map {
                 Ok(())
             }
         }
+    }
+}
+
+impl Default for Map {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -23,7 +23,7 @@ impl CBOR {
             CBOR::Array(a) => {
                 let begin = "[".to_string();
                 let end = "]".to_string();
-                let items = a.into_iter().map(|x| x.diag_item(annotate, known_tags)).collect();
+                let items = a.iter().map(|x| x.diag_item(annotate, known_tags)).collect();
                 let is_pairs = false;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
@@ -31,10 +31,10 @@ impl CBOR {
             CBOR::Map(m) => {
                 let begin = "{".to_string();
                 let end = "}".to_string();
-                let items = m.iter().map(|(key, value)| vec![
+                let items = m.iter().flat_map(|(key, value)| vec![
                     key.diag_item(annotate, known_tags),
                     value.diag_item(annotate, known_tags)
-                ]).flat_map(|x| x).collect();
+                ]).collect();
                 let is_pairs = true;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
@@ -103,7 +103,7 @@ impl DiagItem {
         let string = match self {
             DiagItem::Item(s) => s.clone(),
             DiagItem::Group(begin, end, items, is_pairs, comment) => {
-                let components: Vec<String> = items.into_iter().map(|item| {
+                let components: Vec<String> = items.iter().map(|item| {
                     match item {
                         DiagItem::Item(string) => string,
                         DiagItem::Group(_, _, _, _, _) => "<group>",
@@ -133,12 +133,10 @@ impl DiagItem {
                 for (index, item) in items.iter().enumerate() {
                     let separator = if index == items.len() - 1 {
                         ""
+                    } else if *is_pairs && index & 1 == 0 {
+                        ":"
                     } else {
-                        if *is_pairs && index & 1 == 0 {
-                            ":"
-                        } else {
-                            ","
-                        }
+                        ","
                     };
                     lines.push(item.format_opt(level + 1, separator, annotate));
                 }
@@ -167,11 +165,7 @@ impl DiagItem {
     }
 
     fn is_group(&self) -> bool {
-        if let DiagItem::Group(_, _, _, _, _) = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, DiagItem::Group(_, _, _, _, _))
     }
 
     fn contains_group(&self) -> bool {
