@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{tag::Tag, Simple, cbor_error::CBORError, decode::decode_cbor};
+use crate::{tag::Tag, Simple, error::Error, decode::decode_cbor};
 
 use super::{bytes::Bytes, Tagged, Map, string_util::flanked};
 
@@ -28,7 +28,7 @@ pub enum CBOR {
 /// Affordances for decoding CBOR from binary representation.
 impl CBOR {
     /// Decodes the given date into CBOR symbolic representation.
-    pub fn from_data(data: &[u8]) -> Result<CBOR, CBORError> {
+    pub fn from_data(data: &[u8]) -> Result<CBOR, Error> {
         decode_cbor(data)
     }
 
@@ -36,7 +36,7 @@ impl CBOR {
     ///
     /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
-    pub fn from_hex(hex: &str) -> Result<CBOR, CBORError> {
+    pub fn from_hex(hex: &str) -> Result<CBOR, Error> {
         let data = hex::decode(hex).unwrap();
         Self::from_data(&data)
     }
@@ -44,10 +44,10 @@ impl CBOR {
     /// Extract the CBOR value as an array.
     ///
     /// Returns `Ok` if the value is an array, `Err` otherwise.
-    pub fn as_array(&self) -> Result<&Vec<CBOR>, CBORError> {
+    pub fn as_array(&self) -> Result<&Vec<CBOR>, Error> {
         match self {
             Self::Array(a) => Ok(a),
-            _ => Err(CBORError::WrongType)
+            _ => Err(Error::WrongType)
         }
     }
 }

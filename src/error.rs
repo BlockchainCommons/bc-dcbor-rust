@@ -1,11 +1,9 @@
 use std::str::Utf8Error;
-
 use crate::tag::Tag;
-
 
 /// An error encountered while decoding or parsing CBOR.
 #[derive(Debug)]
-pub enum CBORError {
+pub enum Error {
     /// Early end of data.
     Underrun,
 
@@ -42,29 +40,28 @@ pub enum CBORError {
     InvalidFormat,
 }
 
-impl std::fmt::Display for CBORError {
+impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            CBORError::Underrun => "early end of data".to_string(),
-            CBORError::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
-            CBORError::NonCanonicalNumeric => "non-canonical numeric value".to_string(),
-            CBORError::InvalidString(err) => format!("invalid string format: {:?}", err),
-            CBORError::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
-            CBORError::MisorderedMapKey => "mis-ordered map key".to_string(),
-            CBORError::DuplicateMapKey => "duplicate map key".to_string(),
-            CBORError::OutOfRange => "integer out of range".to_string(),
-            CBORError::WrongType => "wrong type".to_string(),
-            CBORError::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
-            CBORError::InvalidFormat => "invalid CBOR format".to_string(),
+            Error::Underrun => "early end of data".to_string(),
+            Error::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
+            Error::NonCanonicalNumeric => "non-canonical numeric value".to_string(),
+            Error::InvalidString(err) => format!("invalid string format: {:?}", err),
+            Error::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
+            Error::MisorderedMapKey => "mis-ordered map key".to_string(),
+            Error::DuplicateMapKey => "duplicate map key".to_string(),
+            Error::OutOfRange => "integer out of range".to_string(),
+            Error::WrongType => "wrong type".to_string(),
+            Error::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
+            Error::InvalidFormat => "invalid CBOR format".to_string(),
         };
         f.write_str(&s)
     }
 }
 
-impl std::error::Error for CBORError {
-}
+impl std::error::Error for Error { }
 
-impl PartialEq for CBORError {
+impl PartialEq for Error {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::UnsupportedHeaderValue(l0), Self::UnsupportedHeaderValue(r0)) => l0 == r0,

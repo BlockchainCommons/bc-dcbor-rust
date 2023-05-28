@@ -211,7 +211,7 @@ fn encode_map() {
 #[test]
 fn encode_map_misordered() {
     let cbor = CBOR::from_hex("a2026141016142");
-    assert_eq!(cbor, Err(CBORError::MisorderedMapKey));
+    assert_eq!(cbor, Err(Error::MisorderedMapKey));
 }
 
 #[test]
@@ -277,24 +277,24 @@ fn fail_float_coerced_to_int() {
     let c = n.cbor();
     let f: f64 = (&c).try_into().unwrap();
     assert_eq!(f, n);
-    assert_eq!(i32::try_from(&c).unwrap_err(), CBORError::WrongType);
+    assert_eq!(i32::try_from(&c).unwrap_err(), Error::WrongType);
 }
 
 #[test]
 fn non_canonical_float_1() {
     // Non-canonical representation of 1.5 that could be represented at a smaller width.
-    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), CBORError::NonCanonicalNumeric);
+    assert_eq!(CBOR::from_hex("FB3FF8000000000000").unwrap_err(), Error::NonCanonicalNumeric);
 }
 
 #[test]
 fn non_canonical_float_2() {
     // Non-canonical representation of a floating point value that could be represented as an integer.
-    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), CBORError::NonCanonicalNumeric);
+    assert_eq!(CBOR::from_hex("F94A00").unwrap_err(), Error::NonCanonicalNumeric);
 }
 
 #[test]
 fn unused_data() {
-    assert_eq!(CBOR::from_hex("0001").unwrap_err(), CBORError::UnusedData(1));
+    assert_eq!(CBOR::from_hex("0001").unwrap_err(), Error::UnusedData(1));
 }
 
 #[test]

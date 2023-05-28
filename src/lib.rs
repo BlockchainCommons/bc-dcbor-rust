@@ -71,8 +71,8 @@ mod float;
 
 mod array;
 
-mod cbor_error;
-pub use cbor_error::CBORError;
+mod error;
+pub use error::Error;
 
 mod bytes;
 pub use bytes::Bytes;

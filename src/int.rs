@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, cbor_error::CBORError, CBORCodable};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::Error, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -31,11 +31,11 @@ macro_rules! impl_cbor {
         }
 
         impl CBORDecodable for $type {
-            fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
+            fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
                 match cbor {
                     CBOR::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
                     CBOR::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
-                    _ => Err(CBORError::WrongType),
+                    _ => Err(Error::WrongType),
                 }
             }
         }
@@ -61,7 +61,7 @@ macro_rules! impl_cbor {
         }
 
         impl TryFrom<&CBOR> for $type {
-            type Error = CBORError;
+            type Error = Error;
 
             fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
                 Self::from_cbor(value).map(|x| *x)
@@ -81,17 +81,17 @@ impl_cbor!(i32);
 impl_cbor!(i64);
 
 trait From64 {
-    fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Rc<Self>, CBORError> where F: Fn(u64) -> Self, Self: Sized {
+    fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Rc<Self>, Error> where F: Fn(u64) -> Self, Self: Sized {
         if n > max {
-            Err(CBORError::OutOfRange)
+            Err(Error::OutOfRange)
         } else {
             Ok(Rc::new(f(n)))
         }
     }
 
-    fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> Result<Rc<Self>, CBORError> where F: Fn(i64) -> Self, Self: Sized {
+    fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> Result<Rc<Self>, Error> where F: Fn(i64) -> Self, Self: Sized {
         if n > max || n > min {
-            Err(CBORError::OutOfRange)
+            Err(Error::OutOfRange)
         } else {
             Ok(Rc::new(f(n)))
         }

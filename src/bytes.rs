@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, cbor_error::CBORError, CBORCodable};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::Error, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -60,19 +60,19 @@ impl CBOREncodable for Bytes {
 }
 
 impl CBORDecodable for Bytes {
-    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
         match cbor {
             CBOR::Bytes(data) => Ok(Rc::new(data.clone())),
-            _ => Err(CBORError::WrongType),
+            _ => Err(Error::WrongType),
         }
     }
 }
 
 impl Bytes {
-    pub fn from_cbor_bytes(cbor: &CBOR) -> Result<Vec<u8>, CBORError> {
+    pub fn from_cbor_bytes(cbor: &CBOR) -> Result<Vec<u8>, Error> {
         match cbor {
             CBOR::Bytes(bytes) => Ok(bytes.data().clone()),
-            _ => Err(CBORError::WrongType),
+            _ => Err(Error::WrongType),
         }
     }
 }
@@ -118,12 +118,12 @@ impl From<CBOR> for Bytes {
 }
 
 impl TryFrom<&CBOR> for Bytes {
-    type Error = CBORError;
+    type Error = Error;
 
     fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
         match value {
             CBOR::Bytes(bytes) => Ok(bytes.clone()),
-            _ => Err(CBORError::WrongType),
+            _ => Err(Error::WrongType),
         }
     }
 }

@@ -1,6 +1,6 @@
 use std::{collections::{BTreeMap, btree_map::Values as BTreeMapValues, HashMap}, rc::Rc};
 
-use crate::{cbor_encodable::CBOREncodable, CBORError, CBORDecodable};
+use crate::{cbor_encodable::CBOREncodable, Error, CBORDecodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -45,7 +45,7 @@ impl Map {
         self.insert(key.cbor(), value.cbor());
     }
 
-    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {
+    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<(), Error> {
         match self.0.last_key_value() {
             None => {
                 self.insert(key, value);
@@ -54,10 +54,10 @@ impl Map {
             Some(entry) => {
                 let new_key = MapKey::new(key.cbor_data());
                 if self.0.contains_key(&new_key) {
-                    return Err(CBORError::DuplicateMapKey)
+                    return Err(Error::DuplicateMapKey)
                 }
                 if entry.0 >= &new_key {
-                    return Err(CBORError::MisorderedMapKey)
+                    return Err(Error::MisorderedMapKey)
                 }
                 self.0.insert(new_key, MapValue::new(key, value));
                 Ok(())
@@ -211,7 +211,7 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable
 }
 
 impl<K, V> TryInto<HashMap<Rc<K>, Rc<V>>> for CBOR where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash), V: CBORDecodable {
-    type Error = CBORError;
+    type Error = Error;
 
     fn try_into(self) -> Result<HashMap<Rc<K>, Rc<V>>, Self::Error> {
         match self {
@@ -222,13 +222,13 @@ impl<K, V> TryInto<HashMap<Rc<K>, Rc<V>>> for CBOR where K: CBORDecodable + std:
                 }
                 Ok(container)
             },
-            _ => Err(CBORError::WrongType)
+            _ => Err(Error::WrongType)
         }
     }
 }
 
 impl<K, V> TryInto<HashMap<K, V>> for CBOR where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash) + Clone, V: CBORDecodable + Clone {
-    type Error = CBORError;
+    type Error = Error;
 
     fn try_into(self) -> Result<HashMap<K, V>, Self::Error> {
         match self {
@@ -239,7 +239,7 @@ impl<K, V> TryInto<HashMap<K, V>> for CBOR where K: CBORDecodable + std::cmp::Eq
                 }
                 Ok(container)
             },
-            _ => Err(CBORError::WrongType)
+            _ => Err(Error::WrongType)
         }
     }
 }
@@ -257,7 +257,7 @@ impl<K, V> From<BTreeMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodabl
 }
 
 impl<K, V> TryInto<BTreeMap<Rc<K>, Rc<V>>> for CBOR where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord), V: CBORDecodable {
-    type Error = CBORError;
+    type Error = Error;
 
     fn try_into(self) -> Result<BTreeMap<Rc<K>, Rc<V>>, Self::Error> {
         match self {
@@ -268,14 +268,14 @@ impl<K, V> TryInto<BTreeMap<Rc<K>, Rc<V>>> for CBOR where K: CBORDecodable + std
                 }
                 Ok(container)
             },
-            _ => Err(CBORError::WrongType)
+            _ => Err(Error::WrongType)
         }
     }
 }
 
 
 impl<K, V> TryInto<BTreeMap<K, V>> for CBOR where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord) + Clone, V: CBORDecodable + Clone {
-    type Error = CBORError;
+    type Error = Error;
 
     fn try_into(self) -> Result<BTreeMap<K, V>, Self::Error> {
         match self {
@@ -286,7 +286,7 @@ impl<K, V> TryInto<BTreeMap<K, V>> for CBOR where K: CBORDecodable + std::cmp::E
                 }
                 Ok(container)
             },
-            _ => Err(CBORError::WrongType)
+            _ => Err(Error::WrongType)
         }
     }
 }

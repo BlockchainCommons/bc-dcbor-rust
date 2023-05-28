@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime};
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, cbor_error::CBORError, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
+use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, error::Error, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone)]
@@ -73,7 +73,7 @@ impl CBOREncodable for Date {
 }
 
 impl CBORDecodable for Date {
-    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
+    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
         Self::from_tagged_cbor(cbor)
     }
 }
@@ -91,10 +91,10 @@ impl CBORTaggedEncodable for Date {
 }
 
 impl CBORTaggedDecodable for Date {
-    fn from_untagged_cbor(cbor: &CBOR) -> Result<Rc<Self>, CBORError> {
+    fn from_untagged_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
         match cbor {
             CBOR::Unsigned(n) => {
-                let i = i64::try_from(*n).map_err(|_| CBORError::WrongType)?;
+                let i = i64::try_from(*n).map_err(|_| Error::WrongType)?;
                 Ok(Rc::new(Date::from_timestamp(i)))
             },
             CBOR::Negative(n) => {
@@ -103,7 +103,7 @@ impl CBORTaggedDecodable for Date {
             CBOR::Simple(Simple::Float(n)) => {
                 Ok(Rc::new(Date::from_timestamp(*n as i64)))
             },
-            _ => { Err(CBORError::WrongType)}
+            _ => { Err(Error::WrongType)}
         }
     }
 }
