@@ -128,14 +128,37 @@ impl TryFrom<&CBOR> for Bytes {
     }
 }
 
+/// Convert from a `&Bytes` to a `Vec<u8>`.
+impl From<&Bytes> for Vec<u8> {
+    fn from(value: &Bytes) -> Self {
+        value.data().clone()
+    }
+}
+
+/// Convert from a `&Bytes` to an AsRef<[u8]>.
+impl AsRef<[u8]> for Bytes {
+    fn as_ref(&self) -> &[u8] {
+        self.data()
+    }
+}
+
+/// Convert from a `&[u8]` to a `Bytes`.
 impl From<&[u8]> for Bytes {
     fn from(value: &[u8]) -> Self {
         Bytes::from_data(value)
     }
 }
 
+/// Convert a reference to a fixed-size array of bytes to a Bytes instance.
 impl<const L: usize> From<&[u8; L]> for Bytes {
     fn from(value: &[u8; L]) -> Self {
+        Bytes::from_data(value)
+    }
+}
+
+/// Convert from a fixed-size array of bytes to a Bytes instance.
+impl<const L: usize> From<[u8; L]> for Bytes {
+    fn from(value: [u8; L]) -> Self {
         Bytes::from_data(value)
     }
 }
