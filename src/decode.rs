@@ -2,9 +2,9 @@ use std::str::from_utf8;
 
 use half::f16;
 
-use crate::{error::Error, cbor_encodable::CBOREncodable, tag::Tag, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
+use crate::{error::Error, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, bstring, tagged};
 
-use super::{cbor::CBOR, varint::MajorType, bytes::Bytes, Simple, Map};
+use super::{cbor::CBOR, varint::MajorType, Simple, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -102,8 +102,8 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         MajorType::Negative => Ok((CBOR::Negative(-(value as i64) - 1), header_varint_len)),
         MajorType::Bytes => {
             let data_len = value as usize;
-            let bytes: Bytes = parse_bytes(&data[header_varint_len..], data_len)?.into();
-            Ok((bytes.cbor(), header_varint_len + data_len))
+            let bytes: Vec<u8> = parse_bytes(&data[header_varint_len..], data_len)?.into();
+            Ok((bstring(bytes), header_varint_len + data_len))
         },
         MajorType::Text => {
             let data_len = value as usize;
@@ -135,7 +135,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
-            let tagged = CBOR::Tagged(Tag::new(value), Box::new(item));
+            let tagged = tagged(value, item);
             Ok((tagged, header_varint_len + item_len))
         },
         MajorType::Simple => {

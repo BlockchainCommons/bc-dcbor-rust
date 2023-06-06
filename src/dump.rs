@@ -36,12 +36,12 @@ impl CBOR {
                 ];
                 if !d.is_empty() {
                     let mut note: Option<String> = None;
-                    if let Ok(a) = from_utf8(d.data()) {
+                    if let Ok(a) = from_utf8(d) {
                         if let Some(b) = sanitized(a) {
                             note = Some(flanked(&b, "\"", "\""));
                         }
                     }
-                    items.push(DumpItem::new(level + 1, vec!(d.data().to_owned()), note));
+                    items.push(DumpItem::new(level + 1, vec!(d.to_vec()), note));
                 }
                 items
             },

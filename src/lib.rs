@@ -74,8 +74,8 @@ mod array;
 mod error;
 pub use error::Error;
 
-mod bytes;
-pub use bytes::Bytes;
+// mod bytes;
+// pub use bytes::Bytes;
 
 mod date;
 pub use date::Date;
@@ -122,6 +122,16 @@ pub use simple::Simple;
 
 mod varint;
 
-pub fn tagged<T, I>(value: T, item: I) -> CBOR where T: Into<Tag>, I: CBOREncodable {
+pub fn tagged<T, I>(value: T, item: I) -> CBOR
+    where T: Into<Tag>, I: CBOREncodable
+{
     CBOR::Tagged(value.into(), Box::new(item.cbor()))
+}
+
+pub fn bstring<T>(data: T) -> CBOR where T: AsRef<[u8]> {
+    CBOR::Bytes(data.as_ref().to_vec())
+}
+
+pub fn bstring_hex(hex: &str) -> CBOR {
+    CBOR::Bytes(hex::decode(hex).unwrap())
 }

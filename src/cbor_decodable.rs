@@ -10,3 +10,9 @@ pub trait CBORDecodable: 'static {
         Self::from_cbor(&CBOR::from_data(cbor_data)?)
     }
 }
+
+impl CBORDecodable for CBOR {
+    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
+        Ok(cbor.clone())
+    }
+}
