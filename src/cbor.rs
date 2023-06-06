@@ -1,8 +1,6 @@
-use std::rc::Rc;
-
 use crate::{tag::Tag, Simple, error::Error, decode::decode_cbor};
 
-use super::{bytes::Bytes, Tagged, Map, string_util::flanked};
+use super::{bytes::Bytes, Map, string_util::flanked};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
@@ -20,7 +18,7 @@ pub enum CBOR {
     /// Map (major type 5).
     Map(Map),
     /// Tagged value (major type 6).
-    Tagged(Tag, Rc<CBOR>),
+    Tagged(Tag, Box<CBOR>),
     /// Simple value (major type 7).
     Simple(Simple)
 }
@@ -124,7 +122,7 @@ impl std::fmt::Display for CBOR {
             CBOR::Text(x) => format_string(x),
             CBOR::Array(x) => format_array(x),
             CBOR::Map(x) => format_map(x),
-            CBOR::Tagged(tag, item) => format!("{}", Tagged::new(tag.clone(), item)),
+            CBOR::Tagged(tag, item) => format!("{}({})", tag, item),
             CBOR::Simple(x) => format!("{}", x),
         };
         f.write_str(&s)

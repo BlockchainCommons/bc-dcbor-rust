@@ -1,4 +1,3 @@
-use std::rc::Rc;
 
 use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, Error};
 use half::f16;
@@ -45,12 +44,12 @@ impl CBOREncodable for f64 {
 }
 
 impl CBORDecodable for f64 {
-    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
+    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let f = *n as f64;
                 if f as u64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
@@ -58,12 +57,12 @@ impl CBORDecodable for f64 {
             CBOR::Negative(n) => {
                 let f = *n as f64;
                 if f as i64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
             },
-            CBOR::Simple(Simple::Float(n)) => Ok(Rc::new(*n)),
+            CBOR::Simple(Simple::Float(n)) => Ok(*n),
             _ => Err(Error::WrongType)
         }
     }
@@ -96,7 +95,7 @@ impl From<f64> for CBOR {
 
 impl From<CBOR> for f64 {
     fn from(value: CBOR) -> Self {
-        *Self::from_cbor(&value).unwrap()
+        Self::from_cbor(&value).unwrap()
     }
 }
 
@@ -153,12 +152,12 @@ impl CBOREncodable for f32 {
 }
 
 impl CBORDecodable for f32 {
-    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
+    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let f = *n as f32;
                 if f as u64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
@@ -166,7 +165,7 @@ impl CBORDecodable for f32 {
             CBOR::Negative(n) => {
                 let f = *n as f32;
                 if f as i64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
@@ -174,7 +173,7 @@ impl CBORDecodable for f32 {
             CBOR::Simple(Simple::Float(n)) => {
                 let f = *n as f32;
                 if f as f64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
@@ -211,7 +210,7 @@ impl From<f32> for CBOR {
 
 impl From<CBOR> for f32 {
     fn from(value: CBOR) -> Self {
-        *Self::from_cbor(&value).unwrap()
+        Self::from_cbor(&value).unwrap()
     }
 }
 
@@ -264,12 +263,12 @@ impl CBOREncodable for f16 {
 }
 
 impl CBORDecodable for f16 {
-    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
+    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
         match cbor {
             CBOR::Unsigned(n) => {
                 let f = f16::from_f64(*n as f64);
                 if f.to_f64() as u64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
@@ -277,7 +276,7 @@ impl CBORDecodable for f16 {
             CBOR::Negative(n) => {
                 let f = f16::from_f64(*n as f64);
                 if f.to_f64() as i64 == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }
@@ -285,7 +284,7 @@ impl CBORDecodable for f16 {
             CBOR::Simple(Simple::Float(n)) => {
                 let f = f16::from_f64(*n);
                 if f.to_f64() == *n {
-                    Ok(Rc::new(f))
+                    Ok(f)
                 } else {
                     Err(Error::OutOfRange)
                 }

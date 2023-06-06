@@ -1,6 +1,4 @@
-use std::rc::Rc;
-
-use crate::{CBOR, Tagged};
+use crate::{CBOR, varint::{MajorType, EncodeVarInt}};
 
 /// A type that can be encoded as CBOR.
 pub trait CBOREncodable {
@@ -29,8 +27,9 @@ impl CBOREncodable for CBOR {
             CBOR::Array(x) => x.cbor_data(),
             CBOR::Map(x) => x.cbor_data(),
             CBOR::Tagged(tag, item) => {
-                let x = Tagged::new(tag.clone(), item);
-                x.cbor_data()
+                let mut buf = tag.value().encode_varint(MajorType::Tagged);
+                buf.extend(item.cbor_data());
+                buf
             },
             CBOR::Simple(x) => x.cbor_data(),
         }
@@ -43,8 +42,8 @@ impl<T> CBOREncodable for &T where T: CBOREncodable {
     }
 }
 
-impl<T> CBOREncodable for Rc<T> where T: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        (**self).cbor()
-    }
-}
+// impl<T> CBOREncodable for Rc<T> where T: CBOREncodable {
+//     fn cbor(&self) -> CBOR {
+//         (**self).cbor()
+//     }
+// }

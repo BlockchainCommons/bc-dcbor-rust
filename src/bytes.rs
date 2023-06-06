@@ -1,4 +1,3 @@
-use std::rc::Rc;
 
 use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::Error, CBORCodable};
 
@@ -60,9 +59,9 @@ impl CBOREncodable for Bytes {
 }
 
 impl CBORDecodable for Bytes {
-    fn from_cbor(cbor: &CBOR) -> Result<Rc<Self>, Error> {
+    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
         match cbor {
-            CBOR::Bytes(data) => Ok(Rc::new(data.clone())),
+            CBOR::Bytes(data) => Ok(data.clone()),
             _ => Err(Error::WrongType),
         }
     }
@@ -113,7 +112,7 @@ impl From<Bytes> for CBOR {
 
 impl From<CBOR> for Bytes {
     fn from(value: CBOR) -> Self {
-        Self::from_cbor(&value).unwrap().as_ref().clone()
+        Self::from_cbor(&value).unwrap()
     }
 }
 

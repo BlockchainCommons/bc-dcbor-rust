@@ -4,7 +4,7 @@ use half::f16;
 
 use crate::{error::Error, cbor_encodable::CBOREncodable, tag::Tag, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
 
-use super::{cbor::CBOR, varint::MajorType, bytes::Bytes, Simple, Tagged, Map};
+use super::{cbor::CBOR, varint::MajorType, bytes::Bytes, Simple, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -135,8 +135,8 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
-            let tagged = Tagged::new(Tag::new(value), item);
-            Ok((tagged.cbor(), header_varint_len + item_len))
+            let tagged = CBOR::Tagged(Tag::new(value), Box::new(item));
+            Ok((tagged, header_varint_len + item_len))
         },
         MajorType::Simple => {
             match header_varint_len {

@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, BTreeMap, VecDeque, HashSet}, rc::Rc};
+use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
 
 use dcbor::*;
 use half::f16;
@@ -167,10 +167,10 @@ fn encode_array() {
 
 #[test]
 fn encode_heterogenous_array() {
-    let array: Vec<Rc<dyn CBOREncodable>> = vec![
-        Rc::new(1),
-        Rc::new("Hello"),
-        Rc::new([1, 2, 3]),
+    let array = vec![
+        1.cbor(),
+        "Hello".cbor(),
+        vec![1, 2, 3].cbor(),
     ];
 
     let cbor = array.cbor();
@@ -216,7 +216,7 @@ fn encode_map_misordered() {
 
 #[test]
 fn encode_tagged() {
-    test_cbor(Tagged::new(1, "Hello"), r#"tagged(1, text("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
+    test_cbor(tagged(1, "Hello"), r#"tagged(1, text("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
 }
 
 #[test]
@@ -228,11 +228,11 @@ fn encode_value() {
 
 #[test]
 fn encode_envelope() {
-    let alice = Tagged::new(200, Tagged::new(24, "Alice"));
-    let knows = Tagged::new(200, Tagged::new(24, "knows"));
-    let bob = Tagged::new(200, Tagged::new(24, "Bob"));
-    let knows_bob = Tagged::new(200, Tagged::new(221, [knows, bob]));
-    let envelope = Tagged::new(200, [alice, knows_bob]);
+    let alice = tagged(200, tagged(24, "Alice"));
+    let knows = tagged(200, tagged(24, "knows"));
+    let bob = tagged(200, tagged(24, "Bob"));
+    let knows_bob = tagged(200, tagged(221, [knows, bob]));
+    let envelope = tagged(200, [alice, knows_bob]);
     let cbor = envelope.cbor();
     assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
     let bytes = cbor.cbor_data();

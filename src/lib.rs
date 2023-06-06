@@ -117,10 +117,11 @@ mod string;
 
 mod string_util;
 
-mod tagged;
-pub use tagged::Tagged;
-
 mod simple;
 pub use simple::Simple;
 
 mod varint;
+
+pub fn tagged<T, I>(value: T, item: I) -> CBOR where T: Into<Tag>, I: CBOREncodable {
+    CBOR::Tagged(value.into(), Box::new(item.cbor()))
+}

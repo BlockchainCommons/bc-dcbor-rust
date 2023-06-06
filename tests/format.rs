@@ -220,7 +220,7 @@ fn format_map() {
 
 #[test]
 fn format_tagged() {
-    let a = Tagged::new(100, "Hello").cbor();
+    let a = tagged(100, "Hello").cbor();
     run(a,
         r#"100("Hello")"#,
         r#"tagged(100, text("Hello"))"#,
