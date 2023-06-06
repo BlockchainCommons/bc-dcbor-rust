@@ -22,7 +22,7 @@ impl CBOREncodable for CBOR {
                 assert!(x < &0);
                 x.cbor_data()
             },
-            CBOR::Bytes(x) => {
+            CBOR::ByteString(x) => {
                 let mut buf = x.len().encode_varint(MajorType::Bytes);
                 buf.extend(x);
                 buf

@@ -30,7 +30,7 @@ impl CBOR {
         match self {
             CBOR::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
             CBOR::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),
-            CBOR::Bytes(d) => {
+            CBOR::ByteString(d) => {
                 let mut items = vec![
                     DumpItem::new(level, vec!(d.len().encode_varint(MajorType::Bytes)), Some(format!("bytes({})", d.len())))
                 ];

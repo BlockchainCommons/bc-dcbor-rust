@@ -10,7 +10,7 @@ pub enum CBOR {
     /// Negative integer (major type 1).
     Negative(i64),
     /// Byte string (major type 2).
-    Bytes(Vec<u8>),
+    ByteString(Vec<u8>),
     /// UTF-8 string (major type 3).
     Text(String),
     /// Array (major type 4).
@@ -65,7 +65,7 @@ impl PartialEq for CBOR {
         match (self, other) {
             (Self::Unsigned(l0), Self::Unsigned(r0)) => l0 == r0,
             (Self::Negative(l0), Self::Negative(r0)) => l0 == r0,
-            (Self::Bytes(l0), Self::Bytes(r0)) => l0 == r0,
+            (Self::ByteString(l0), Self::ByteString(r0)) => l0 == r0,
             (Self::Text(l0), Self::Text(r0)) => l0 == r0,
             (Self::Array(l0), Self::Array(r0)) => l0 == r0,
             (Self::Map(l0), Self::Map(r0)) => l0 == r0,
@@ -103,7 +103,7 @@ impl std::fmt::Debug for CBOR {
         match self {
             Self::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
             Self::Negative(x) => f.debug_tuple("negative").field(x).finish(),
-            Self::Bytes(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
+            Self::ByteString(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
             Self::Text(x) => f.debug_tuple("text").field(x).finish(),
             Self::Array(x) => f.debug_tuple("array").field(x).finish(),
             Self::Map(x) => f.debug_tuple("map").field(x).finish(),
@@ -118,7 +118,7 @@ impl std::fmt::Display for CBOR {
         let s = match self {
             CBOR::Unsigned(x) => format!("{}", x),
             CBOR::Negative(x) => format!("{}", x),
-            CBOR::Bytes(x) => format!("h'{}'", hex::encode(x)),
+            CBOR::ByteString(x) => format!("h'{}'", hex::encode(x)),
             CBOR::Text(x) => format_string(x),
             CBOR::Array(x) => format_array(x),
             CBOR::Map(x) => format_map(x),

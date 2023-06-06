@@ -129,9 +129,20 @@ pub fn tagged<T, I>(value: T, item: I) -> CBOR
 }
 
 pub fn bstring<T>(data: T) -> CBOR where T: AsRef<[u8]> {
-    CBOR::Bytes(data.as_ref().to_vec())
+    CBOR::ByteString(data.as_ref().to_vec())
+}
+
+pub fn into_bstring(cbor: &CBOR) -> Option<&[u8]> {
+    match cbor {
+        CBOR::ByteString(bytes) => Some(bytes),
+        _ => None,
+    }
+}
+
+pub fn expect_bstring(cbor: &CBOR) -> Result<&[u8], Error> {
+    into_bstring(cbor).ok_or(Error::InvalidFormat)
 }
 
 pub fn bstring_hex(hex: &str) -> CBOR {
-    CBOR::Bytes(hex::decode(hex).unwrap())
+    CBOR::ByteString(hex::decode(hex).unwrap())
 }

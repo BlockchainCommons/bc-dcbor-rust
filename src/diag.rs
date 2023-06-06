@@ -17,7 +17,7 @@ impl CBOR {
 
     fn diag_item(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> DiagItem {
         match self {
-            CBOR::Unsigned(_) | CBOR::Negative(_) | CBOR::Bytes(_) |
+            CBOR::Unsigned(_) | CBOR::Negative(_) | CBOR::ByteString(_) |
             CBOR::Text(_) | CBOR::Simple(_) => DiagItem::Item(format!("{}", self)),
 
             CBOR::Array(a) => {
