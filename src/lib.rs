@@ -122,27 +122,45 @@ pub use simple::Simple;
 
 mod varint;
 
-pub fn tagged<T, I>(value: T, item: I) -> CBOR
+pub fn tagged_value<T, I>(tag: T, item: I) -> CBOR
     where T: Into<Tag>, I: CBOREncodable
 {
-    CBOR::Tagged(value.into(), Box::new(item.cbor()))
+    CBOR::Tagged(tag.into(), Box::new(item.cbor()))
 }
 
-pub fn bstring<T>(data: T) -> CBOR where T: AsRef<[u8]> {
+pub fn from_tagged_value(cbor: &CBOR) -> Option<(&Tag, &CBOR)> {
+    match cbor {
+        CBOR::Tagged(tag, value) => Some((tag, value.as_ref())),
+        _ => None,
+    }
+}
+
+pub fn expect_tagged_value<T>(expected_tag: T, cbor: &CBOR) -> Result<&CBOR, Error>
+    where T: Into<Tag>
+{
+    let (tag, value) = from_tagged_value(cbor).ok_or(Error::InvalidFormat)?;
+    if tag == &expected_tag.into() {
+        Ok(value)
+    } else {
+        Err(Error::InvalidFormat)
+    }
+}
+
+pub fn byte_string<T>(data: T) -> CBOR where T: AsRef<[u8]> {
     CBOR::ByteString(data.as_ref().to_vec())
 }
 
-pub fn into_bstring(cbor: &CBOR) -> Option<&[u8]> {
+pub fn byte_string_hex(hex: &str) -> CBOR {
+    byte_string(hex::decode(hex).unwrap())
+}
+
+pub fn from_byte_string(cbor: &CBOR) -> Option<&[u8]> {
     match cbor {
         CBOR::ByteString(bytes) => Some(bytes),
         _ => None,
     }
 }
 
-pub fn expect_bstring(cbor: &CBOR) -> Result<&[u8], Error> {
-    into_bstring(cbor).ok_or(Error::InvalidFormat)
-}
-
-pub fn bstring_hex(hex: &str) -> CBOR {
-    CBOR::ByteString(hex::decode(hex).unwrap())
+pub fn expect_byte_string(cbor: &CBOR) -> Result<&[u8], Error> {
+    from_byte_string(cbor).ok_or(Error::InvalidFormat)
 }
