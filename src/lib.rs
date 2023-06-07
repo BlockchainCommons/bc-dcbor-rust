@@ -121,17 +121,3 @@ mod simple;
 pub use simple::Simple;
 
 mod varint;
-
-pub fn tagged_value<T, I>(tag: T, item: I) -> CBOR
-    where T: Into<Tag>, I: CBOREncodable
-{
-    CBOR::Tagged(tag.into(), Box::new(item.cbor()))
-}
-
-pub fn byte_string<T>(data: T) -> CBOR where T: AsRef<[u8]> {
-    CBOR::ByteString(data.as_ref().to_vec())
-}
-
-pub fn byte_string_hex(hex: &str) -> CBOR {
-    byte_string(hex::decode(hex).unwrap())
-}

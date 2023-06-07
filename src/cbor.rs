@@ -1,4 +1,4 @@
-use crate::{tag::Tag, Simple, error::Error, decode::decode_cbor};
+use crate::{tag::Tag, Simple, error::Error, decode::decode_cbor, CBOREncodable};
 
 use super::{Map, string_util::flanked};
 
@@ -41,6 +41,16 @@ impl CBOR {
 }
 
 impl CBOR {
+    /// Create a new CBOR value representing a byte string.
+    pub fn byte_string<T>(data: T) -> CBOR where T: AsRef<[u8]> {
+        CBOR::ByteString(data.as_ref().to_vec())
+    }
+
+    /// Create a new CBOR value representing a byte string given as a hexadecimal string.
+    pub fn byte_string_hex(hex: &str) -> CBOR {
+        Self::byte_string(hex::decode(hex).unwrap())
+    }
+
     /// Extract the CBOR value as a byte string.
     ///
     /// Returns `Some` if the value is a byte string, `None` otherwise.
@@ -107,6 +117,13 @@ impl CBOR {
     /// Returns `Ok` if the value is a map, `Err` otherwise.
     pub fn expect_map(&self) -> Result<&Map, Error> {
         self.as_map().ok_or(Error::WrongType)
+    }
+
+    /// Create a new CBOR value representing a tagged value.
+    pub fn tagged_value<T, I>(tag: T, item: I) -> CBOR
+        where T: Into<Tag>, I: CBOREncodable
+    {
+        CBOR::Tagged(tag.into(), Box::new(item.cbor()))
     }
 
     /// Extract the CBOR value as a tagged value.

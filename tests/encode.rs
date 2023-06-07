@@ -131,18 +131,18 @@ fn encode_signed() {
 
 #[test]
 fn encode_bytes_1() {
-    test_cbor_codable(byte_string_hex("00112233"), "bytes(00112233)", "h'00112233'", "4400112233");
+    test_cbor_codable(CBOR::byte_string_hex("00112233"), "bytes(00112233)", "h'00112233'", "4400112233");
 }
 
 #[test]
 fn encode_bytes() {
     test_cbor_codable(
-        byte_string_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
+        CBOR::byte_string_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
         "bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)",
         "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
         "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
     );
-    test_cbor_codable(byte_string([0x11, 0x22, 0x33]),
+    test_cbor_codable(CBOR::byte_string([0x11, 0x22, 0x33]),
     "bytes(112233)",
     "h'112233'",
     "43112233"
@@ -216,7 +216,7 @@ fn encode_map_misordered() {
 
 #[test]
 fn encode_tagged() {
-    test_cbor(tagged_value(1, "Hello"), r#"tagged(1, text("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
+    test_cbor(CBOR::tagged_value(1, "Hello"), r#"tagged(1, text("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
 }
 
 #[test]
@@ -228,11 +228,11 @@ fn encode_value() {
 
 #[test]
 fn encode_envelope() {
-    let alice = tagged_value(200, tagged_value(24, "Alice"));
-    let knows = tagged_value(200, tagged_value(24, "knows"));
-    let bob = tagged_value(200, tagged_value(24, "Bob"));
-    let knows_bob = tagged_value(200, tagged_value(221, [knows, bob]));
-    let envelope = tagged_value(200, [alice, knows_bob]);
+    let alice = CBOR::tagged_value(200, CBOR::tagged_value(24, "Alice"));
+    let knows = CBOR::tagged_value(200, CBOR::tagged_value(24, "knows"));
+    let bob = CBOR::tagged_value(200, CBOR::tagged_value(24, "Bob"));
+    let knows_bob = CBOR::tagged_value(200, CBOR::tagged_value(221, [knows, bob]));
+    let envelope = CBOR::tagged_value(200, [alice, knows_bob]);
     let cbor = envelope.cbor();
     assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
     let bytes = cbor.cbor_data();
@@ -336,7 +336,7 @@ fn convert_values() {
     test_convert(false);
     test_convert("Hello".to_string());
     test_convert(10.0);
-    test_convert(byte_string_hex("001122334455"))
+    test_convert(CBOR::byte_string_hex("001122334455"))
 }
 
 #[test]

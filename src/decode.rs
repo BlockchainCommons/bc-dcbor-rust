@@ -2,7 +2,7 @@ use std::str::from_utf8;
 
 use half::f16;
 
-use crate::{error::Error, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, byte_string, tagged_value};
+use crate::{error::Error, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
 
 use super::{cbor::CBOR, varint::MajorType, Simple, Map};
 
@@ -103,7 +103,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         MajorType::Bytes => {
             let data_len = value as usize;
             let bytes: Vec<u8> = parse_bytes(&data[header_varint_len..], data_len)?.into();
-            Ok((byte_string(bytes), header_varint_len + data_len))
+            Ok((CBOR::byte_string(bytes), header_varint_len + data_len))
         },
         MajorType::Text => {
             let data_len = value as usize;
@@ -135,7 +135,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
-            let tagged = tagged_value(value, item);
+            let tagged = CBOR::tagged_value(value, item);
             Ok((tagged, header_varint_len + item_len))
         },
         MajorType::Simple => {
