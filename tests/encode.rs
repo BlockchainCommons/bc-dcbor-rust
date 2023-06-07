@@ -207,11 +207,12 @@ fn encode_map() {
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
         "a80a011864022003617a046261610581186406812007f408");
 
+    assert_eq!(m.get::<bool, i32>(false), Some(8));
+    assert_eq!(m.get::<bool, i32>(true), None);
     assert_eq!(m.extract::<i32, i32>(-1).unwrap(), 3);
     assert_eq!(m.extract::<Vec<i32>, i32>(vec![-1]).unwrap(), 7);
     assert_eq!(m.extract::<&str, i32>("z").unwrap(), 4);
-    assert_eq!(m.get::<bool, i32>(false), Some(8));
-    assert_eq!(m.get::<bool, i32>(true), None);
+    assert!(m.extract::<&str, i32>("foo").is_err());
 }
 
 #[test]

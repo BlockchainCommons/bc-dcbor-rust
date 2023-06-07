@@ -66,10 +66,11 @@ impl Map {
     }
 
     /// Get a value from the map, given a key.
+    ///
+    /// Returns `Some` if the key is present in the map, `None` otherwise.
     pub fn get<K, V>(&self, key: K) -> Option<V>
     where
-        K: CBOREncodable,
-        V: CBORDecodable
+        K: CBOREncodable, V: CBORDecodable
     {
         match self.0.get(&MapKey::new(key.cbor_data())) {
             Some(value) => V::from_cbor(&value.value).ok(),
@@ -77,6 +78,9 @@ impl Map {
         }
     }
 
+    /// Get a value from the map, given a key.
+    ///
+    /// Returns `Ok` if the key is present in the map, `Err` otherwise.
     pub fn extract<K, V>(&self, key: K) -> Result<V, Error>
     where
         K: CBOREncodable, V: CBORDecodable
