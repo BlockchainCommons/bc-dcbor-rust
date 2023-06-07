@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime};
 use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, error::Error, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
 
 /// A CBOR-friendly representation of a date and time.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Date(DateTime<Utc>);
 
 impl Date {

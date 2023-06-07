@@ -38,15 +38,115 @@ impl CBOR {
         let data = hex::decode(hex).unwrap();
         Self::from_data(&data)
     }
+}
+
+impl CBOR {
+    /// Extract the CBOR value as a byte string.
+    ///
+    /// Returns `Some` if the value is a byte string, `None` otherwise.
+    pub fn as_byte_string(&self) -> Option<&[u8]> {
+        match self {
+            Self::ByteString(b) => Some(b),
+            _ => None
+        }
+    }
+
+    /// Extract the CBOR value as a byte string.
+    ///
+    /// Returns `Ok` if the value is a byte string, `Err` otherwise.
+    pub fn expect_byte_string(&self) -> Result<&[u8], Error> {
+        self.as_byte_string().ok_or(Error::WrongType)
+    }
+
+    /// Extract the CBOR value as a text string.
+    ///
+    /// Returns `Some` if the value is a text string, `None` otherwise.
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Self::Text(t) => Some(t),
+            _ => None
+        }
+    }
+
+    /// Extract the CBOR value as a text string.
+    ///
+    /// Returns `Ok` if the value is a text string, `Err` otherwise.
+    pub fn expect_text(&self) -> Result<&str, Error> {
+        self.as_text().ok_or(Error::WrongType)
+    }
+
+    /// Extract the CBOR value as an array.
+    ///
+    /// Returns `Some` if the value is an array, `None` otherwise.
+    pub fn as_array(&self) -> Option<&Vec<CBOR>> {
+        match self {
+            Self::Array(a) => Some(a),
+            _ => None
+        }
+    }
 
     /// Extract the CBOR value as an array.
     ///
     /// Returns `Ok` if the value is an array, `Err` otherwise.
-    pub fn as_array(&self) -> Result<&Vec<CBOR>, Error> {
+    pub fn expect_array(&self) -> Result<&Vec<CBOR>, Error> {
+        self.as_array().ok_or(Error::WrongType)
+    }
+
+    /// Extract the CBOR value as a map.
+    ///
+    /// Returns `Some` if the value is a map, `None` otherwise.
+    pub fn as_map(&self) -> Option<&Map> {
         match self {
-            Self::Array(a) => Ok(a),
+            Self::Map(m) => Some(m),
+            _ => None
+        }
+    }
+
+    /// Extract the CBOR value as a map.
+    ///
+    /// Returns `Ok` if the value is a map, `Err` otherwise.
+    pub fn expect_map(&self) -> Result<&Map, Error> {
+        self.as_map().ok_or(Error::WrongType)
+    }
+
+    /// Extract the CBOR value as a tagged value.
+    ///
+    /// Returns `Some` if the value is a tagged value, `None` otherwise.
+    pub fn as_tagged_value(&self) -> Option<(&Tag, &CBOR)> {
+        match self {
+            Self::Tagged(t, v) => Some((t, v)),
+            _ => None
+        }
+    }
+
+    /// Extract the CBOR value as a tagged value.
+    ///
+    /// Returns `Ok` if the value is a tagged value with the expected tag, `Err`
+    /// otherwise.
+    pub fn expect_tagged_value<T>(&self, expected_tag: T) -> Result<&CBOR, Error>
+    where T: Into<Tag>
+    {
+        match self.as_tagged_value() {
+            Some((tag, value)) if tag == &expected_tag.into() => Ok(value),
             _ => Err(Error::WrongType)
         }
+    }
+
+    /// Extract the CBOR value as a simple value.
+    ///
+    /// Returns `Some` if the value is a simple value, `None` otherwise.
+    pub fn as_simple_value(&self) -> Option<&Simple> {
+        match self {
+            Self::Simple(s) => Some(s),
+            _ => None
+        }
+    }
+
+    /// Extract the CBOR value as a simple value.
+    ///
+    /// Returns `Ok` if the value is a simple value, `Err` otherwise.
+    pub fn expect_simple_value(&self) -> Result<&Simple, Error> {
+        self.as_simple_value().ok_or(Error::WrongType)
     }
 }
 
