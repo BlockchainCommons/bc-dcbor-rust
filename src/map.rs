@@ -64,6 +64,28 @@ impl Map {
             }
         }
     }
+
+    /// Get a value from the map, given a key.
+    pub fn get<K, V>(&self, key: K) -> Option<V>
+    where
+        K: CBOREncodable,
+        V: CBORDecodable
+    {
+        match self.0.get(&MapKey::new(key.cbor_data())) {
+            Some(value) => V::from_cbor(&value.value).ok(),
+            None => None
+        }
+    }
+
+    pub fn extract<K, V>(&self, key: K) -> Result<V, Error>
+    where
+        K: CBOREncodable, V: CBORDecodable
+    {
+        match self.get(key) {
+            Some(value) => Ok(value),
+            None => Err(Error::InvalidFormat)
+        }
+    }
 }
 
 impl Default for Map {
