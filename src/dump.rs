@@ -1,6 +1,6 @@
 use std::str::from_utf8;
 
-use crate::{CBOR, known_tags::KnownTags, CBOREncodable, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
+use crate::{CBOR, tags_store::TagsStoreTrait, CBOREncodable, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
 
 /// Affordances for viewing the encoded binary representation of CBOR as hexadecimal.
 impl CBOR {
@@ -14,7 +14,7 @@ impl CBOR {
     /// Optionally annotates the output, e.g. breaking the output up into
     /// semantically meaningful lines, formatting dates, and adding names of
     /// known tags.
-    pub fn hex_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
+    pub fn hex_opt(&self, annotate: bool, known_tags: Option<&dyn TagsStoreTrait>) -> String {
         if !annotate {
             return self.hex()
         }
@@ -26,7 +26,7 @@ impl CBOR {
         lines.join("\n")
     }
 
-    fn dump_items(&self, level: usize, known_tags: Option<&dyn KnownTags>) -> Vec<DumpItem> {
+    fn dump_items(&self, level: usize, known_tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
         match self {
             CBOR::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
             CBOR::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),

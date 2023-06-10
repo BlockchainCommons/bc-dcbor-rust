@@ -83,8 +83,8 @@ pub use date::Date;
 mod diag;
 mod dump;
 
-mod known_tags;
-pub use known_tags::{KnownTags, KnownTagsDict};
+mod tags_store;
+pub use tags_store::{TagsStoreTrait, TagsStore};
 
 mod tag;
 pub use tag::Tag;

@@ -1,4 +1,4 @@
-use crate::{CBOR, known_tags::KnownTags, string_util::flanked, Date};
+use crate::{CBOR, tags_store::TagsStoreTrait, string_util::flanked, Date};
 
 /// Affordances for viewing CBOR in diagnostic notation.
 impl CBOR {
@@ -6,7 +6,7 @@ impl CBOR {
     ///
     /// Optionally annotates the output, e.g. formatting dates and adding names
     /// of known tags.
-    pub fn diagnostic_opt(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> String {
+    pub fn diagnostic_opt(&self, annotate: bool, known_tags: Option<&dyn TagsStoreTrait>) -> String {
         self.diag_item(annotate, known_tags).format(annotate)
     }
 
@@ -15,7 +15,7 @@ impl CBOR {
         self.diagnostic_opt(false, None)
     }
 
-    fn diag_item(&self, annotate: bool, known_tags: Option<&dyn KnownTags>) -> DiagItem {
+    fn diag_item(&self, annotate: bool, known_tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
         match self {
             CBOR::Unsigned(_) | CBOR::Negative(_) | CBOR::ByteString(_) |
             CBOR::Text(_) | CBOR::Simple(_) => DiagItem::Item(format!("{}", self)),

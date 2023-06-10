@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use crate::Tag;
 
 /// A type that can map between tags and their names.
-pub trait KnownTags {
+pub trait TagsStoreTrait {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String>;
     fn name_for_tag(&self, tag: &Tag) -> String;
     fn tag_for_value(&self, value: u64) -> Option<Tag>;
     fn tag_for_name(&self, name: &str) -> Option<Tag>;
 
-    fn name_for_tag_opt<T>(tag: &Tag, known_tags: Option<&T>) -> String where T: KnownTags, Self: Sized {
+    fn name_for_tag_opt<T>(tag: &Tag, known_tags: Option<&T>) -> String where T: TagsStoreTrait, Self: Sized {
         match known_tags {
             None => tag.value().to_string(),
             Some(tags) => tags.name_for_tag(tag)
@@ -19,12 +19,12 @@ pub trait KnownTags {
 
 /// A dictionary of mappings between tags and their names.
 #[derive(Clone, Debug)]
-pub struct KnownTagsDict {
+pub struct TagsStore {
     tags_by_value: HashMap<u64, Tag>,
     tags_by_name: HashMap<String, Tag>,
 }
 
-impl KnownTagsDict {
+impl TagsStore {
     pub fn new<T>(tags: T) -> Self where T: IntoIterator<Item=Tag> {
         let mut tags_by_value = HashMap::new();
         let mut tags_by_name = HashMap::new();
@@ -49,7 +49,7 @@ impl KnownTagsDict {
     }
 }
 
-impl KnownTags for KnownTagsDict {
+impl TagsStoreTrait for TagsStore {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String> {
         self.tag_for_value(tag.value()).map(|tag| tag.name().unwrap())
     }
@@ -67,7 +67,7 @@ impl KnownTags for KnownTagsDict {
     }
 }
 
-impl Default for KnownTagsDict {
+impl Default for TagsStore {
     fn default() -> Self {
         Self::new([])
     }
