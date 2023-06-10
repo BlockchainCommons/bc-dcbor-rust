@@ -9,15 +9,15 @@ fn run(cbor: CBOR,
     hex: &str,
     hex_annotated: &str)
 {
-    let mut known_tags = TagsStore::new([]);
-    known_tags.insert(Tag::new_with_name(1, "date"));
+    let mut tags = TagsStore::new([]);
+    tags.insert(Tag::new_with_name(1, "date"));
 
     assert_eq!(format!("{}", cbor), description);
     assert_eq!(format!("{:?}", cbor), debug_description);
     assert_eq!(format!("{}", cbor.diagnostic()), diagnostic);
-    assert_eq!(format!("{}", cbor.diagnostic_opt(true, Some(&known_tags))), diagnostic_annotated);
+    assert_eq!(format!("{}", cbor.diagnostic_opt(true, Some(&tags))), diagnostic_annotated);
     assert_eq!(cbor.hex(), hex);
-    assert_eq!(cbor.hex_opt(true, Some(&known_tags)), hex_annotated);
+    assert_eq!(cbor.hex_opt(true, Some(&tags)), hex_annotated);
 }
 
 #[test]

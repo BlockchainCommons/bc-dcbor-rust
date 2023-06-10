@@ -14,11 +14,11 @@ impl CBOR {
     /// Optionally annotates the output, e.g. breaking the output up into
     /// semantically meaningful lines, formatting dates, and adding names of
     /// known tags.
-    pub fn hex_opt(&self, annotate: bool, known_tags: Option<&dyn TagsStoreTrait>) -> String {
+    pub fn hex_opt(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> String {
         if !annotate {
             return self.hex()
         }
-        let items = self.dump_items(0, known_tags);
+        let items = self.dump_items(0, tags);
         let note_column = items.iter().fold(0, |largest, item| {
             largest.max(item.format_first_column().len())
         });
@@ -26,7 +26,7 @@ impl CBOR {
         lines.join("\n")
     }
 
-    fn dump_items(&self, level: usize, known_tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
+    fn dump_items(&self, level: usize, tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
         match self {
             CBOR::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
             CBOR::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),
@@ -65,8 +65,8 @@ impl CBOR {
                 let header = tag.value().encode_varint(MajorType::Tagged);
                 let header_data = vec![vec!(header[0]), header[1..].to_vec()];
                 let mut note_components: Vec<String> = vec![format!("tag({})", tag.value())];
-                if let Some(known_tags) = known_tags {
-                    if let Some(name) = known_tags.assigned_name_for_tag(tag) {
+                if let Some(tags) = tags {
+                    if let Some(name) = tags.assigned_name_for_tag(tag) {
                         note_components.push(format!("  ; {}", name));
                     }
                 }
@@ -75,7 +75,7 @@ impl CBOR {
                     vec![
                         DumpItem::new(level, header_data, Some(tag_note))
                     ],
-                    item.dump_items(level + 1, known_tags)
+                    item.dump_items(level + 1, tags)
                 ].into_iter().flatten().collect()
             },
             CBOR::Array(array) => {
@@ -85,7 +85,7 @@ impl CBOR {
                     vec![
                         DumpItem::new(level, header_data, Some(format!("array({})", array.len())))
                     ],
-                    array.iter().flat_map(|x| x.dump_items(level + 1, known_tags)).collect()
+                    array.iter().flat_map(|x| x.dump_items(level + 1, tags)).collect()
                 ].into_iter().flatten().collect()
             },
             CBOR::Map(m) => {
@@ -97,8 +97,8 @@ impl CBOR {
                     ],
                     m.iter().flat_map(|x| {
                         vec![
-                            x.0.dump_items(level + 1, known_tags),
-                            x.1.dump_items(level + 1, known_tags)
+                            x.0.dump_items(level + 1, tags),
+                            x.1.dump_items(level + 1, tags)
                         ].into_iter().flatten().collect::<Vec<DumpItem>>()
                     }).collect()
                 ].into_iter().flatten().collect()

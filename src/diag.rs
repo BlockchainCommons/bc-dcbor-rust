@@ -6,8 +6,8 @@ impl CBOR {
     ///
     /// Optionally annotates the output, e.g. formatting dates and adding names
     /// of known tags.
-    pub fn diagnostic_opt(&self, annotate: bool, known_tags: Option<&dyn TagsStoreTrait>) -> String {
-        self.diag_item(annotate, known_tags).format(annotate)
+    pub fn diagnostic_opt(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> String {
+        self.diag_item(annotate, tags).format(annotate)
     }
 
     /// Returns a representation of this CBOR in diagnostic notation.
@@ -15,7 +15,7 @@ impl CBOR {
         self.diagnostic_opt(false, None)
     }
 
-    fn diag_item(&self, annotate: bool, known_tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
+    fn diag_item(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
         match self {
             CBOR::Unsigned(_) | CBOR::Negative(_) | CBOR::ByteString(_) |
             CBOR::Text(_) | CBOR::Simple(_) => DiagItem::Item(format!("{}", self)),
@@ -23,7 +23,7 @@ impl CBOR {
             CBOR::Array(a) => {
                 let begin = "[".to_string();
                 let end = "]".to_string();
-                let items = a.iter().map(|x| x.diag_item(annotate, known_tags)).collect();
+                let items = a.iter().map(|x| x.diag_item(annotate, tags)).collect();
                 let is_pairs = false;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
@@ -32,8 +32,8 @@ impl CBOR {
                 let begin = "{".to_string();
                 let end = "}".to_string();
                 let items = m.iter().flat_map(|(key, value)| vec![
-                    key.diag_item(annotate, known_tags),
-                    value.diag_item(annotate, known_tags)
+                    key.diag_item(annotate, tags),
+                    value.diag_item(annotate, tags)
                 ]).collect();
                 let is_pairs = true;
                 let comment = None;
@@ -52,17 +52,17 @@ impl CBOR {
                             diag_item = DiagItem::Item(date);
                         },
                         _ => {
-                            diag_item = item.diag_item(annotate, known_tags);
+                            diag_item = item.diag_item(annotate, tags);
                         },
                     }
                 } else {
-                    diag_item = item.diag_item(annotate, known_tags);
+                    diag_item = item.diag_item(annotate, tags);
                 }
                 let begin = tag.value().to_string() + "(";
                 let end = ")".to_string();
                 let items = vec![diag_item];
                 let is_pairs = false;
-                let comment = known_tags.as_ref().and_then(|x| x.assigned_name_for_tag(tag));
+                let comment = tags.as_ref().and_then(|x| x.assigned_name_for_tag(tag));
                 DiagItem::Group(begin, end, items, is_pairs, comment)
             },
         }

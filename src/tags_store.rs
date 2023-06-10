@@ -9,8 +9,8 @@ pub trait TagsStoreTrait {
     fn tag_for_value(&self, value: u64) -> Option<Tag>;
     fn tag_for_name(&self, name: &str) -> Option<Tag>;
 
-    fn name_for_tag_opt<T>(tag: &Tag, known_tags: Option<&T>) -> String where T: TagsStoreTrait, Self: Sized {
-        match known_tags {
+    fn name_for_tag_opt<T>(tag: &Tag, tags: Option<&T>) -> String where T: TagsStoreTrait, Self: Sized {
+        match tags {
             None => tag.value().to_string(),
             Some(tags) => tags.name_for_tag(tag)
         }
