@@ -216,6 +216,15 @@ fn encode_map() {
 }
 
 #[test]
+fn encode_anders_map() {
+    let mut m = Map::new();
+    m.insert_into(1, 45.7);
+    m.insert_into(2, "Hi there!");
+    assert_eq!(m.cbor_data(), hex!("a201fb4046d9999999999a0269486920746865726521"));
+    assert_eq!(m.extract::<i32, f64>(1).unwrap(), 45.7);
+}
+
+#[test]
 fn encode_map_misordered() {
     let cbor = CBOR::from_hex("a2026141016142");
     assert_eq!(cbor, Err(Error::MisorderedMapKey));
