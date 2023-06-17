@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.7.0")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.7.1")]
 #![warn(rust_2018_idioms)]
 
 //! # dCBOR: Deterministic CBOR Codec
@@ -19,7 +19,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.7.0"
+//! dcbor = "0.7.1"
 //! ```
 //! # Specification
 //!
