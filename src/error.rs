@@ -2,7 +2,7 @@ use std::str::Utf8Error;
 use crate::tag::Tag;
 
 /// An error encountered while decoding or parsing CBOR.
-#[derive(Debug, Eq, Clone)]
+#[derive(Debug)]
 pub enum Error {
     /// Early end of data.
     Underrun,
@@ -60,14 +60,3 @@ impl std::fmt::Display for Error {
 }
 
 impl std::error::Error for Error { }
-
-impl PartialEq for Error {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::UnsupportedHeaderValue(l0), Self::UnsupportedHeaderValue(r0)) => l0 == r0,
-            (Self::InvalidString(l0), Self::InvalidString(r0)) => l0 == r0,
-            (Self::UnusedData(l0), Self::UnusedData(r0)) => l0 == r0,
-            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
-        }
-    }
-}
