@@ -2,7 +2,7 @@ use std::str::Utf8Error;
 use crate::tag::Tag;
 
 /// An error encountered while decoding or parsing CBOR.
-#[derive(Debug)]
+#[derive(Debug, Eq, Clone)]
 pub enum Error {
     /// Early end of data.
     Underrun,
