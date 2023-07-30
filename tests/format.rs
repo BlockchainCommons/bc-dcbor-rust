@@ -345,7 +345,7 @@ fn format_structure_2() {
           1:
           h'59f2293a5bce7d4de59e71b4207ac5d2',
           2:
-          1(2021-02-24T00:00:00Z)   ; date,
+          1(2021-02-24T00:00:00Z),   ; date
           3:
           "Dark Purple Aqua Love",
           4:

@@ -83,7 +83,7 @@ impl DiagItem {
     fn format_opt(&self, level: usize, separator: &str, annotate: bool) -> String {
         match self {
             DiagItem::Item(string) => {
-                self.format_line(level, string, separator)
+                self.format_line(level, string, separator, None)
             },
             DiagItem::Group(_, _, _, _, _) => {
                 if self.contains_group() || self.total_strings_len() > 20 || self.greatest_strings_len() > 20 {
@@ -95,14 +95,24 @@ impl DiagItem {
         }
     }
 
-    fn format_line(&self, level: usize, string: &str, separator: &str) -> String {
-        format!("{}{}{}", " ".repeat(level * 3), string, separator)
+    fn format_line(&self, level: usize, string: &str, separator: &str, comment: Option<&str>) -> String {
+        let result = format!("{}{}{}", " ".repeat(level * 3), string, separator);
+        if let Some(comment) = comment {
+            format!("{}   ; {}", result, comment)
+        } else {
+            result
+        }
     }
 
-    fn single_line_composition(&self, level: usize, separator: &str, annotate: bool) -> String {
-        let string = match self {
-            DiagItem::Item(s) => s.clone(),
-            DiagItem::Group(begin, end, items, is_pairs, comment) => {
+    fn single_line_composition(&self, level: usize, separator: &str, _annotate: bool) -> String {
+        let string: String;
+        let comment: Option<&str>;
+        match self {
+            DiagItem::Item(s) => {
+                string = s.clone();
+                comment = None;
+            },
+            DiagItem::Group(begin, end, items, is_pairs, comm) => {
                 let components: Vec<String> = items.iter().map(|item| {
                     match item {
                         DiagItem::Item(string) => string,
@@ -110,14 +120,11 @@ impl DiagItem {
                     }.to_string()
                 }).collect();
                 let pair_separator = if *is_pairs { ": " } else { ", " };
-                let s = flanked(&Self::joined(&components, ", ", Some(pair_separator)), begin, end);
-                match (annotate, comment) {
-                    (true, Some(comment)) => format!("{}   ; {}", s, comment),
-                    _ => s,
-                }
+                string = flanked(&Self::joined(&components, ", ", Some(pair_separator)), begin, end);
+                comment = comm.as_ref().map(|x| x.as_str());
             },
         };
-        self.format_line(level, &string, separator)
+        self.format_line(level, &string, separator, comment)
     }
 
     fn multiline_composition(&self, level: usize, separator: &str, annotate: bool) -> String {
@@ -129,7 +136,7 @@ impl DiagItem {
                     (true, Some(comment)) => format!("{}   ; {}", begin, comment),
                     _ => begin.to_owned()
                 };
-                lines.push(self.format_line(level, &b, ""));
+                lines.push(self.format_line(level, &b, "", comment.as_ref().map(|x| x.as_str())));
                 for (index, item) in items.iter().enumerate() {
                     let separator = if index == items.len() - 1 {
                         ""
@@ -140,7 +147,7 @@ impl DiagItem {
                     };
                     lines.push(item.format_opt(level + 1, separator, annotate));
                 }
-                lines.push(self.format_line(level, end, separator));
+                lines.push(self.format_line(level, end, separator, None));
                 lines.join("\n")
             },
         }
