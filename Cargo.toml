@@ -1,6 +1,6 @@
 [package]
 name = "dcbor"
-version = "0.7.4"
+version = "0.7.5"
 edition = "2021"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
 authors = ["Blockchain Commons"]
