@@ -13,7 +13,7 @@ documentation = "https://docs.rs/dcbor"
 
 [dependencies]
 chrono = "0.4.23"
-half = "2.2.1"
+half = "=2.2.1"
 hex = "0.4.3"
 
 [dev-dependencies]
