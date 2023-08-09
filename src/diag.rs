@@ -132,11 +132,7 @@ impl DiagItem {
             DiagItem::Item(string) => string.to_owned(),
             DiagItem::Group(begin, end, items, is_pairs, comment) => {
                 let mut lines: Vec<String> = vec![];
-                let b = match (annotate, comment) {
-                    (true, Some(comment)) => format!("{}   ; {}", begin, comment),
-                    _ => begin.to_owned()
-                };
-                lines.push(self.format_line(level, &b, "", comment.as_ref().map(|x| x.as_str())));
+                lines.push(self.format_line(level, begin, "", comment.as_ref().map(|x| x.as_str())));
                 for (index, item) in items.iter().enumerate() {
                     let separator = if index == items.len() - 1 {
                         ""
