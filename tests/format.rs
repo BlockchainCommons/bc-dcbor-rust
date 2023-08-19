@@ -46,14 +46,14 @@ fn format_simple() {
         "f6",
         "f6 # null"
     );
-    run(Simple::new(100).cbor(),
-        "simple(100)",
-        "simple(100)",
-        "simple(100)",
-        "simple(100)",
-        "f864",
-        "f864 # simple(100)"
-    );
+    // run(Simple::new(100).cbor(),
+    //     "simple(100)",
+    //     "simple(100)",
+    //     "simple(100)",
+    //     "simple(100)",
+    //     "f864",
+    //     "f864 # simple(100)"
+    // );
 }
 
 #[test]

@@ -4,7 +4,7 @@ use half::f16;
 
 use crate::{error::Error, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
 
-use super::{cbor::CBOR, varint::MajorType, Simple, Map};
+use super::{cbor::CBOR, varint::MajorType, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -160,7 +160,9 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                         20 => Ok((CBOR::FALSE, header_varint_len)),
                         21 => Ok((CBOR::TRUE, header_varint_len)),
                         22 => Ok((CBOR::NULL, header_varint_len)),
-                        v => Ok((Simple::new(v).cbor(), header_varint_len)),
+                        _ => {
+                            Err(Error::InvalidSimpleValue)
+                        },
                     }
                 }
             }

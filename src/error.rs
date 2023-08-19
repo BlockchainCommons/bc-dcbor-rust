@@ -13,6 +13,9 @@ pub enum Error {
     /// A numeric value was encoded in non-canonical form.
     NonCanonicalNumeric,
 
+    /// An invalid simple value was encountered.
+    InvalidSimpleValue,
+
     /// An invalidly-encoded UTF-8 string was encountered.
     InvalidString(Utf8Error),
 
@@ -47,6 +50,7 @@ impl std::fmt::Display for Error {
             Error::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
             Error::NonCanonicalNumeric => "non-canonical numeric value".to_string(),
             Error::InvalidString(err) => format!("invalid string format: {:?}", err),
+            Error::InvalidSimpleValue => "invalid simple value".to_string(),
             Error::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
             Error::MisorderedMapKey => "mis-ordered map key".to_string(),
             Error::DuplicateMapKey => "duplicate map key".to_string(),

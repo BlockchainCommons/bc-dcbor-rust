@@ -242,7 +242,6 @@ fn encode_tagged() {
 fn encode_value() {
     test_cbor(false, "simple(false)", "false", "f4");
     test_cbor(true, "simple(true)", "true", "f5");
-    test_cbor(Simple::new(100), "simple(100)", "simple(100)", "f864");
 }
 
 #[test]
