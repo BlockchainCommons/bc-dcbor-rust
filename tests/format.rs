@@ -241,10 +241,10 @@ fn format_date() {
         "1(-100)",
         "tagged(1, negative(-100))",
         "1(-100)",
-        "1(1969-12-31T23:58:20Z)   ; date",
+        "1(1969-12-31T23:58:20Z)   / date /",
         "c13863",
         indoc! {"
-        c1      # tag(1)   ; date
+        c1      # tag(1) date
            3863 # negative(-100)
         "}.trim()
     );
@@ -253,10 +253,10 @@ fn format_date() {
         "1(1675854714)",
         "tagged(1, unsigned(1675854714))",
         "1(1675854714)",
-        "1(2023-02-08T11:11:54Z)   ; date",
+        "1(2023-02-08T11:11:54Z)   / date /",
         "c11a63e3837a",
         indoc! {"
-        c1            # tag(1)   ; date
+        c1            # tag(1) date
            1a63e3837a # unsigned(1675854714)
         "}.trim()
     );
@@ -345,7 +345,7 @@ fn format_structure_2() {
           1:
           h'59f2293a5bce7d4de59e71b4207ac5d2',
           2:
-          1(2021-02-24T00:00:00Z),   ; date
+          1(2021-02-24T00:00:00Z),   / date /
           3:
           "Dark Purple Aqua Love",
           4:
@@ -361,7 +361,7 @@ fn format_structure_2() {
           50                                 # bytes(16)
              59f2293a5bce7d4de59e71b4207ac5d2
           02                                 # unsigned(2)
-          c1                                 # tag(1)   ; date
+          c1                                 # tag(1) date
              1a60359700                      # unsigned(1614124800)
           03                                 # unsigned(3)
           75                                 # text(21)

@@ -67,7 +67,7 @@ impl CBOR {
                 let mut note_components: Vec<String> = vec![format!("tag({})", tag.value())];
                 if let Some(tags) = tags {
                     if let Some(name) = tags.assigned_name_for_tag(tag) {
-                        note_components.push(format!("  ; {}", name));
+                        note_components.push(name);
                     }
                 }
                 let tag_note = note_components.join(" ");

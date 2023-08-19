@@ -98,7 +98,7 @@ impl DiagItem {
     fn format_line(&self, level: usize, string: &str, separator: &str, comment: Option<&str>) -> String {
         let result = format!("{}{}{}", " ".repeat(level * 3), string, separator);
         if let Some(comment) = comment {
-            format!("{}   ; {}", result, comment)
+            format!("{}   / {} /", result, comment)
         } else {
             result
         }
