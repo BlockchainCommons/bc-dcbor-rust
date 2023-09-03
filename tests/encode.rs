@@ -340,7 +340,7 @@ fn tag() {
 #[test]
 fn encode_date() {
     test_cbor_codable(
-        Date::from_timestamp(1675854714),
+        Date::from_timestamp(1675854714.0),
         "tagged(1, unsigned(1675854714))",
         "1(1675854714)",
         "c11a63e3837a"

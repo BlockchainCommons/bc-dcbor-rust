@@ -1,6 +1,6 @@
 [package]
 name = "dcbor"
-version = "0.7.7"
+version = "0.8.0"
 edition = "2021"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
 authors = ["Blockchain Commons"]
@@ -12,7 +12,7 @@ categories = ["data-structures", "encoding"]
 documentation = "https://docs.rs/dcbor"
 
 [dependencies]
-chrono = "0.4.23"
+chrono = "0.4.28"
 half = "=2.2.1"
 hex = "0.4.3"
 

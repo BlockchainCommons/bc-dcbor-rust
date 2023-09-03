@@ -1,4 +1,4 @@
-use crate::{CBOR, tags_store::TagsStoreTrait, string_util::flanked, Date};
+use crate::{CBOR, tags_store::TagsStoreTrait, string_util::flanked, Date, cbor_decodable::CBORDecodable};
 
 /// Affordances for viewing CBOR in diagnostic notation.
 impl CBOR {
@@ -42,16 +42,12 @@ impl CBOR {
             CBOR::Tagged(tag, item) => {
                 let diag_item: DiagItem;
                 if annotate && tag.value() == 1 {
-                    match **item {
-                        CBOR::Unsigned(secs_after_epoch) => {
-                            let date = Date::from_timestamp(secs_after_epoch as i64).to_string();
+                    match f64::from_cbor(item) {
+                        Ok(n) => {
+                            let date = Date::from_timestamp(n).to_string();
                             diag_item = DiagItem::Item(date);
                         },
-                        CBOR::Negative(secs_before_epoch) => {
-                            let date = Date::from_timestamp(secs_before_epoch).to_string();
-                            diag_item = DiagItem::Item(date);
-                        },
-                        _ => {
+                        Err(_) => {
                             diag_item = item.diag_item(annotate, tags);
                         },
                     }

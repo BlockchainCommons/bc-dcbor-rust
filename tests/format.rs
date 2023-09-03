@@ -237,7 +237,7 @@ fn format_tagged() {
 
 #[test]
 fn format_date() {
-    run(Date::from_timestamp(-100).cbor(),
+    run(Date::from_timestamp(-100.0).cbor(),
         "1(-100)",
         "tagged(1, negative(-100))",
         "1(-100)",
@@ -249,15 +249,30 @@ fn format_date() {
         "}.trim()
     );
 
-    run(Date::from_timestamp(1675854714).cbor(),
-        "1(1675854714)",
-        "tagged(1, unsigned(1675854714))",
-        "1(1675854714)",
-        "1(2023-02-08T11:11:54Z)   / date /",
-        "c11a63e3837a",
+    run(Date::from_timestamp(1647887071.0).cbor(),
+        "1(1647887071)",
+        "tagged(1, unsigned(1647887071))",
+        "1(1647887071)",
+        "1(2022-03-21T18:24:31Z)   / date /",
+        "c11a6238c2df",
         indoc! {"
         c1            # tag(1) date
-           1a63e3837a # unsigned(1675854714)
+           1a6238c2df # unsigned(1647887071)
+        "}.trim()
+    );
+}
+
+#[test]
+fn format_fractional_date() {
+    run(Date::from_timestamp(0.5).cbor(),
+        "1(0.5)",
+        "tagged(1, simple(0.5))",
+        "1(0.5)",
+        "1(1970-01-01T00:00:00Z)   / date /",
+        "c1f93800",
+        indoc! {"
+        c1        # tag(1) date
+           f93800 # 0.5
         "}.trim()
     );
 }

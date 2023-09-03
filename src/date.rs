@@ -1,7 +1,7 @@
 
-use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime};
+use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, error::Error, CBORTaggedDecodable, CBORTaggedCodable, Simple, CBORTagged};
+use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, error::Error, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -14,8 +14,10 @@ impl Date {
     }
 
     /// Creates a new `Date` from seconds since (or before) the Unix epoch.
-    pub fn from_timestamp(seconds_since_unix_epoch: i64) -> Self {
-        Self::from_datetime(Utc.timestamp_opt(seconds_since_unix_epoch, 0).unwrap())
+    pub fn from_timestamp(seconds_since_unix_epoch: f64) -> Self {
+        let whole_seconds_since_unix_epoch = seconds_since_unix_epoch.trunc() as i64;
+        let nsecs = (seconds_since_unix_epoch.fract() * 1_000_000_000.0) as u32;
+        Self::from_datetime(Utc.timestamp_opt(whole_seconds_since_unix_epoch, nsecs).unwrap())
     }
 
     /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
@@ -28,7 +30,7 @@ impl Date {
         // try parsing as just a date (with assumed zero time)
         if let Ok(d) = NaiveDate::parse_from_str(value, "%Y-%m-%d") {
             let dt = NaiveDateTime::new(d, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
-            return Some(Self::from_datetime(DateTime::from_utc(dt, Utc)));
+            return Some(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
         }
 
         None
@@ -45,8 +47,11 @@ impl Date {
     }
 
     /// Returns the `Date` as the number of seconds since the Unix epoch.
-    pub fn timestamp(&self) -> i64 {
-        self.datetime().timestamp()
+    pub fn timestamp(&self) -> f64 {
+        let d = self.datetime();
+        let whole_seconds_since_unix_epoch = d.timestamp();
+        let nsecs = d.nanosecond();
+        (whole_seconds_since_unix_epoch as f64) + ((nsecs as f64) / 1_000_000_000.0)
     }
 }
 
@@ -91,19 +96,8 @@ impl CBORTaggedEncodable for Date {
 
 impl CBORTaggedDecodable for Date {
     fn from_untagged_cbor(cbor: &CBOR) -> Result<Self, Error> {
-        match cbor {
-            CBOR::Unsigned(n) => {
-                let i = i64::try_from(*n).map_err(|_| Error::WrongType)?;
-                Ok(Date::from_timestamp(i))
-            },
-            CBOR::Negative(n) => {
-                Ok(Date::from_timestamp(*n))
-            },
-            CBOR::Simple(Simple::Float(n)) => {
-                Ok(Date::from_timestamp(*n as i64))
-            },
-            _ => { Err(Error::WrongType)}
-        }
+        let n = f64::from_cbor(cbor)?;
+        Ok(Date::from_timestamp(n))
     }
 }
 
