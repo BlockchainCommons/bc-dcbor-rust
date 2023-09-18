@@ -2,18 +2,18 @@ use std::str::from_utf8;
 
 use half::f16;
 
-use crate::{error::Error, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
+use crate::{error::CBORError, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
 
 use super::{cbor::CBOR, varint::MajorType, Map};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
 /// Returns an error if the data is not well-formed deterministic CBOR.
-pub fn decode_cbor(data: &[u8]) -> Result<CBOR, Error> {
+pub fn decode_cbor(data: &[u8]) -> Result<CBOR, CBORError> {
     let (cbor, len) = decode_cbor_internal(data)?;
     let remaining = data.len() - len;
     if remaining > 0 {
-        return Err(Error::UnusedData(remaining));
+        return Err(CBORError::UnusedData(remaining));
     }
     Ok(cbor)
 }
@@ -34,40 +34,40 @@ fn parse_header(header: u8) -> (MajorType, u8) {
     (major_type, header_value)
 }
 
-fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), Error> {
+fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), CBORError> {
     if data.is_empty() {
-        return Err(Error::Underrun)
+        return Err(CBORError::Underrun)
     }
     let (major_type, header_value) = parse_header(data[0]);
     let data_remaining = data.len() - 1;
     let (value, varint_len) = match header_value {
         0..=23 => (header_value as u64, 1),
         24 => {
-            if data_remaining < 1 { return Err(Error::Underrun); }
+            if data_remaining < 1 { return Err(CBORError::Underrun); }
             let val = data[1] as u64;
-            if val < 24 { return Err(Error::NonCanonicalNumeric) }
+            if val < 24 { return Err(CBORError::NonCanonicalNumeric) }
             (val, 2)
         },
         25 => {
-            if data_remaining < 2 { return Err(Error::Underrun); }
+            if data_remaining < 2 { return Err(CBORError::Underrun); }
             let val =
                 ((data[1] as u64) << 8) |
                 (data[2] as u64);
-            if val <= u8::MAX as u64 { return Err(Error::NonCanonicalNumeric) }
+            if val <= u8::MAX as u64 { return Err(CBORError::NonCanonicalNumeric) }
             (val, 3)
         },
         26 => {
-            if data_remaining < 4 { return Err(Error::Underrun); }
+            if data_remaining < 4 { return Err(CBORError::Underrun); }
             let val =
                 ((data[1] as u64) << 24) |
                 ((data[2] as u64) << 16) |
                 ((data[3] as u64) << 8) |
                 (data[4] as u64);
-            if val <= u16::MAX as u64 { return Err(Error::NonCanonicalNumeric) }
+            if val <= u16::MAX as u64 { return Err(CBORError::NonCanonicalNumeric) }
             (val, 5)
         },
         27 => {
-            if data_remaining < 8 { return Err(Error::Underrun); }
+            if data_remaining < 8 { return Err(CBORError::Underrun); }
             let val =
                 ((data[1] as u64) << 56) |
                 ((data[2] as u64) << 48) |
@@ -77,24 +77,24 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), Error> {
                 ((data[6] as u64) << 16) |
                 ((data[7] as u64) << 8) |
                 (data[8] as u64);
-            if val <= u32::MAX as u64 { return Err(Error::NonCanonicalNumeric) }
+            if val <= u32::MAX as u64 { return Err(CBORError::NonCanonicalNumeric) }
             (val, 9)
         },
-        v => return Err(Error::UnsupportedHeaderValue(v))
+        v => return Err(CBORError::UnsupportedHeaderValue(v))
     };
     Ok((major_type, value, varint_len))
 }
 
-fn parse_bytes(data: &[u8], len: usize) -> Result<&[u8], Error> {
+fn parse_bytes(data: &[u8], len: usize) -> Result<&[u8], CBORError> {
     if data.len() < len {
-        return Err(Error::Underrun);
+        return Err(CBORError::Underrun);
     }
     Ok(&data[0..len])
 }
 
-fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
+fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
     if data.is_empty() {
-        return Err(Error::Underrun)
+        return Err(CBORError::Underrun)
     }
     let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
@@ -108,7 +108,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
         MajorType::Text => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
-            let string = from_utf8(buf).map_err(Error::InvalidString)?;
+            let string = from_utf8(buf)?;
             Ok((string.cbor(), header_varint_len + data_len))
         },
         MajorType::Array => {
@@ -161,7 +161,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), Error> {
                         21 => Ok((CBOR::TRUE, header_varint_len)),
                         22 => Ok((CBOR::NULL, header_varint_len)),
                         _ => {
-                            Err(Error::InvalidSimpleValue)
+                            Err(CBORError::InvalidSimpleValue)
                         },
                     }
                 }

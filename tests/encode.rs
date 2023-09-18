@@ -227,7 +227,7 @@ fn encode_anders_map() {
 #[test]
 fn encode_map_misordered() {
     let cbor = CBOR::from_hex("a2026141016142");
-    if let Err(Error::MisorderedMapKey) = cbor {
+    if let Err(CBORError::MisorderedMapKey) = cbor {
     } else {
         panic!("Expected MisorderedMapKey error");
     }
@@ -295,16 +295,14 @@ fn fail_float_coerced_to_int() {
     let c = n.cbor();
     let f: f64 = (&c).try_into().unwrap();
     assert_eq!(f, n);
-    if let Err(Error::WrongType) = i32::try_from(&c) {
-    } else {
-        panic!("Expected WrongType error");
-    }
+    let a = i32::try_from(&c);
+    assert!(a.is_err());
 }
 
 #[test]
 fn non_canonical_float_1() {
     // Non-canonical representation of 1.5 that could be represented at a smaller width.
-    if let Err(Error::NonCanonicalNumeric) = CBOR::from_hex("FB3FF8000000000000") {
+    if let Err(CBORError::NonCanonicalNumeric) = CBOR::from_hex("FB3FF8000000000000") {
     } else {
         panic!("Expected NonCanonicalNumeric error");
     }
@@ -313,7 +311,7 @@ fn non_canonical_float_1() {
 #[test]
 fn non_canonical_float_2() {
     // Non-canonical representation of a floating point value that could be represented as an integer.
-    if let Err(Error::NonCanonicalNumeric) = CBOR::from_hex("F94A00") {
+    if let Err(CBORError::NonCanonicalNumeric) = CBOR::from_hex("F94A00") {
     } else {
         panic!("Expected NonCanonicalNumeric error");
     }
@@ -321,7 +319,7 @@ fn non_canonical_float_2() {
 
 #[test]
 fn unused_data() {
-    if let Err(Error::UnusedData(1)) = CBOR::from_hex("0001") {
+    if let Err(CBORError::UnusedData(1)) = CBOR::from_hex("0001") {
     } else {
         panic!("Expected UnusedData error");
     }

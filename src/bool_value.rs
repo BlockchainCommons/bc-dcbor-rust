@@ -1,4 +1,6 @@
-use crate::{CBOREncodable, CBOR, Simple, CBORDecodable, CBORCodable, Error};
+use crate::{CBOREncodable, CBOR, Simple, CBORDecodable, CBORCodable, CBORError};
+
+use anyhow::bail;
 
 impl CBOREncodable for bool {
     fn cbor(&self) -> CBOR {
@@ -17,11 +19,11 @@ impl CBOREncodable for bool {
 }
 
 impl CBORDecodable for bool {
-    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
+    fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         match cbor {
             CBOR::Simple(Simple::False) => Ok(false),
             CBOR::Simple(Simple::True) => Ok(true),
-            _ => Err(Error::WrongType),
+            _ => bail!(CBORError::WrongType),
         }
     }
 }
@@ -47,7 +49,7 @@ impl From<CBOR> for bool {
 }
 
 impl TryFrom<&CBOR> for bool {
-    type Error = Error;
+    type Error = anyhow::Error;
 
     fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
         Self::from_cbor(value)

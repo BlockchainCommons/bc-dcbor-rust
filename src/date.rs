@@ -1,7 +1,9 @@
 
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, error::Error, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
+use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
+
+use anyhow::bail;
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -56,12 +58,12 @@ impl Date {
 }
 
 impl TryFrom<&str> for Date {
-    type Error = String;
+    type Error = anyhow::Error;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match Self::new_from_string(value) {
             Some(date) => Ok(date),
-            None => Err("Invalid date string".into())
+            None => bail!("Invalid date string")
         }
     }
 }
@@ -77,7 +79,7 @@ impl CBOREncodable for Date {
 }
 
 impl CBORDecodable for Date {
-    fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
+    fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         Self::from_tagged_cbor(cbor)
     }
 }
@@ -95,7 +97,7 @@ impl CBORTaggedEncodable for Date {
 }
 
 impl CBORTaggedDecodable for Date {
-    fn from_untagged_cbor(cbor: &CBOR) -> Result<Self, Error> {
+    fn from_untagged_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         let n = f64::from_cbor(cbor)?;
         Ok(Date::from_timestamp(n))
     }

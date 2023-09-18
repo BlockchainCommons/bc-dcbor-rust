@@ -1,66 +1,49 @@
 use std::str::Utf8Error;
 use crate::tag::Tag;
+use thiserror::Error;
 
 /// An error encountered while decoding or parsing CBOR.
-#[derive(Debug)]
-pub enum Error {
-    /// Early end of data.
+#[derive(Debug, Error)]
+pub enum CBORError {
+    #[error("early end of CBOR data")]
     Underrun,
 
-    /// Unsupported value in CBOR header.
+    #[error("ensupported value in CBOR header")]
     UnsupportedHeaderValue(u8),
 
-    /// A numeric value was encoded in non-canonical form.
+    #[error("a CBOR numeric value was encoded in non-canonical form")]
     NonCanonicalNumeric,
 
-    /// An invalid simple value was encountered.
+    #[error("an invalid CBOR simple value was encountered")]
     InvalidSimpleValue,
 
-    /// An invalidly-encoded UTF-8 string was encountered.
+    #[error("an invalidly-encoded UTF-8 string was encountered in the CBOR ({0:?})")]
     InvalidString(Utf8Error),
 
-    /// The decoded CBOR had extra data at the end.
+    #[error("the decoded CBOR had {0} extra bytes at the end")]
     UnusedData(usize),
 
-    /// The decoded CBOR map has keys that are not in canonical order.
+    #[error("the decoded CBOR map has keys that are not in canonical order")]
     MisorderedMapKey,
 
-    /// The decoded CBOR map has a duplicate key.
+    #[error("the decoded CBOR map has a duplicate key")]
     DuplicateMapKey,
 
-    /// The numeric value could not be represented in the specified numeric type.
+    #[error("missing CBOR map key")]
+    MissingMapKey,
+
+    #[error("the CBOR numeric value could not be represented in the specified numeric type")]
     OutOfRange,
 
-    /// The decoded value was not the expected type.
+    #[error("the decoded CBOR value was not the expected type")]
     WrongType,
 
-    /// The decoded value did not have the expected tag.
-    ///
-    /// The case includes the expected tag and encountered tag as associated data.
+    #[error("expected CBOR tag {0}, but got {1}")]
     WrongTag(Tag, Tag),
-
-    /// Invalid CBOR format. Frequently returned by libraries depending on this one.
-    InvalidFormat,
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            Error::Underrun => "early end of data".to_string(),
-            Error::UnsupportedHeaderValue(v) => format!("unsupported value in header ({})", v),
-            Error::NonCanonicalNumeric => "non-canonical numeric value".to_string(),
-            Error::InvalidString(err) => format!("invalid string format: {:?}", err),
-            Error::InvalidSimpleValue => "invalid simple value".to_string(),
-            Error::UnusedData(len) => format!("unused data past end: {:?} bytes", len),
-            Error::MisorderedMapKey => "mis-ordered map key".to_string(),
-            Error::DuplicateMapKey => "duplicate map key".to_string(),
-            Error::OutOfRange => "integer out of range".to_string(),
-            Error::WrongType => "wrong type".to_string(),
-            Error::WrongTag(expected, encountered) => format!("wrong tag, expected: {:?}, encountered: {:?}", expected, encountered),
-            Error::InvalidFormat => "invalid CBOR format".to_string(),
-        };
-        f.write_str(&s)
+impl From<Utf8Error> for CBORError {
+    fn from(err: Utf8Error) -> Self {
+        CBORError::InvalidString(err)
     }
 }
-
-impl std::error::Error for Error { }

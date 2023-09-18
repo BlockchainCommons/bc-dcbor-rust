@@ -72,7 +72,7 @@ mod float;
 mod array;
 
 mod error;
-pub use error::Error;
+pub use error::CBORError;
 
 mod date;
 pub use date::Date;

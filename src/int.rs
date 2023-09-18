@@ -1,7 +1,9 @@
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::Error, CBORCodable};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
+
+use anyhow::bail;
 
 macro_rules! impl_cbor {
     ($type: ty) => {
@@ -30,11 +32,11 @@ macro_rules! impl_cbor {
         }
 
         impl CBORDecodable for $type {
-            fn from_cbor(cbor: &CBOR) -> Result<Self, Error> {
+            fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
                 match cbor {
                     CBOR::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
                     CBOR::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
-                    _ => Err(Error::WrongType),
+                    _ => bail!(CBORError::WrongType),
                 }
             }
         }
@@ -60,7 +62,7 @@ macro_rules! impl_cbor {
         }
 
         impl TryFrom<&CBOR> for $type {
-            type Error = Error;
+            type Error = anyhow::Error;
 
             fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
                 Self::from_cbor(value)
@@ -80,19 +82,21 @@ impl_cbor!(i32);
 impl_cbor!(i64);
 
 trait From64 {
-    fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Self, Error> where F: Fn(u64) -> Self, Self: Sized {
+    fn from_u64<F>(n: u64, max: u64, f: F) -> anyhow::Result<Self>
+    where F: Fn(u64) -> Self, Self: Sized
+    {
         if n > max {
-            Err(Error::OutOfRange)
-        } else {
-            Ok(f(n))
+            bail!(CBORError::OutOfRange)
         }
+        Ok(f(n))
     }
 
-    fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> Result<Self, Error> where F: Fn(i64) -> Self, Self: Sized {
+    fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> anyhow::Result<Self>
+    where F: Fn(i64) -> Self, Self: Sized
+    {
         if n > max || n > min {
-            Err(Error::OutOfRange)
-        } else {
-            Ok(f(n))
+            bail!(CBORError::OutOfRange)
         }
+        Ok(f(n))
     }
 }
