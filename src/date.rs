@@ -23,19 +23,19 @@ impl Date {
     }
 
     /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
-    pub fn new_from_string(value: &str) -> Option<Self> {
+    pub fn new_from_string(value: &str) -> anyhow::Result<Self> {
         // try parsing as DateTime
         if let Ok(dt) = DateTime::parse_from_rfc3339(value) {
-            return Some(Self::from_datetime(dt.with_timezone(&Utc)));
+            return Ok(Self::from_datetime(dt.with_timezone(&Utc)));
         }
 
         // try parsing as just a date (with assumed zero time)
         if let Ok(d) = NaiveDate::parse_from_str(value, "%Y-%m-%d") {
             let dt = NaiveDateTime::new(d, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
-            return Some(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
+            return Ok(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
         }
 
-        None
+        bail!("Invalid date string")
     }
 
     /// Creates a new `Date` containing the current date and time.
@@ -61,10 +61,7 @@ impl TryFrom<&str> for Date {
     type Error = anyhow::Error;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match Self::new_from_string(value) {
-            Some(date) => Ok(date),
-            None => bail!("Invalid date string")
-        }
+        Self::new_from_string(value)
     }
 }
 

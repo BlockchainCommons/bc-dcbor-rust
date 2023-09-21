@@ -1,4 +1,4 @@
-use dcbor::*;
+use dcbor::preamble::*;
 use indoc::indoc;
 
 fn run(cbor: CBOR,
@@ -237,7 +237,7 @@ fn format_tagged() {
 
 #[test]
 fn format_date() {
-    run(Date::from_timestamp(-100.0).cbor(),
+    run(dcbor::Date::from_timestamp(-100.0).cbor(),
         "1(-100)",
         "tagged(1, negative(-100))",
         "1(-100)",
@@ -249,7 +249,7 @@ fn format_date() {
         "}.trim()
     );
 
-    run(Date::from_timestamp(1647887071.0).cbor(),
+    run(dcbor::Date::from_timestamp(1647887071.0).cbor(),
         "1(1647887071)",
         "tagged(1, unsigned(1647887071))",
         "1(1647887071)",
@@ -264,7 +264,7 @@ fn format_date() {
 
 #[test]
 fn format_fractional_date() {
-    run(Date::from_timestamp(0.5).cbor(),
+    run(dcbor::Date::from_timestamp(0.5).cbor(),
         "1(0.5)",
         "tagged(1, simple(0.5))",
         "1(0.5)",
