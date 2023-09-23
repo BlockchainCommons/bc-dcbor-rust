@@ -45,3 +45,9 @@ impl<T> CBOREncodable for &T where T: CBOREncodable {
         (*self).cbor()
     }
 }
+
+impl CBOREncodable for Box<CBOR> {
+    fn cbor(&self) -> CBOR {
+        (**self).cbor()
+    }
+}
