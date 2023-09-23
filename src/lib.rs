@@ -34,7 +34,7 @@
 //! ```
 //! # fn main() {
 //! # {
-//! use dcbor::preamble::*;
+//! use dcbor::prelude::*;
 //! let array = [1000, 2000, 3000];
 //! let cbor = array.cbor();
 //! assert_eq!(cbor.hex(), "831903e81907d0190bb8");
@@ -47,7 +47,7 @@
 //! ```
 //! # fn main() {
 //! # {
-//! use dcbor::preamble::*;
+//! use dcbor::prelude::*;
 //! let data = hex_literal::hex!("831903e81907d0190bb8");
 //! let cbor = CBOR::from_data(&data).unwrap();
 //! assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
@@ -119,4 +119,4 @@ pub use simple::Simple;
 
 mod varint;
 
-pub mod preamble;
+pub mod prelude;

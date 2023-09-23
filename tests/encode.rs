@@ -1,6 +1,6 @@
 use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
 
-use dcbor::preamble::*;
+use dcbor::prelude::*;
 use half::f16;
 use hex_literal::hex;
 

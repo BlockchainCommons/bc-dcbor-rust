@@ -1,4 +1,4 @@
-use dcbor::preamble::*;
+use dcbor::prelude::*;
 use indoc::indoc;
 
 fn run(cbor: CBOR,
