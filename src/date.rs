@@ -65,6 +65,12 @@ impl TryFrom<&str> for Date {
     }
 }
 
+impl AsRef<Date> for Date {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
+
 impl CBOREncodable for Date {
     fn cbor(&self) -> CBOR {
         self.tagged_cbor()
