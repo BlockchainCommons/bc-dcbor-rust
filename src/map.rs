@@ -196,7 +196,7 @@ impl Eq for MapKey {
 
 impl PartialOrd for MapKey {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.0.partial_cmp(&other.0)
+        Some(self.cmp(other))
     }
 }
 
