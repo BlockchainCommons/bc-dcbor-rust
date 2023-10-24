@@ -1,3 +1,5 @@
+use bytes::Bytes;
+
 use crate::{CBOR, varint::{MajorType, EncodeVarInt}};
 
 /// A type that can be encoded as CBOR.
@@ -49,5 +51,11 @@ impl<T> CBOREncodable for &T where T: CBOREncodable {
 impl CBOREncodable for Box<CBOR> {
     fn cbor(&self) -> CBOR {
         (**self).cbor()
+    }
+}
+
+impl CBOREncodable for Bytes {
+    fn cbor(&self) -> CBOR {
+        CBOR::ByteString(self.clone())
     }
 }

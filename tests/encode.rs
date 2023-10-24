@@ -1,5 +1,6 @@
 use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
 
+use bytes::Bytes;
 use dcbor::prelude::*;
 use half::f16;
 use hex_literal::hex;
@@ -131,18 +132,24 @@ fn encode_signed() {
 
 #[test]
 fn encode_bytes_1() {
-    test_cbor_codable(CBOR::byte_string_hex("00112233"), "bytes(00112233)", "h'00112233'", "4400112233");
+    test_cbor_codable(
+        Bytes::from_static(&hex!("00112233")),
+            "bytes(00112233)",
+            "h'00112233'",
+            "4400112233"
+        );
 }
 
 #[test]
 fn encode_bytes() {
     test_cbor_codable(
-        CBOR::byte_string_hex("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"),
+        Bytes::from_static(&hex!("c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7")),
         "bytes(c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7)",
         "h'c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7'",
         "5820c0a7da14e5847c526244f7e083d26fe33f86d2313ad2b77164233444423a50a7"
     );
-    test_cbor_codable(CBOR::byte_string([0x11, 0x22, 0x33]),
+    let bytes = Bytes::from_static(&[0x11, 0x22, 0x33]);
+    test_cbor_codable(bytes,
     "bytes(112233)",
     "h'112233'",
     "43112233"
@@ -364,7 +371,7 @@ fn convert_values() {
     test_convert(false);
     test_convert("Hello".to_string());
     test_convert(10.0);
-    test_convert(CBOR::byte_string_hex("001122334455"))
+    test_convert(Bytes::from_static(&hex!("001122334455")));
 }
 
 #[test]

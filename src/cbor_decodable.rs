@@ -1,4 +1,6 @@
-use crate::CBOR;
+use bytes::Bytes;
+
+use crate::{CBOR, CBORError};
 
 /// A type that can be decoded from CBOR.
 pub trait CBORDecodable: 'static {
@@ -14,5 +16,14 @@ pub trait CBORDecodable: 'static {
 impl CBORDecodable for CBOR {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         Ok(cbor.clone())
+    }
+}
+
+impl CBORDecodable for Bytes {
+    fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
+        match cbor {
+            CBOR::ByteString(b) => Ok(b.clone()),
+            _ => Err(CBORError::WrongType)?
+        }
     }
 }

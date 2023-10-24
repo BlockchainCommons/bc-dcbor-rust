@@ -102,8 +102,8 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
         MajorType::Negative => Ok((CBOR::Negative(-(value as i64) - 1), header_varint_len)),
         MajorType::Bytes => {
             let data_len = value as usize;
-            let bytes: Vec<u8> = parse_bytes(&data[header_varint_len..], data_len)?.into();
-            Ok((CBOR::byte_string(bytes), header_varint_len + data_len))
+            let bytes = parse_bytes(&data[header_varint_len..], data_len)?.to_vec().into();
+            Ok((CBOR::ByteString(bytes), header_varint_len + data_len))
         },
         MajorType::Text => {
             let data_len = value as usize;

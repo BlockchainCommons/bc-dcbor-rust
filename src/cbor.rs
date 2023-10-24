@@ -1,3 +1,5 @@
+use bytes::Bytes;
+
 use crate::{tag::Tag, Simple, error::CBORError, decode::decode_cbor, CBOREncodable};
 
 use super::{Map, string_util::flanked};
@@ -10,7 +12,7 @@ pub enum CBOR {
     /// Negative integer (major type 1).
     Negative(i64),
     /// Byte string (major type 2).
-    ByteString(Vec<u8>),
+    ByteString(Bytes),
     /// UTF-8 string (major type 3).
     Text(String),
     /// Array (major type 4).
@@ -43,7 +45,7 @@ impl CBOR {
 impl CBOR {
     /// Create a new CBOR value representing a byte string.
     pub fn byte_string<T>(data: T) -> CBOR where T: AsRef<[u8]> {
-        CBOR::ByteString(data.as_ref().to_vec())
+        CBOR::ByteString(Bytes::copy_from_slice(data.as_ref()))
     }
 
     /// Create a new CBOR value representing a byte string given as a hexadecimal string.
@@ -54,9 +56,9 @@ impl CBOR {
     /// Extract the CBOR value as a byte string.
     ///
     /// Returns `Some` if the value is a byte string, `None` otherwise.
-    pub fn as_byte_string(&self) -> Option<&[u8]> {
+    pub fn as_byte_string(&self) -> Option<Bytes> {
         match self {
-            Self::ByteString(b) => Some(b),
+            Self::ByteString(b) => Some(b.clone()),
             _ => None
         }
     }
@@ -64,7 +66,7 @@ impl CBOR {
     /// Extract the CBOR value as a byte string.
     ///
     /// Returns `Ok` if the value is a byte string, `Err` otherwise.
-    pub fn expect_byte_string(&self) -> Result<&[u8], CBORError> {
+    pub fn expect_byte_string(&self) -> Result<Bytes, CBORError> {
         self.as_byte_string().ok_or(CBORError::WrongType)
     }
 
