@@ -122,9 +122,7 @@ impl CBOR {
     }
 
     /// Create a new CBOR value representing a tagged value.
-    pub fn tagged_value<T, I>(tag: T, item: I) -> CBOR
-        where T: Into<Tag>, I: CBOREncodable
-    {
+    pub fn tagged_value(tag: impl Into<Tag>, item: impl CBOREncodable) -> CBOR {
         CBOR::Tagged(tag.into(), Box::new(item.cbor()))
     }
 
@@ -142,9 +140,7 @@ impl CBOR {
     ///
     /// Returns `Ok` if the value is a tagged value with the expected tag, `Err`
     /// otherwise.
-    pub fn expect_tagged_value<T>(&self, expected_tag: T) -> Result<&CBOR, CBORError>
-    where T: Into<Tag>
-    {
+    pub fn expect_tagged_value(&self, expected_tag: impl Into<Tag>) -> Result<&CBOR, CBORError> {
         match self.as_tagged_value() {
             Some((tag, value)) if tag == &expected_tag.into() => Ok(value),
             _ => Err(CBORError::WrongType)

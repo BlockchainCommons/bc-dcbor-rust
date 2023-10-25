@@ -5,7 +5,7 @@ use dcbor::prelude::*;
 use half::f16;
 use hex_literal::hex;
 
-fn test_cbor<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBOREncodable {
+fn test_cbor(t: impl CBOREncodable, expected_debug: &str, expected_display: &str, expected_data: &str) {
     let cbor = t.cbor();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
