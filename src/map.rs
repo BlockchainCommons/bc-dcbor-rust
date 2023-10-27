@@ -236,11 +236,11 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable
     }
 }
 
-impl<K, V> TryInto<HashMap<K, V>> for CBOR where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash) + Clone, V: CBORDecodable + Clone {
+impl<K, V> TryFrom<&CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash) + Clone, V: CBORDecodable + Clone {
     type Error = Box<dyn std::error::Error>;
 
-    fn try_into(self) -> Result<HashMap<K, V>, Self::Error> {
-        match self {
+    fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
+        match cbor {
             CBOR::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
@@ -265,11 +265,11 @@ impl<K, V> From<BTreeMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodabl
     }
 }
 
-impl<K, V> TryInto<BTreeMap<K, V>> for CBOR where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord) + Clone, V: CBORDecodable + Clone {
+impl<K, V> TryFrom<&CBOR> for BTreeMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord) + Clone, V: CBORDecodable + Clone {
     type Error = Box<dyn std::error::Error>;
 
-    fn try_into(self) -> Result<BTreeMap<K, V>, Self::Error> {
-        match self {
+    fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
+        match cbor {
             CBOR::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
                 for (k, v) in map.iter() {

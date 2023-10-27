@@ -382,7 +382,7 @@ fn convert_hash_map() {
     h.insert(25, "C".to_string());
     let m = h.cbor();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
-    let h2: HashMap<i32, String> = m.try_into().unwrap();
+    let h2: HashMap<i32, String> = (&m).try_into().unwrap();
     assert_eq!(h, h2);
 }
 
@@ -394,7 +394,7 @@ fn convert_btree_map() {
     h.insert(25, "C".to_string());
     let m = h.cbor();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
-    let h2: BTreeMap<i32, String> = m.try_into().unwrap();
+    let h2: BTreeMap<i32, String> = (&m).try_into().unwrap();
     assert_eq!(h, h2);
 }
 
