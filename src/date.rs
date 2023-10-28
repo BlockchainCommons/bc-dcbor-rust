@@ -57,6 +57,12 @@ impl Date {
     }
 }
 
+impl Default for Date {
+    fn default() -> Self {
+        Self::now()
+    }
+}
+
 impl TryFrom<&str> for Date {
     type Error = anyhow::Error;
 
