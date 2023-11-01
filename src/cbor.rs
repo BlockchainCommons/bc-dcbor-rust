@@ -142,7 +142,14 @@ impl CBOR {
     /// otherwise.
     pub fn expect_tagged_value(&self, expected_tag: impl Into<Tag>) -> Result<&CBOR, CBORError> {
         match self.as_tagged_value() {
-            Some((tag, value)) if tag == &expected_tag.into() => Ok(value),
+            Some((tag, value)) => {
+                let expected_tag = expected_tag.into();
+                if tag == &expected_tag {
+                    Ok(value)
+                } else {
+                    Err(CBORError::WrongTag(expected_tag, tag.to_owned()))
+                }
+            },
             _ => Err(CBORError::WrongType)
         }
     }

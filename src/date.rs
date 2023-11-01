@@ -1,4 +1,6 @@
 
+use std::ops::{Add, Sub};
+
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
 
 use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
@@ -6,7 +8,7 @@ use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDeco
 use anyhow::bail;
 
 /// A CBOR-friendly representation of a date and time.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Date(DateTime<Utc>);
 
 impl Date {
@@ -54,6 +56,24 @@ impl Date {
         let whole_seconds_since_unix_epoch = d.timestamp();
         let nsecs = d.nanosecond();
         (whole_seconds_since_unix_epoch as f64) + ((nsecs as f64) / 1_000_000_000.0)
+    }
+}
+
+// Support adding seconds as f64
+impl Add<f64> for Date {
+    type Output = Self;
+
+    fn add(self, rhs: f64) -> Self::Output {
+        Self::from_timestamp(self.timestamp() + rhs)
+    }
+}
+
+// Support subtracting another date and returning the number of seconds as f64
+impl Sub for Date {
+    type Output = f64;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.timestamp() - rhs.timestamp()
     }
 }
 
