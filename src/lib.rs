@@ -29,7 +29,7 @@
 //!
 //! # Usage
 //!
-//! Encode an array of strings as CBOR.
+//! Encode an array of integers as CBOR.
 //!
 //! ```
 //! # fn main() {
@@ -42,7 +42,7 @@
 //! # }
 //! ```
 //!
-//! Decode CBOR binary back to an array of strings.
+//! Decode CBOR binary back to an array of integers.
 //!
 //! ```
 //! # fn main() {
