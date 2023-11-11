@@ -103,12 +103,6 @@ impl From<Date> for CBOR {
     }
 }
 
-impl From<&Date> for CBOR {
-    fn from(value: &Date) -> Self {
-        value.cbor()
-    }
-}
-
 impl AsRef<Date> for Date {
     fn as_ref(&self) -> &Self {
         self

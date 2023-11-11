@@ -20,6 +20,12 @@ impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
     }
 }
 
+impl<T> From<Vec<T>> for CBOR where T: CBOREncodable {
+    fn from(vec: Vec<T>) -> Self {
+        vec.cbor()
+    }
+}
+
 impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable + Clone {
     type Error = anyhow::Error;
 
@@ -74,6 +80,12 @@ impl<T, const N: usize> CBOREncodable for [T; N] where T: CBOREncodable {
     }
 }
 
+impl<T, const N: usize> From<[T; N]> for CBOR where T: CBOREncodable {
+    fn from(array: [T; N]) -> Self {
+        array.cbor()
+    }
+}
+
 impl<T> CBOREncodable for VecDeque<T> where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())
@@ -85,6 +97,12 @@ impl<T> CBOREncodable for VecDeque<T> where T: CBOREncodable {
             buf.extend(item.cbor_data());
         }
         buf
+    }
+}
+
+impl<T> From<VecDeque<T>> for CBOR where T: CBOREncodable {
+    fn from(deque: VecDeque<T>) -> Self {
+        deque.cbor()
     }
 }
 
@@ -106,12 +124,6 @@ impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable + Clone {
     }
 }
 
-impl<T> From<&VecDeque<T>> for CBOR where T: CBOREncodable {
-    fn from(array: &VecDeque<T>) -> Self {
-        CBOR::Array(array.iter().map(|x| x.cbor()).collect())
-    }
-}
-
 impl<T> CBOREncodable for HashSet<T> where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
         CBOR::Array(self.iter().map(|x| x.cbor()).collect())
@@ -123,6 +135,12 @@ impl<T> CBOREncodable for HashSet<T> where T: CBOREncodable {
             buf.extend(item.cbor_data());
         }
         buf
+    }
+}
+
+impl<T> From<HashSet<T>> for CBOR where T: CBOREncodable {
+    fn from(set: HashSet<T>) -> Self {
+        set.cbor()
     }
 }
 

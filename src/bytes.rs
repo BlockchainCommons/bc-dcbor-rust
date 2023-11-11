@@ -8,12 +8,6 @@ impl From<Bytes> for CBOR {
     }
 }
 
-impl From<&Bytes> for CBOR {
-    fn from(value: &Bytes) -> Self {
-        CBOR::ByteString(value.clone())
-    }
-}
-
 impl TryFrom<CBOR> for Bytes {
     type Error = anyhow::Error;
 

@@ -82,12 +82,6 @@ pub(crate) fn validate_canonical_f64(n: f64) -> Result<(), CBORError> {
     Ok(())
 }
 
-impl From<&f64> for CBOR {
-    fn from(value: &f64) -> Self {
-        value.cbor()
-    }
-}
-
 impl From<f64> for CBOR {
     fn from(value: f64) -> Self {
         value.cbor()
@@ -197,12 +191,6 @@ pub(crate) fn validate_canonical_f32(n: f32) -> Result<(), CBORError> {
     Ok(())
 }
 
-impl From<&f32> for CBOR {
-    fn from(value: &f32) -> Self {
-        value.cbor()
-    }
-}
-
 impl From<f32> for CBOR {
     fn from(value: f32) -> Self {
         value.cbor()
@@ -260,6 +248,12 @@ impl CBOREncodable for f16 {
             return CBOR_NAN.to_vec();
         }
         self.to_bits().encode_varint(MajorType::Simple)
+    }
+}
+
+impl From<f16> for CBOR {
+    fn from(value: f16) -> Self {
+        value.cbor()
     }
 }
 

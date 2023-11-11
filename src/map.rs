@@ -118,6 +118,12 @@ impl CBOREncodable for Map {
     }
 }
 
+impl From<Map> for CBOR {
+    fn from(value: Map) -> Self {
+        value.cbor()
+    }
+}
+
 impl std::fmt::Debug for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("{:?}", self.0))

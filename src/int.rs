@@ -49,12 +49,6 @@ macro_rules! impl_cbor {
             }
         }
 
-        impl From<&$type> for CBOR {
-            fn from(value: &$type) -> Self {
-                value.cbor()
-            }
-        }
-
         impl From<CBOR> for $type {
             fn from(value: CBOR) -> Self {
                 Self::from_cbor(&value).unwrap()

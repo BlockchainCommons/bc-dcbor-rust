@@ -3,7 +3,7 @@ use bytes::Bytes;
 use crate::{CBOR, varint::{MajorType, EncodeVarInt}};
 
 /// A type that can be encoded as CBOR.
-pub trait CBOREncodable {
+pub trait CBOREncodable: Into<CBOR> {
     /// Returns the value in CBOR symbolic representation.
     fn cbor(&self) -> CBOR;
     /// Returns the value in CBOR binary representation.
@@ -48,9 +48,21 @@ impl<T> CBOREncodable for &T where T: CBOREncodable {
     }
 }
 
+impl<T> From<&T> for CBOR where T: CBOREncodable {
+    fn from(value: &T) -> Self {
+        value.cbor()
+    }
+}
+
 impl CBOREncodable for Box<CBOR> {
     fn cbor(&self) -> CBOR {
         (**self).cbor()
+    }
+}
+
+impl From<Box<CBOR>> for CBOR {
+    fn from(value: Box<CBOR>) -> Self {
+        value.cbor()
     }
 }
 

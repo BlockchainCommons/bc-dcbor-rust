@@ -36,12 +36,6 @@ impl From<bool> for CBOR {
     }
 }
 
-impl From<&bool> for CBOR {
-    fn from(value: &bool) -> Self {
-        value.cbor()
-    }
-}
-
 impl From<CBOR> for bool {
     fn from(value: CBOR) -> Self {
         Self::from_cbor(&value).unwrap()
