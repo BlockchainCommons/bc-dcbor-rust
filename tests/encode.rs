@@ -201,14 +201,14 @@ fn encode_heterogenous_array() {
 #[test]
 fn encode_map() {
     let mut m = Map::new();
-    m.insert_into(-1, 3);
-    m.insert_into(vec![-1], 7);
-    m.insert_into("z", 4);
-    m.insert_into(10, 1);
-    m.insert_into(false, 8);
-    m.insert_into(100, 2);
-    m.insert_into("aa", 5);
-    m.insert_into(vec![100], 6);
+    m.insert(-1, 3);
+    m.insert(vec![-1].cbor(), 7);
+    m.insert("z", 4);
+    m.insert(10, 1);
+    m.insert(false, 8);
+    m.insert(100, 2);
+    m.insert("aa", 5);
+    m.insert(vec![100].cbor(), 6);
     test_cbor(m.clone(),
         r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#,
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
@@ -225,8 +225,8 @@ fn encode_map() {
 #[test]
 fn encode_anders_map() {
     let mut m = Map::new();
-    m.insert_into(1, 45.7);
-    m.insert_into(2, "Hi there!");
+    m.insert(1, 45.7);
+    m.insert(2, "Hi there!");
     assert_eq!(m.cbor_data(), hex!("a201fb4046d9999999999a0269486920746865726521"));
     assert_eq!(m.extract::<i32, f64>(1).unwrap(), 45.7);
 }
@@ -354,13 +354,14 @@ fn encode_date() {
 
 fn test_convert<T>(value: T)
 where
-    T: PartialEq + Clone + Into<CBOR> + From<CBOR> + TryFrom<CBOR> + std::fmt::Debug,
+    T: PartialEq + Clone + Into<CBOR> + TryFrom<CBOR> + std::fmt::Debug,
     T::Error: std::fmt::Debug,
 {
     let cbor = value.clone().into();
     let value2 = cbor.try_into().unwrap();
     assert_eq!(value, value2);
-    let value3 = T::from(value.clone().into());
+    let cbor_2: CBOR = value.clone().into();
+    let value3 = cbor_2.try_into().unwrap();
     assert_eq!(value, value3);
 }
 

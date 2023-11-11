@@ -1,4 +1,6 @@
-use crate::cbor_encodable::CBOREncodable;
+use anyhow::bail;
+
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -36,6 +38,31 @@ impl CBOREncodable for Simple {
         }
     }
 }
+
+impl From<Simple> for CBOR {
+    fn from(value: Simple) -> Self {
+        value.cbor()
+    }
+}
+
+impl CBORDecodable for Simple {
+    fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
+        match cbor {
+            CBOR::Simple(simple) => Ok(simple.clone()),
+            _ => bail!(CBORError::WrongType),
+        }
+    }
+}
+
+impl TryFrom<&CBOR> for Simple {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
+        Self::from_cbor(value)
+    }
+}
+
+impl CBORCodable for Simple { }
 
 impl PartialEq for Simple {
     fn eq(&self, other: &Self) -> bool {

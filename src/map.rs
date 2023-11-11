@@ -33,16 +33,10 @@ impl Map {
     }
 
     /// Inserts a key-value pair into the map.
-    pub fn insert(&mut self, key: CBOR, value: CBOR) {
+    pub fn insert(&mut self, key: impl Into<CBOR>, value: impl Into<CBOR>) {
+        let key = key.into();
+        let value = value.into();
         self.0.insert(MapKey::new(key.cbor_data()), MapValue::new(key, value));
-    }
-
-    /// Inserts a key-value pair into the map.
-    pub fn insert_into<K, V>(&mut self, key: K, value: V)
-    where
-        K: CBOREncodable, V: CBOREncodable
-    {
-        self.insert(key.cbor(), value.cbor());
     }
 
     pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {

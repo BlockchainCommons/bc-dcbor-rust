@@ -91,6 +91,24 @@ impl TryFrom<&str> for Date {
     }
 }
 
+impl From<DateTime<Utc>> for Date {
+    fn from(value: DateTime<Utc>) -> Self {
+        Self::from_datetime(value)
+    }
+}
+
+impl From<Date> for CBOR {
+    fn from(value: Date) -> Self {
+        value.cbor()
+    }
+}
+
+impl From<&Date> for CBOR {
+    fn from(value: &Date) -> Self {
+        value.cbor()
+    }
+}
+
 impl AsRef<Date> for Date {
     fn as_ref(&self) -> &Self {
         self
