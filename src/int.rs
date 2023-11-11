@@ -49,17 +49,11 @@ macro_rules! impl_cbor {
             }
         }
 
-        impl From<CBOR> for $type {
-            fn from(value: CBOR) -> Self {
-                Self::from_cbor(&value).unwrap()
-            }
-        }
-
-        impl TryFrom<&CBOR> for $type {
+        impl TryFrom<CBOR> for $type {
             type Error = anyhow::Error;
 
-            fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
-                Self::from_cbor(value)
+            fn try_from(value: CBOR) -> Result<Self, Self::Error> {
+                Self::from_cbor(&value)
             }
         }
     };

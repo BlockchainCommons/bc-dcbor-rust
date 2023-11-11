@@ -56,14 +56,3 @@ impl From<CBOR> for String {
         Self::from_cbor(&value).unwrap()
     }
 }
-
-impl TryFrom<&CBOR> for String {
-    type Error = CBORError;
-
-    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
-        match value.case() {
-            CBORCase::Text(s) => Ok(s.clone()),
-            _ => Err(CBORError::WrongType),
-        }
-    }
-}

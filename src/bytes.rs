@@ -18,14 +18,3 @@ impl TryFrom<CBOR> for Bytes {
         }
     }
 }
-
-impl TryFrom<&CBOR> for Bytes {
-    type Error = anyhow::Error;
-
-    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
-        match value.case() {
-            CBORCase::ByteString(b) => Ok(b.clone()),
-            _ => Err(anyhow::anyhow!("Cannot convert {:?} to Bytes", value))
-        }
-    }
-}

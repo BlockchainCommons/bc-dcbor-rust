@@ -62,14 +62,6 @@ impl TryFrom<CBOR> for Simple {
     }
 }
 
-impl TryFrom<&CBOR> for Simple {
-    type Error = anyhow::Error;
-
-    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
-        Self::from_cbor(value)
-    }
-}
-
 impl CBORCodable for Simple { }
 
 impl PartialEq for Simple {

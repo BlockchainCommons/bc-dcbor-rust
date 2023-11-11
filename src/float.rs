@@ -94,19 +94,6 @@ impl From<CBOR> for f64 {
     }
 }
 
-impl TryFrom<&CBOR> for f64 {
-    type Error = CBORError;
-
-    fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
-        match cbor.case() {
-            CBORCase::Unsigned(n) => Ok(*n as f64),
-            CBORCase::Negative(n) => Ok(*n as f64),
-            CBORCase::Simple(Simple::Float(n)) => Ok(*n),
-            _ => Err(CBORError::WrongType)
-        }
-    }
-}
-
 impl CBOREncodable for f32 {
     fn cbor(&self) -> CBOR {
         let n = *self;
@@ -200,19 +187,6 @@ impl From<f32> for CBOR {
 impl From<CBOR> for f32 {
     fn from(value: CBOR) -> Self {
         Self::from_cbor(&value).unwrap()
-    }
-}
-
-impl TryFrom<&CBOR> for f32 {
-    type Error = anyhow::Error;
-
-    fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
-        match cbor.case() {
-            CBORCase::Unsigned(n) => Ok(*n as f32),
-            CBORCase::Negative(n) => Ok(*n as f32),
-            CBORCase::Simple(Simple::Float(n)) => Ok(*n as f32),
-            _ => bail!(CBORError::WrongType)
-        }
     }
 }
 

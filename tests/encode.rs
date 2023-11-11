@@ -287,11 +287,11 @@ fn encode_float() {
 fn int_coerced_to_float() {
     let n = 42;
     let c = n.cbor();
-    let f: f64 = (&c).try_into().unwrap();
+    let f: f64 = c.clone().try_into().unwrap();
     assert_eq!(f, n as f64);
     let c2 = f.cbor();
     assert_eq!(c2, c);
-    let i: i32 = (&c).try_into().unwrap();
+    let i: i32 = c.try_into().unwrap();
     assert_eq!(i, n);
 }
 
@@ -300,9 +300,9 @@ fn fail_float_coerced_to_int() {
     // Floating point values cannot be coerced to integer types.
     let n = 42.5;
     let c = n.cbor();
-    let f: f64 = (&c).try_into().unwrap();
+    let f: f64 = c.clone().try_into().unwrap();
     assert_eq!(f, n);
-    let a = i32::try_from(&c);
+    let a = i32::try_from(c);
     assert!(a.is_err());
 }
 
@@ -383,7 +383,7 @@ fn convert_hash_map() {
     h.insert(25, "C".to_string());
     let m = h.cbor();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
-    let h2: HashMap<i32, String> = (&m).try_into().unwrap();
+    let h2: HashMap<i32, String> = m.try_into().unwrap();
     assert_eq!(h, h2);
 }
 
@@ -395,7 +395,7 @@ fn convert_btree_map() {
     h.insert(25, "C".to_string());
     let m = h.cbor();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
-    let h2: BTreeMap<i32, String> = (&m).try_into().unwrap();
+    let h2: BTreeMap<i32, String> = m.try_into().unwrap();
     assert_eq!(h, h2);
 }
 

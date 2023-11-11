@@ -236,10 +236,10 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable
     }
 }
 
-impl<K, V> TryFrom<&CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash) + Clone, V: CBORDecodable + Clone {
+impl<K, V> TryFrom<CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash) + Clone, V: CBORDecodable + Clone {
     type Error = Box<dyn std::error::Error>;
 
-    fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.case() {
             CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
@@ -265,10 +265,10 @@ impl<K, V> From<BTreeMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodabl
     }
 }
 
-impl<K, V> TryFrom<&CBOR> for BTreeMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord) + Clone, V: CBORDecodable + Clone {
+impl<K, V> TryFrom<CBOR> for BTreeMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord) + Clone, V: CBORDecodable + Clone {
     type Error = Box<dyn std::error::Error>;
 
-    fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.case() {
             CBORCase::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
