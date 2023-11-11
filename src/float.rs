@@ -289,6 +289,14 @@ impl CBORDecodable for f16 {
     }
 }
 
+impl TryFrom<CBOR> for f16 {
+    type Error = anyhow::Error;
+
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
+        Self::from_cbor(&cbor)
+    }
+}
+
 impl CBORCodable for f16 {}
 
 pub(crate) fn validate_canonical_f16(n: f16) -> Result<(), CBORError> {

@@ -125,6 +125,14 @@ impl CBORDecodable for Date {
     }
 }
 
+impl TryFrom<CBOR> for Date {
+    type Error = anyhow::Error;
+
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
+        Self::from_cbor(&cbor)
+    }
+}
+
 impl CBORCodable for Date { }
 
 impl CBORTagged for Date {

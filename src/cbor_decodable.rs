@@ -3,7 +3,7 @@ use bytes::Bytes;
 use crate::{CBOR, CBORError};
 
 /// A type that can be decoded from CBOR.
-pub trait CBORDecodable: 'static {
+pub trait CBORDecodable: TryFrom<CBOR> + 'static {
     /// Creates an instance of this type from CBOR symbolic representation.
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> where Self: Sized;
 
