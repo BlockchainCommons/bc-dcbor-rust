@@ -22,7 +22,7 @@ fn run(cbor: CBOR,
 
 #[test]
 fn format_simple() {
-    run(CBOR::FALSE,
+    run(CBOR::r#false(),
         "false",
         "simple(false)",
         "false",
@@ -30,7 +30,7 @@ fn format_simple() {
         "f4",
         "f4 # false"
     );
-    run(CBOR::TRUE,
+    run(CBOR::r#true(),
         "true",
         "simple(true)",
         "true",
@@ -38,7 +38,7 @@ fn format_simple() {
         "f5",
         "f5 # true"
     );
-    run(CBOR::NULL,
+    run(CBOR::null(),
         "null",
         "simple(null)",
         "null",

@@ -1,7 +1,7 @@
 
 use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
+use super::{cbor::{CBOR, CBORCase}, varint::{EncodeVarInt, MajorType}};
 
 use anyhow::bail;
 
@@ -13,9 +13,9 @@ macro_rules! impl_cbor {
             fn cbor(&self) -> CBOR {
                 #[allow(unused_comparisons)]
                 if *self < 0 {
-                    CBOR::Negative(*self as i64)
+                    CBORCase::Negative(*self as i64).into()
                 } else {
-                    CBOR::Unsigned(*self as u64)
+                    CBORCase::Unsigned(*self as u64).into()
                 }
             }
 
@@ -33,9 +33,9 @@ macro_rules! impl_cbor {
 
         impl CBORDecodable for $type {
             fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-                match cbor {
-                    CBOR::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
-                    CBOR::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
+                match cbor.case() {
+                    CBORCase::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
+                    CBORCase::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
                     _ => bail!(CBORError::WrongType),
                 }
             }

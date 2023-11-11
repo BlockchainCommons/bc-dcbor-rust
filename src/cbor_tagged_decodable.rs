@@ -1,5 +1,5 @@
 
-use crate::{CBOR, CBORError, CBORDecodable, CBORTagged};
+use crate::{CBOR, CBORError, CBORDecodable, CBORTagged, CBORCase};
 use anyhow::bail;
 
 /// A type that can be decoded from CBOR with a specific tag.
@@ -12,8 +12,8 @@ pub trait CBORTaggedDecodable: CBORDecodable + CBORTagged {
 
     /// Creates an instance of this type by decoding it from tagged CBOR.
     fn from_tagged_cbor(cbor: &CBOR) -> anyhow::Result<Self> where Self: Sized {
-        match cbor {
-            CBOR::Tagged(tag, item) => {
+        match cbor.case() {
+            CBORCase::Tagged(tag, item) => {
                 if *tag == Self::CBOR_TAG {
                     Self::from_untagged_cbor(item)
                 } else {

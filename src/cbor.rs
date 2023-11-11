@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use bytes::Bytes;
 
 use crate::{tag::Tag, Simple, error::CBORError, decode::decode_cbor, CBOREncodable};
@@ -6,7 +8,22 @@ use super::{Map, string_util::flanked};
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
-pub enum CBOR {
+pub struct CBOR(Rc<CBORCase>);
+
+impl CBOR {
+    pub fn case(&self) -> &CBORCase {
+        &self.0
+    }
+}
+
+impl From<CBORCase> for CBOR {
+    fn from(case: CBORCase) -> Self {
+        Self(Rc::new(case))
+    }
+}
+
+#[derive(Clone)]
+pub enum CBORCase {
     /// Unsigned integer (major type 0).
     Unsigned(u64),
     /// Negative integer (major type 1).
@@ -45,7 +62,7 @@ impl CBOR {
 impl CBOR {
     /// Create a new CBOR value representing a byte string.
     pub fn byte_string<T>(data: T) -> CBOR where T: AsRef<[u8]> {
-        CBOR::ByteString(Bytes::copy_from_slice(data.as_ref()))
+        CBORCase::ByteString(Bytes::copy_from_slice(data.as_ref())).into()
     }
 
     /// Create a new CBOR value representing a byte string given as a hexadecimal string.
@@ -57,8 +74,8 @@ impl CBOR {
     ///
     /// Returns `Some` if the value is a byte string, `None` otherwise.
     pub fn as_byte_string(&self) -> Option<Bytes> {
-        match self {
-            Self::ByteString(b) => Some(b.clone()),
+        match self.case() {
+            CBORCase::ByteString(b) => Some(b.clone()),
             _ => None
         }
     }
@@ -74,8 +91,8 @@ impl CBOR {
     ///
     /// Returns `Some` if the value is a text string, `None` otherwise.
     pub fn as_text(&self) -> Option<&str> {
-        match self {
-            Self::Text(t) => Some(t),
+        match self.case() {
+            CBORCase::Text(t) => Some(t),
             _ => None
         }
     }
@@ -91,8 +108,8 @@ impl CBOR {
     ///
     /// Returns `Some` if the value is an array, `None` otherwise.
     pub fn as_array(&self) -> Option<&Vec<CBOR>> {
-        match self {
-            Self::Array(a) => Some(a),
+        match self.case() {
+            CBORCase::Array(a) => Some(a),
             _ => None
         }
     }
@@ -108,8 +125,8 @@ impl CBOR {
     ///
     /// Returns `Some` if the value is a map, `None` otherwise.
     pub fn as_map(&self) -> Option<&Map> {
-        match self {
-            Self::Map(m) => Some(m),
+        match self.case() {
+            CBORCase::Map(m) => Some(m),
             _ => None
         }
     }
@@ -123,15 +140,15 @@ impl CBOR {
 
     /// Create a new CBOR value representing a tagged value.
     pub fn tagged_value(tag: impl Into<Tag>, item: impl CBOREncodable) -> CBOR {
-        CBOR::Tagged(tag.into(), Box::new(item.cbor()))
+        CBORCase::Tagged(tag.into(), Box::new(item.cbor())).into()
     }
 
     /// Extract the CBOR value as a tagged value.
     ///
     /// Returns `Some` if the value is a tagged value, `None` otherwise.
     pub fn as_tagged_value(&self) -> Option<(&Tag, &CBOR)> {
-        match self {
-            Self::Tagged(t, v) => Some((t, v)),
+        match self.case() {
+            CBORCase::Tagged(t, v) => Some((t, v)),
             _ => None
         }
     }
@@ -158,8 +175,8 @@ impl CBOR {
     ///
     /// Returns `Some` if the value is a simple value, `None` otherwise.
     pub fn as_simple_value(&self) -> Option<&Simple> {
-        match self {
-            Self::Simple(s) => Some(s),
+        match self.case() {
+            CBORCase::Simple(s) => Some(s),
             _ => None
         }
     }
@@ -175,24 +192,32 @@ impl CBOR {
 /// Associated constants for common CBOR simple values.
 impl CBOR {
     /// The CBOR simple value representing `false`.
-    pub const FALSE: CBOR = CBOR::Simple(Simple::False);
+    pub fn r#false() -> Self {
+        CBORCase::Simple(Simple::False).into()
+    }
+
     /// The CBOR simple value representing `true`.
-    pub const TRUE: CBOR = CBOR::Simple(Simple::True);
+    pub fn r#true() -> Self {
+        CBORCase::Simple(Simple::True).into()
+    }
+
     /// The CBOR simple value representing `null` (`None`).
-    pub const NULL: CBOR = CBOR::Simple(Simple::Null);
+    pub fn null() -> Self {
+        CBORCase::Simple(Simple::Null).into()
+    }
 }
 
 impl PartialEq for CBOR {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Self::Unsigned(l0), Self::Unsigned(r0)) => l0 == r0,
-            (Self::Negative(l0), Self::Negative(r0)) => l0 == r0,
-            (Self::ByteString(l0), Self::ByteString(r0)) => l0 == r0,
-            (Self::Text(l0), Self::Text(r0)) => l0 == r0,
-            (Self::Array(l0), Self::Array(r0)) => l0 == r0,
-            (Self::Map(l0), Self::Map(r0)) => l0 == r0,
-            (Self::Tagged(l0, l1), Self::Tagged(r0, r1)) => l0 == r0 && l1 == r1,
-            (Self::Simple(l0), Self::Simple(r0)) => l0 == r0,
+        match (self.case(), other.case()) {
+            (CBORCase::Unsigned(l0), CBORCase::Unsigned(r0)) => l0 == r0,
+            (CBORCase::Negative(l0), CBORCase::Negative(r0)) => l0 == r0,
+            (CBORCase::ByteString(l0), CBORCase::ByteString(r0)) => l0 == r0,
+            (CBORCase::Text(l0), CBORCase::Text(r0)) => l0 == r0,
+            (CBORCase::Array(l0), CBORCase::Array(r0)) => l0 == r0,
+            (CBORCase::Map(l0), CBORCase::Map(r0)) => l0 == r0,
+            (CBORCase::Tagged(l0, l1), CBORCase::Tagged(r0, r1)) => l0 == r0 && l1 == r1,
+            (CBORCase::Simple(l0), CBORCase::Simple(r0)) => l0 == r0,
             _ => false,
         }
     }
@@ -222,30 +247,30 @@ fn format_map(m: &Map) -> String {
 
 impl std::fmt::Debug for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
-            Self::Negative(x) => f.debug_tuple("negative").field(x).finish(),
-            Self::ByteString(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
-            Self::Text(x) => f.debug_tuple("text").field(x).finish(),
-            Self::Array(x) => f.debug_tuple("array").field(x).finish(),
-            Self::Map(x) => f.debug_tuple("map").field(x).finish(),
-            Self::Tagged(tag, item) => f.write_fmt(format_args!("tagged({}, {:?})", tag, item)),
-            Self::Simple(x) => f.write_fmt(format_args!("simple({})", x.name())),
+        match self.case() {
+            CBORCase::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
+            CBORCase::Negative(x) => f.debug_tuple("negative").field(x).finish(),
+            CBORCase::ByteString(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
+            CBORCase::Text(x) => f.debug_tuple("text").field(x).finish(),
+            CBORCase::Array(x) => f.debug_tuple("array").field(x).finish(),
+            CBORCase::Map(x) => f.debug_tuple("map").field(x).finish(),
+            CBORCase::Tagged(tag, item) => f.write_fmt(format_args!("tagged({}, {:?})", tag, item)),
+            CBORCase::Simple(x) => f.write_fmt(format_args!("simple({})", x.name())),
         }
     }
 }
 
 impl std::fmt::Display for CBOR {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            CBOR::Unsigned(x) => format!("{}", x),
-            CBOR::Negative(x) => format!("{}", x),
-            CBOR::ByteString(x) => format!("h'{}'", hex::encode(x)),
-            CBOR::Text(x) => format_string(x),
-            CBOR::Array(x) => format_array(x),
-            CBOR::Map(x) => format_map(x),
-            CBOR::Tagged(tag, item) => format!("{}({})", tag, item),
-            CBOR::Simple(x) => format!("{}", x),
+        let s = match self.case() {
+            CBORCase::Unsigned(x) => format!("{}", x),
+            CBORCase::Negative(x) => format!("{}", x),
+            CBORCase::ByteString(x) => format!("h'{}'", hex::encode(x)),
+            CBORCase::Text(x) => format_string(x),
+            CBORCase::Array(x) => format_array(x),
+            CBORCase::Map(x) => format_map(x),
+            CBORCase::Tagged(tag, item) => format!("{}({})", tag, item),
+            CBORCase::Simple(x) => format!("{}", x),
         };
         f.write_str(&s)
     }

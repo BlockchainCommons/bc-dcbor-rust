@@ -1,5 +1,5 @@
 
-use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, CBORError};
+use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, CBORError, CBORCase};
 use half::f16;
 use anyhow::bail;
 
@@ -18,7 +18,7 @@ impl CBOREncodable for f64 {
         if i as f64 == n {
             return i.cbor();
         }
-        CBOR::Simple(Simple::Float(n))
+        CBORCase::Simple(Simple::Float(n)).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -46,8 +46,8 @@ impl CBOREncodable for f64 {
 
 impl CBORDecodable for f64 {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-        match cbor {
-            CBOR::Unsigned(n) => {
+        match cbor.case() {
+            CBORCase::Unsigned(n) => {
                 let f = *n as f64;
                 if f as u64 == *n {
                     Ok(f)
@@ -55,7 +55,7 @@ impl CBORDecodable for f64 {
                     bail!(CBORError::OutOfRange);
                 }
             },
-            CBOR::Negative(n) => {
+            CBORCase::Negative(n) => {
                 let f = *n as f64;
                 if f as i64 == *n {
                     Ok(f)
@@ -63,7 +63,7 @@ impl CBORDecodable for f64 {
                     bail!(CBORError::OutOfRange);
                 }
             },
-            CBOR::Simple(Simple::Float(n)) => Ok(*n),
+            CBORCase::Simple(Simple::Float(n)) => Ok(*n),
             _ => bail!(CBORError::WrongType)
         }
     }
@@ -98,10 +98,10 @@ impl TryFrom<&CBOR> for f64 {
     type Error = CBORError;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Unsigned(n) => Ok(*n as f64),
-            CBOR::Negative(n) => Ok(*n as f64),
-            CBOR::Simple(Simple::Float(n)) => Ok(*n),
+        match cbor.case() {
+            CBORCase::Unsigned(n) => Ok(*n as f64),
+            CBORCase::Negative(n) => Ok(*n as f64),
+            CBORCase::Simple(Simple::Float(n)) => Ok(*n),
             _ => Err(CBORError::WrongType)
         }
     }
@@ -120,7 +120,7 @@ impl CBOREncodable for f32 {
         if i as f32 == n {
             return i.cbor();
         }
-        CBOR::Simple(Simple::Float(n as f64))
+        CBORCase::Simple(Simple::Float(n as f64)).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -148,8 +148,8 @@ impl CBOREncodable for f32 {
 
 impl CBORDecodable for f32 {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-        match cbor {
-            CBOR::Unsigned(n) => {
+        match cbor.case() {
+            CBORCase::Unsigned(n) => {
                 let f = *n as f32;
                 if f as u64 == *n {
                     Ok(f)
@@ -157,7 +157,7 @@ impl CBORDecodable for f32 {
                     bail!(CBORError::OutOfRange);
                 }
             },
-            CBOR::Negative(n) => {
+            CBORCase::Negative(n) => {
                 let f = *n as f32;
                 if f as i64 == *n {
                     Ok(f)
@@ -165,7 +165,7 @@ impl CBORDecodable for f32 {
                     bail!(CBORError::OutOfRange);
                 }
             },
-            CBOR::Simple(Simple::Float(n)) => {
+            CBORCase::Simple(Simple::Float(n)) => {
                 let f = *n as f32;
                 if f as f64 == *n {
                     Ok(f)
@@ -207,10 +207,10 @@ impl TryFrom<&CBOR> for f32 {
     type Error = anyhow::Error;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Unsigned(n) => Ok(*n as f32),
-            CBOR::Negative(n) => Ok(*n as f32),
-            CBOR::Simple(Simple::Float(n)) => Ok(*n as f32),
+        match cbor.case() {
+            CBORCase::Unsigned(n) => Ok(*n as f32),
+            CBORCase::Negative(n) => Ok(*n as f32),
+            CBORCase::Simple(Simple::Float(n)) => Ok(*n as f32),
             _ => bail!(CBORError::WrongType)
         }
     }
@@ -229,7 +229,7 @@ impl CBOREncodable for f16 {
         if i as f64 == n {
             return i.cbor();
         }
-        CBOR::Simple(Simple::Float(n))
+        CBORCase::Simple(Simple::Float(n)).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -259,8 +259,8 @@ impl From<f16> for CBOR {
 
 impl CBORDecodable for f16 {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-        match cbor {
-            CBOR::Unsigned(n) => {
+        match cbor.case() {
+            CBORCase::Unsigned(n) => {
                 let f = f16::from_f64(*n as f64);
                 if f.to_f64() as u64 == *n {
                     Ok(f)
@@ -268,7 +268,7 @@ impl CBORDecodable for f16 {
                     bail!(CBORError::OutOfRange)
                 }
             },
-            CBOR::Negative(n) => {
+            CBORCase::Negative(n) => {
                 let f = f16::from_f64(*n as f64);
                 if f.to_f64() as i64 == *n {
                     Ok(f)
@@ -276,7 +276,7 @@ impl CBORDecodable for f16 {
                     bail!(CBORError::OutOfRange)
                 }
             },
-            CBOR::Simple(Simple::Float(n)) => {
+            CBORCase::Simple(Simple::Float(n)) => {
                 let f = f16::from_f64(*n);
                 if f.to_f64() == *n {
                     Ok(f)

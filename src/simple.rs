@@ -1,6 +1,6 @@
 use anyhow::bail;
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -26,7 +26,7 @@ impl Simple {
 
 impl CBOREncodable for Simple {
     fn cbor(&self) -> CBOR {
-        CBOR::Simple(self.clone())
+        CBORCase::Simple(self.clone()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -47,8 +47,8 @@ impl From<Simple> for CBOR {
 
 impl CBORDecodable for Simple {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-        match cbor {
-            CBOR::Simple(simple) => Ok(simple.clone()),
+        match cbor.case() {
+            CBORCase::Simple(simple) => Ok(simple.clone()),
             _ => bail!(CBORError::WrongType),
         }
     }

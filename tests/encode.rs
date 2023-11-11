@@ -1,7 +1,7 @@
 use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
 
 use bytes::Bytes;
-use dcbor::prelude::*;
+use dcbor::{prelude::*, CBORCase};
 use half::f16;
 use hex_literal::hex;
 
@@ -183,8 +183,8 @@ fn encode_heterogenous_array() {
     let cbor = array.cbor();
     let data = cbor.cbor_data();
     let decoded_cbor = CBOR::from_data(&data).unwrap();
-    match decoded_cbor {
-        CBOR::Array(a) => {
+    match decoded_cbor.case() {
+        CBORCase::Array(a) => {
             assert_eq!(a[0], 1.cbor());
             assert_eq!(a[1], "Hello".cbor());
             assert_eq!(a[2], [1, 2, 3].cbor());

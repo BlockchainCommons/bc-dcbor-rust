@@ -1,6 +1,6 @@
 use std::str::from_utf8;
 
-use crate::{CBOR, tags_store::TagsStoreTrait, CBOREncodable, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}};
+use crate::{CBOR, tags_store::TagsStoreTrait, CBOREncodable, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}, CBORCase};
 
 /// Affordances for viewing the encoded binary representation of CBOR as hexadecimal.
 impl CBOR {
@@ -27,10 +27,10 @@ impl CBOR {
     }
 
     fn dump_items(&self, level: usize, tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
-        match self {
-            CBOR::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
-            CBOR::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),
-            CBOR::ByteString(d) => {
+        match self.case() {
+            CBORCase::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
+            CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),
+            CBORCase::ByteString(d) => {
                 let mut items = vec![
                     DumpItem::new(level, vec!(d.len().encode_varint(MajorType::Bytes)), Some(format!("bytes({})", d.len())))
                 ];
@@ -45,7 +45,7 @@ impl CBOR {
                 }
                 items
             },
-            CBOR::Text(s) => {
+            CBORCase::Text(s) => {
                 let header = s.len().encode_varint(MajorType::Text);
                 let header_data = vec![vec!(header[0]), header[1..].to_vec()];
                 let utf8_data = s.as_bytes().to_vec();
@@ -54,14 +54,14 @@ impl CBOR {
                     DumpItem::new(level + 1, vec![utf8_data], Some(flanked(s, "\"", "\"")))
                 ]
             },
-            CBOR::Simple(v) => {
+            CBORCase::Simple(v) => {
                 let data = v.cbor_data();
                 let note = format!("{}", v);
                 vec![
                     DumpItem::new(level, vec![data], Some(note))
                 ]
             },
-            CBOR::Tagged(tag, item) => {
+            CBORCase::Tagged(tag, item) => {
                 let header = tag.value().encode_varint(MajorType::Tagged);
                 let header_data = vec![vec!(header[0]), header[1..].to_vec()];
                 let mut note_components: Vec<String> = vec![format!("tag({})", tag.value())];
@@ -78,7 +78,7 @@ impl CBOR {
                     item.dump_items(level + 1, tags)
                 ].into_iter().flatten().collect()
             },
-            CBOR::Array(array) => {
+            CBORCase::Array(array) => {
                 let header = array.len().encode_varint(MajorType::Array);
                 let header_data = vec![vec!(header[0]), header[1..].to_vec()];
                 vec![
@@ -88,7 +88,7 @@ impl CBOR {
                     array.iter().flat_map(|x| x.dump_items(level + 1, tags)).collect()
                 ].into_iter().flatten().collect()
             },
-            CBOR::Map(m) => {
+            CBORCase::Map(m) => {
                 let header = m.len().encode_varint(MajorType::Map);
                 let header_data = vec![vec!(header[0]), header[1..].to_vec()];
                 vec![

@@ -1,6 +1,6 @@
 use std::collections::{VecDeque, HashSet};
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::CBORError};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::CBORError, CBORCase};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -8,7 +8,7 @@ use anyhow::bail;
 
 impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
-        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
+        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -30,10 +30,10 @@ impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable + Clone {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Array(cbor_array) => {
+        match cbor.case() {
+            CBORCase::Array(cbor_array) => {
                 let mut result = Vec::new();
-                for cbor in cbor_array {
+                for cbor in cbor_array.clone() {
                     let element = T::from_cbor(&cbor)?;
                     result.push(element.clone());
                 }
@@ -46,14 +46,14 @@ impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable + Clone {
 
 impl<T> From<&[T]> for CBOR where T: CBOREncodable {
     fn from(array: &[T]) -> Self {
-        CBOR::Array(array.iter().map(|x| x.cbor()).collect())
+        CBORCase::Array(array.iter().map(|x| x.cbor()).collect()).into()
     }
 }
 
 impl<T> CBORDecodable for Vec<T> where T: CBORDecodable + Clone {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-        match cbor {
-            CBOR::Array(cbor_array) => {
+        match cbor.case() {
+            CBORCase::Array(cbor_array) => {
                 let mut result = Vec::new();
                 for cbor in cbor_array {
                     let element = T::from_cbor(cbor)?;
@@ -68,7 +68,7 @@ impl<T> CBORDecodable for Vec<T> where T: CBORDecodable + Clone {
 
 impl<T, const N: usize> CBOREncodable for [T; N] where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
-        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
+        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -88,7 +88,7 @@ impl<T, const N: usize> From<[T; N]> for CBOR where T: CBOREncodable {
 
 impl<T> CBOREncodable for VecDeque<T> where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
-        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
+        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -110,11 +110,11 @@ impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable + Clone {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Array(cbor_array) => {
+        match cbor.case() {
+            CBORCase::Array(cbor_array) => {
                 let mut result = VecDeque::new();
                 for cbor in cbor_array {
-                    let element = T::from_cbor(&cbor)?;
+                    let element = T::from_cbor(cbor)?;
                     result.push_back(element.clone());
                 }
                 Ok(result)
@@ -126,7 +126,7 @@ impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable + Clone {
 
 impl<T> CBOREncodable for HashSet<T> where T: CBOREncodable {
     fn cbor(&self) -> CBOR {
-        CBOR::Array(self.iter().map(|x| x.cbor()).collect())
+        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -148,11 +148,11 @@ impl<T> TryFrom<CBOR> for HashSet<T> where T: CBORDecodable + Eq + std::hash::Ha
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Array(cbor_array) => {
+        match cbor.case() {
+            CBORCase::Array(cbor_array) => {
                 let mut result = HashSet::new();
                 for cbor in cbor_array {
-                    let element = T::from_cbor(&cbor)?;
+                    let element = T::from_cbor(cbor)?;
                     result.insert(element.clone());
                 }
                 Ok(result)

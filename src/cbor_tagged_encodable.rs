@@ -1,5 +1,5 @@
 
-use crate::{CBOR, CBOREncodable, CBORTagged};
+use crate::{CBOR, CBOREncodable, CBORTagged, CBORCase};
 
 /// A type that can be encoded to CBOR with a specific tag.
 ///
@@ -11,7 +11,7 @@ pub trait CBORTaggedEncodable: CBOREncodable + CBORTagged {
 
     /// Returns the tagged CBOR encoding of this instance.
     fn tagged_cbor(&self) -> CBOR {
-        CBOR::Tagged(Self::CBOR_TAG, Box::new(self.untagged_cbor()))
+        CBORCase::Tagged(Self::CBOR_TAG, Box::new(self.untagged_cbor())).into()
     }
 
     /// Returns the tagged value in CBOR binary representation.

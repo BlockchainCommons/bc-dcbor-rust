@@ -2,7 +2,7 @@ use std::str::from_utf8;
 
 use half::f16;
 
-use crate::{error::CBORError, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}};
+use crate::{error::CBORError, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
 
 use super::{cbor::CBOR, varint::MajorType, Map};
 
@@ -98,12 +98,12 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
     }
     let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
-        MajorType::Unsigned => Ok((CBOR::Unsigned(value), header_varint_len)),
-        MajorType::Negative => Ok((CBOR::Negative(-(value as i64) - 1), header_varint_len)),
+        MajorType::Unsigned => Ok((CBORCase::Unsigned(value).into(), header_varint_len)),
+        MajorType::Negative => Ok((CBORCase::Negative(-(value as i64) - 1).into(), header_varint_len)),
         MajorType::Bytes => {
             let data_len = value as usize;
             let bytes = parse_bytes(&data[header_varint_len..], data_len)?.to_vec().into();
-            Ok((CBOR::ByteString(bytes), header_varint_len + data_len))
+            Ok((CBORCase::ByteString(bytes).into(), header_varint_len + data_len))
         },
         MajorType::Text => {
             let data_len = value as usize;
@@ -157,9 +157,9 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
                 },
                 _ => {
                     match value {
-                        20 => Ok((CBOR::FALSE, header_varint_len)),
-                        21 => Ok((CBOR::TRUE, header_varint_len)),
-                        22 => Ok((CBOR::NULL, header_varint_len)),
+                        20 => Ok((CBOR::r#false(), header_varint_len)),
+                        21 => Ok((CBOR::r#true(), header_varint_len)),
+                        22 => Ok((CBOR::null(), header_varint_len)),
                         _ => {
                             Err(CBORError::InvalidSimpleValue)
                         },

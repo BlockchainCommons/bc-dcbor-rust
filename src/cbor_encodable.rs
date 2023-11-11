@@ -1,6 +1,6 @@
 use bytes::Bytes;
 
-use crate::{CBOR, varint::{MajorType, EncodeVarInt}};
+use crate::{CBOR, varint::{MajorType, EncodeVarInt}, CBORCase};
 
 /// A type that can be encoded as CBOR.
 pub trait CBOREncodable: Into<CBOR> {
@@ -18,26 +18,26 @@ impl CBOREncodable for CBOR {
     }
 
     fn cbor_data(&self) -> Vec<u8> {
-        match self {
-            CBOR::Unsigned(x) => x.cbor_data(),
-            CBOR::Negative(x) => {
+        match self.case() {
+            CBORCase::Unsigned(x) => x.cbor_data(),
+            CBORCase::Negative(x) => {
                 assert!(x < &0);
                 x.cbor_data()
             },
-            CBOR::ByteString(x) => {
+            CBORCase::ByteString(x) => {
                 let mut buf = x.len().encode_varint(MajorType::Bytes);
                 buf.extend(x);
                 buf
             },
-            CBOR::Text(x) => x.cbor_data(),
-            CBOR::Array(x) => x.cbor_data(),
-            CBOR::Map(x) => x.cbor_data(),
-            CBOR::Tagged(tag, item) => {
+            CBORCase::Text(x) => x.cbor_data(),
+            CBORCase::Array(x) => x.cbor_data(),
+            CBORCase::Map(x) => x.cbor_data(),
+            CBORCase::Tagged(tag, item) => {
                 let mut buf = tag.value().encode_varint(MajorType::Tagged);
                 buf.extend(item.cbor_data());
                 buf
             },
-            CBOR::Simple(x) => x.cbor_data(),
+            CBORCase::Simple(x) => x.cbor_data(),
         }
     }
 }
@@ -68,6 +68,6 @@ impl From<Box<CBOR>> for CBOR {
 
 impl CBOREncodable for Bytes {
     fn cbor(&self) -> CBOR {
-        CBOR::ByteString(self.clone())
+        CBORCase::ByteString(self.clone()).into()
     }
 }

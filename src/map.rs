@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues, HashMap};
 
-use crate::{cbor_encodable::CBOREncodable, CBORError, CBORDecodable};
+use crate::{cbor_encodable::CBOREncodable, CBORError, CBORDecodable, CBORCase};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
@@ -104,7 +104,7 @@ impl Eq for Map {
 
 impl CBOREncodable for Map {
     fn cbor(&self) -> CBOR {
-        CBOR::Map(self.clone())
+        CBORCase::Map(self.clone()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -226,13 +226,13 @@ impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: CBOREncodab
 
 impl<K, V> CBOREncodable for HashMap<K, V> where K: CBOREncodable, V: CBOREncodable {
     fn cbor(&self) -> CBOR {
-        CBOR::Map(Map::from(self.iter()))
+        CBORCase::Map(Map::from(self.iter())).into()
     }
 }
 
 impl<K, V> From<HashMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable {
     fn from(container: HashMap<K, V>) -> Self {
-        CBOR::Map(Map::from(container.iter()))
+        CBORCase::Map(Map::from(container.iter())).into()
     }
 }
 
@@ -240,8 +240,8 @@ impl<K, V> TryFrom<&CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::E
     type Error = Box<dyn std::error::Error>;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Map(map) => {
+        match cbor.case() {
+            CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
                     container.insert(K::from_cbor(k)?.clone(), V::from_cbor(v)?.clone());
@@ -255,13 +255,13 @@ impl<K, V> TryFrom<&CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::E
 
 impl<K, V> CBOREncodable for BTreeMap<K, V> where K: CBOREncodable, V: CBOREncodable {
     fn cbor(&self) -> CBOR {
-        CBOR::Map(Map::from(self.iter()))
+        CBORCase::Map(Map::from(self.iter())).into()
     }
 }
 
 impl<K, V> From<BTreeMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable {
     fn from(container: BTreeMap<K, V>) -> Self {
-        CBOR::Map(Map::from(container.iter()))
+        CBORCase::Map(Map::from(container.iter())).into()
     }
 }
 
@@ -269,8 +269,8 @@ impl<K, V> TryFrom<&CBOR> for BTreeMap<K, V> where K: CBORDecodable + std::cmp::
     type Error = Box<dyn std::error::Error>;
 
     fn try_from(cbor: &CBOR) -> Result<Self, Self::Error> {
-        match cbor {
-            CBOR::Map(map) => {
+        match cbor.case() {
+            CBORCase::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
                 for (k, v) in map.iter() {
                     container.insert(K::from_cbor(k)?.clone(), V::from_cbor(v)?.clone());

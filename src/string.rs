@@ -1,12 +1,12 @@
 use anyhow::bail;
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable};
+use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
 
 use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
 
 impl CBOREncodable for &str {
     fn cbor(&self) -> CBOR {
-        CBOR::Text(self.to_string())
+        CBORCase::Text(self.to_string()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -20,7 +20,7 @@ impl CBOREncodable for &str {
 
 impl CBOREncodable for String {
     fn cbor(&self) -> CBOR {
-        CBOR::Text(self.clone())
+        CBORCase::Text(self.clone()).into()
     }
 
     fn cbor_data(&self) -> Vec<u8> {
@@ -30,8 +30,8 @@ impl CBOREncodable for String {
 
 impl CBORDecodable for String {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-        match cbor {
-            CBOR::Text(s) => Ok(s.clone()),
+        match cbor.case() {
+            CBORCase::Text(s) => Ok(s.clone()),
             _ => bail!(CBORError::WrongType),
         }
     }
@@ -61,8 +61,8 @@ impl TryFrom<&CBOR> for String {
     type Error = CBORError;
 
     fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
-        match value {
-            CBOR::Text(s) => Ok(s.clone()),
+        match value.case() {
+            CBORCase::Text(s) => Ok(s.clone()),
             _ => Err(CBORError::WrongType),
         }
     }

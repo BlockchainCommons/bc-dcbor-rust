@@ -1,4 +1,4 @@
-use crate::{CBOR, tags_store::TagsStoreTrait, string_util::flanked, Date, cbor_decodable::CBORDecodable};
+use crate::{CBOR, tags_store::TagsStoreTrait, string_util::flanked, Date, cbor_decodable::CBORDecodable, CBORCase};
 
 /// Affordances for viewing CBOR in diagnostic notation.
 impl CBOR {
@@ -16,11 +16,11 @@ impl CBOR {
     }
 
     fn diag_item(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
-        match self {
-            CBOR::Unsigned(_) | CBOR::Negative(_) | CBOR::ByteString(_) |
-            CBOR::Text(_) | CBOR::Simple(_) => DiagItem::Item(format!("{}", self)),
+        match self.case() {
+            CBORCase::Unsigned(_) | CBORCase::Negative(_) | CBORCase::ByteString(_) |
+            CBORCase::Text(_) | CBORCase::Simple(_) => DiagItem::Item(format!("{}", self)),
 
-            CBOR::Array(a) => {
+            CBORCase::Array(a) => {
                 let begin = "[".to_string();
                 let end = "]".to_string();
                 let items = a.iter().map(|x| x.diag_item(annotate, tags)).collect();
@@ -28,7 +28,7 @@ impl CBOR {
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
             },
-            CBOR::Map(m) => {
+            CBORCase::Map(m) => {
                 let begin = "{".to_string();
                 let end = "}".to_string();
                 let items = m.iter().flat_map(|(key, value)| vec![
@@ -39,7 +39,7 @@ impl CBOR {
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
             },
-            CBOR::Tagged(tag, item) => {
+            CBORCase::Tagged(tag, item) => {
                 let diag_item: DiagItem;
                 if annotate && tag.value() == 1 {
                     match f64::from_cbor(item) {
