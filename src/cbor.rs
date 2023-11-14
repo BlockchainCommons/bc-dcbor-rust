@@ -1,14 +1,18 @@
-use std::rc::Rc;
-
 use bytes::Bytes;
 
 use crate::{tag::Tag, Simple, error::CBORError, decode::decode_cbor, CBOREncodable};
 
 use super::{Map, string_util::flanked};
 
+#[cfg(feature = "multithreaded")]
+use std::sync::Arc as RefCounted;
+
+#[cfg(not(feature = "multithreaded"))]
+use std::rc::Rc as RefCounted;
+
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
-pub struct CBOR(Rc<CBORCase>);
+pub struct CBOR(RefCounted<CBORCase>);
 
 impl CBOR {
     pub fn case(&self) -> &CBORCase {
@@ -18,7 +22,7 @@ impl CBOR {
 
 impl From<CBORCase> for CBOR {
     fn from(case: CBORCase) -> Self {
-        Self(Rc::new(case))
+        Self(RefCounted::new(case))
     }
 }
 
