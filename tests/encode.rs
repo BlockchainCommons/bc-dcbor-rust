@@ -306,6 +306,37 @@ fn fail_float_coerced_to_int() {
     assert!(a.is_err());
 }
 
+/*
+```swift
+func testNegative65BitIntegers() throws {
+    // Integer values in the range 2^64 ... 2^63 – 1 are invalid in dCBOR.
+
+    // 2^63 – 1
+    XCTAssertThrowsError(try CBOR(‡"3b8000000000000000"))
+
+    // 2^64
+    XCTAssertThrowsError(try CBOR(‡"3bffffffffffffffff"))
+}
+```
+ */
+
+#[test]
+fn fail_negative_65_bit_integers() {
+    // Integer values in the range 2^64 ... 2^63 – 1 are invalid in dCBOR.
+
+    // 2^63 – 1
+    if let Err(CBORError::OutOfRange) = CBOR::from_hex("3b8000000000000000") {
+    } else {
+        panic!("Expected InvalidInteger error");
+    }
+
+    // 2^64
+    if let Err(CBORError::OutOfRange) = CBOR::from_hex("3bffffffffffffffff") {
+    } else {
+        panic!("Expected InvalidInteger error");
+    }
+}
+
 #[test]
 fn non_canonical_float_1() {
     // Non-canonical representation of 1.5 that could be represented at a smaller width.

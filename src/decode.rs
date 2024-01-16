@@ -99,7 +99,12 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
     let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
         MajorType::Unsigned => Ok((CBORCase::Unsigned(value).into(), header_varint_len)),
-        MajorType::Negative => Ok((CBORCase::Negative(-(value as i64) - 1).into(), header_varint_len)),
+        MajorType::Negative => {
+            if value > i64::MAX as u64 {
+                return Err(CBORError::OutOfRange);
+            }
+            Ok((CBORCase::Negative(-(value as i64) - 1).into(), header_varint_len))
+        },
         MajorType::Bytes => {
             let data_len = value as usize;
             let bytes = parse_bytes(&data[header_varint_len..], data_len)?.to_vec().into();
