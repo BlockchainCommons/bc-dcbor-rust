@@ -1,5 +1,5 @@
 
-use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, CBORError, CBORCase};
+use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, CBORError, CBORCase, ExactFrom};
 use half::f16;
 use anyhow::bail;
 
@@ -9,13 +9,11 @@ impl CBOREncodable for f64 {
     fn cbor(&self) -> CBOR {
         let n = *self;
         if n < 0.0f64 {
-            let i = n as i64;
-            if i as f64 == n {
+            if let Some(i) = i64::exact_from_f64(n) {
                 return i.cbor();
             }
         }
-        let i = n as u64;
-        if i as f64 == n {
+        if let Some(i) = u64::exact_from_f64(n) {
             return i.cbor();
         }
         CBORCase::Simple(Simple::Float(n)).into()
@@ -28,19 +26,17 @@ impl CBOREncodable for f64 {
             return f.cbor_data();
         }
         if n < 0.0f64 {
-            let i = n as i64;
-            if i as f64 == n {
+            if let Some(i) = i64::exact_from_f64(n) {
                 return i.cbor_data();
             }
         }
-        let i = n as u64;
-        if i as f64 == n {
+        if let Some(i) = u64::exact_from_f64(n) {
             return i.cbor_data();
         }
         if self.is_nan() {
             return CBOR_NAN.to_vec();
         }
-        n.to_bits().encode_varint(MajorType::Simple)
+        n.to_bits().encode_int(MajorType::Simple)
     }
 }
 
@@ -48,16 +44,14 @@ impl CBORDecodable for f64 {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Unsigned(n) => {
-                let f = *n as f64;
-                if f as u64 == *n {
+                if let Some(f) = f64::exact_from_u64(*n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Negative(n) => {
-                let f = *n as f64;
-                if f as i64 == *n {
+                if let Some(f) = f64::exact_from_i64(*n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
@@ -98,13 +92,11 @@ impl CBOREncodable for f32 {
     fn cbor(&self) -> CBOR {
         let n = *self;
         if n < 0.0f32 {
-            let i = n as i32;
-            if i as f32 == n {
+            if let Some(i) = i32::exact_from_f32(n) {
                 return i.cbor();
             }
         }
-        let i = n as u32;
-        if i as f32 == n {
+        if let Some(i) = u32::exact_from_f32(n) {
             return i.cbor();
         }
         CBORCase::Simple(Simple::Float(n as f64)).into()
@@ -117,19 +109,17 @@ impl CBOREncodable for f32 {
             return f.cbor_data();
         }
         if n < 0.0f32 {
-            let i = n as i32;
-            if i as f32 == n {
+            if let Some(i) = i32::exact_from_f32(n) {
                 return i.cbor_data();
             }
         }
-        let i = n as u32;
-        if i as f32 == n {
+        if let Some(i) = u32::exact_from_f32(n) {
             return i.cbor_data();
         }
         if self.is_nan() {
             return CBOR_NAN.to_vec();
         }
-        n.to_bits().encode_varint(MajorType::Simple)
+        n.to_bits().encode_int(MajorType::Simple)
     }
 }
 
@@ -137,24 +127,21 @@ impl CBORDecodable for f32 {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Unsigned(n) => {
-                let f = *n as f32;
-                if f as u64 == *n {
+                if let Some(f) = f32::exact_from_u64(*n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Negative(n) => {
-                let f = *n as f32;
-                if f as i64 == *n {
+                if let Some(f) = f32::exact_from_i64(*n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Simple(Simple::Float(n)) => {
-                let f = *n as f32;
-                if f as f64 == *n {
+                if let Some(f) = f32::exact_from_f64(*n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
@@ -194,13 +181,11 @@ impl CBOREncodable for f16 {
     fn cbor(&self) -> CBOR {
         let n = self.to_f64();
         if n < 0.0 {
-            let i = n as i16;
-            if i as f64 == n {
+            if let Some(i) = i16::exact_from_f64(n) {
                 return i.cbor();
             }
         }
-        let i = n as u16;
-        if i as f64 == n {
+        if let Some(i) = u16::exact_from_f64(n) {
             return i.cbor();
         }
         CBORCase::Simple(Simple::Float(n)).into()
@@ -209,19 +194,17 @@ impl CBOREncodable for f16 {
     fn cbor_data(&self) -> Vec<u8> {
         let n = self.to_f64();
         if n < 0.0 {
-            let i = n as i16;
-            if i as f64 == n {
+            if let Some(i) = i16::exact_from_f64(n) {
                 return i.cbor_data();
             }
         }
-        let i = n as u16;
-        if i as f64 == n {
+        if let Some(i) = u16::exact_from_f64(n) {
             return i.cbor_data();
         }
         if self.is_nan() {
             return CBOR_NAN.to_vec();
         }
-        self.to_bits().encode_varint(MajorType::Simple)
+        self.to_bits().encode_int(MajorType::Simple)
     }
 }
 
@@ -235,27 +218,24 @@ impl CBORDecodable for f16 {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Unsigned(n) => {
-                let f = f16::from_f64(*n as f64);
-                if f.to_f64() as u64 == *n {
+                if let Some(f) = f16::exact_from_u64(*n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange)
+                    bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Negative(n) => {
-                let f = f16::from_f64(*n as f64);
-                if f.to_f64() as i64 == *n {
+                if let Some(f) = f16::exact_from_i64(*n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange)
+                    bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Simple(Simple::Float(n)) => {
-                let f = f16::from_f64(*n);
-                if f.to_f64() == *n {
+                if let Some(f) = f16::exact_from_f64(*n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange)
+                    bail!(CBORError::OutOfRange);
                 }
             },
             _ => bail!(CBORError::WrongType)

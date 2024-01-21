@@ -121,5 +121,7 @@ mod simple;
 pub use simple::Simple;
 
 mod varint;
+mod exact;
+use exact::ExactFrom;
 
 pub mod prelude;

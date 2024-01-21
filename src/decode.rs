@@ -38,7 +38,8 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), CBORError
     if data.is_empty() {
         return Err(CBORError::Underrun)
     }
-    let (major_type, header_value) = parse_header(data[0]);
+    let header = data[0];
+    let (major_type, header_value) = parse_header(header);
     let data_remaining = data.len() - 1;
     let (value, varint_len) = match header_value {
         0..=23 => (header_value as u64, 1),
@@ -53,7 +54,9 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), CBORError
             let val =
                 ((data[1] as u64) << 8) |
                 (data[2] as u64);
-            if val <= u8::MAX as u64 { return Err(CBORError::NonCanonicalNumeric) }
+            if val <= u8::MAX as u64 && header != 0xf9 {
+                return Err(CBORError::NonCanonicalNumeric)
+            }
             (val, 3)
         },
         26 => {
@@ -63,7 +66,9 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), CBORError
                 ((data[2] as u64) << 16) |
                 ((data[3] as u64) << 8) |
                 (data[4] as u64);
-            if val <= u16::MAX as u64 { return Err(CBORError::NonCanonicalNumeric) }
+            if val <= u16::MAX as u64 && header != 0xfa {
+                return Err(CBORError::NonCanonicalNumeric)
+            }
             (val, 5)
         },
         27 => {
@@ -77,7 +82,9 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize), CBORError
                 ((data[6] as u64) << 16) |
                 ((data[7] as u64) << 8) |
                 (data[8] as u64);
-            if val <= u32::MAX as u64 { return Err(CBORError::NonCanonicalNumeric) }
+            if val <= u32::MAX as u64 && header != 0xfb {
+                return Err(CBORError::NonCanonicalNumeric)
+            }
             (val, 9)
         },
         v => return Err(CBORError::UnsupportedHeaderValue(v))

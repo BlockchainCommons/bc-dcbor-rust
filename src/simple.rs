@@ -94,7 +94,7 @@ impl std::fmt::Display for Simple {
             Self::False => "false".to_owned(),
             Self::True => "true".to_owned(),
             Self::Null => "null".to_owned(),
-            Self::Float(v) => format!("{}", v),
+            Self::Float(v) => format!("{:?}", v),
         };
         f.write_str(&s)
     }
