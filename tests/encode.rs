@@ -330,7 +330,7 @@ fn encode_float() {
 fn int_coerced_to_float() {
     let n = 42;
     let c = n.cbor();
-    let f: f64 = c.clone().try_into().unwrap();
+    let f: f64 = c.clone().into();
     assert_eq!(f, n as f64);
     let c2 = f.cbor();
     assert_eq!(c2, c);
@@ -343,7 +343,7 @@ fn fail_float_coerced_to_int() {
     // Floating point values cannot be coerced to integer types.
     let n = 42.5;
     let c = n.cbor();
-    let f: f64 = c.clone().try_into().unwrap();
+    let f: f64 = c.clone().into();
     assert_eq!(f, n);
     let a = i32::try_from(c);
     assert!(a.is_err());
