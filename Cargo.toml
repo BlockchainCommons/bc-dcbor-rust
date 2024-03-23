@@ -1,6 +1,6 @@
 [package]
 name = "dcbor"
-version = "0.11.2"
+version = "0.12.0"
 edition = "2021"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
 authors = ["Blockchain Commons"]
@@ -30,3 +30,8 @@ default = ["std"]
 std = ["half/std", "chrono/std", "hex/std", "bytes/std", "anyhow/std"]
 no_std = ["hashbrown"]
 multithreaded = []
+
+# cargo test
+# cargo test --features multithreaded
+# cargo test --no-default-features --features no_std
+# cargo test --no-default-features --features no_std,multithreaded
