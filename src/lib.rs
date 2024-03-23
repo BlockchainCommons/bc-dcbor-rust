@@ -1,6 +1,5 @@
 #![doc(html_root_url = "https://docs.rs/dcbor/0.11.2")]
 #![warn(rust_2018_idioms)]
-// #![no_std]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 //! # dCBOR: Deterministic CBOR Codec
@@ -23,6 +22,32 @@
 //! [dependencies]
 //! dcbor = "0.11.2"
 //! ```
+//!
+//! # Features
+//!
+//! ## Multi-threaded
+//!
+//! The `multithreaded` feature is available but not enabled by default. It uses `Arc` for
+//! reference counting instead of `Rc`. To enable it, add the following to your `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies.dcbor]
+//! version = "0.11.2"
+//! features = ["multithreaded"]
+//! ```
+//!
+//! ## `no_std`
+//!
+//! The `dcbor` library is `no_std` compatible. To use it in a `no_std` environment, disable the
+//! default features in your `Cargo.toml` and enable the `no_std` feature:
+//!
+//! ```toml
+//! [dependencies.dcbor]
+//! version = "0.11.2"
+//! default-features = false
+//! features = ["no_std"]
+//! ```
+//!
 //! # Specification
 //!
 //! The current specification of the norms and practices guiding the creation of
