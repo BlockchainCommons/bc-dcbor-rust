@@ -1,3 +1,5 @@
+import_stdlib!();
+
 use bytes::Bytes;
 
 use crate::{CBOR, varint::{MajorType, EncodeVarInt}, CBORCase};

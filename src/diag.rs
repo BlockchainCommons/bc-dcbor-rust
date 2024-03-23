@@ -1,4 +1,8 @@
-use crate::{CBOR, tags_store::TagsStoreTrait, string_util::flanked, Date, cbor_decodable::CBORDecodable, CBORCase};
+import_stdlib!();
+
+use crate::{CBOR, tags_store::TagsStoreTrait, Date, cbor_decodable::CBORDecodable, CBORCase};
+
+use super::string_util::flanked;
 
 /// Affordances for viewing CBOR in diagnostic notation.
 impl CBOR {

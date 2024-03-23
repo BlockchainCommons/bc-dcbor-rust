@@ -1,10 +1,10 @@
-use std::str::from_utf8;
+import_stdlib!();
 
 use half::f16;
 
-use crate::{error::CBORError, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
+use crate::{CBOR, Map, error::CBORError, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
 
-use super::{cbor::CBOR, varint::MajorType, Map};
+use super::varint::MajorType;
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -120,7 +120,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
         MajorType::Text => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
-            let string = from_utf8(buf)?;
+            let string = str::from_utf8(buf)?;
             Ok((string.cbor(), header_varint_len + data_len))
         },
         MajorType::Array => {

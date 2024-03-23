@@ -1,3 +1,5 @@
+import_stdlib!();
+
 #[derive(Debug, Clone)]
 enum TagName {
     Static(&'static str),
@@ -50,14 +52,14 @@ impl PartialEq for Tag {
 
 impl Eq for Tag { }
 
-impl std::hash::Hash for Tag {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+impl hash::Hash for Tag {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
         self.value.hash(state);
     }
 }
 
-impl std::fmt::Display for Tag {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for Tag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.name {
             Some(TagName::Static(name)) => write!(f, "{}", name),
             Some(TagName::Dynamic(name)) => write!(f, "{}", name),

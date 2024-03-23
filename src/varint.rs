@@ -1,3 +1,5 @@
+import_stdlib!();
+
 #[derive(Debug)]
 pub enum MajorType {
     Unsigned,

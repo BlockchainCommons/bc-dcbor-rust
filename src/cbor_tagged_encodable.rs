@@ -1,3 +1,4 @@
+import_stdlib!();
 
 use crate::{CBOR, CBOREncodable, CBORTagged, CBORCase};
 

@@ -1,8 +1,10 @@
+import_stdlib!();
+
 use anyhow::bail;
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
+use crate::{CBOR, CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
+use super::varint::{EncodeVarInt, MajorType};
 
 /// A CBOR simple value.
 #[derive(Clone)]
@@ -76,8 +78,8 @@ impl PartialEq for Simple {
     }
 }
 
-impl std::fmt::Debug for Simple {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Simple {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::False => "false".to_owned(),
             Self::True => "true".to_owned(),
@@ -88,8 +90,8 @@ impl std::fmt::Debug for Simple {
     }
 }
 
-impl std::fmt::Display for Simple {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for Simple {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             Self::False => "false".to_owned(),
             Self::True => "true".to_owned(),

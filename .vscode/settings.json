@@ -1,0 +1,6 @@
+// {
+//     "rust-analyzer.cargo.features": ["no_std"],
+//     "rust-analyzer.cargo.allFeatures": false,
+//     "rust-analyzer.checkOnSave.allTargets": false,
+//     "rust-analyzer.checkOnSave.extraArgs": ["--no-default-features"]
+// }

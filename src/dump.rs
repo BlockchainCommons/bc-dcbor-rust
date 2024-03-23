@@ -1,6 +1,8 @@
-use std::str::from_utf8;
+import_stdlib!();
 
-use crate::{CBOR, tags_store::TagsStoreTrait, CBOREncodable, varint::{EncodeVarInt, MajorType}, string_util::{sanitized, flanked}, CBORCase};
+use crate::{CBOR, tags_store::TagsStoreTrait, CBOREncodable, CBORCase};
+
+use super::{string_util::{sanitized, flanked}, varint::{EncodeVarInt, MajorType}};
 
 /// Affordances for viewing the encoded binary representation of CBOR as hexadecimal.
 impl CBOR {
@@ -36,7 +38,7 @@ impl CBOR {
                 ];
                 if !d.is_empty() {
                     let mut note: Option<String> = None;
-                    if let Ok(a) = from_utf8(d) {
+                    if let Ok(a) = str::from_utf8(d) {
                         if let Some(b) = sanitized(a) {
                             note = Some(flanked(&b, "\"", "\""));
                         }

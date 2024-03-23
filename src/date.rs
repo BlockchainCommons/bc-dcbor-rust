@@ -1,11 +1,12 @@
+import_stdlib!();
 
-use std::ops::{Add, Sub};
+use ops::{Add, Sub};
 
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
-
 use anyhow::bail;
+
+use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -154,8 +155,8 @@ impl CBORTaggedDecodable for Date {
 
 impl CBORTaggedCodable for Date { }
 
-impl std::fmt::Display for Date {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for Date {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.datetime().to_rfc3339_opts(SecondsFormat::Secs, true).as_str())
     }
 }

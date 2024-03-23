@@ -1,7 +1,8 @@
+import_stdlib!();
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable};
+use crate::{CBOR, CBOREncodable, CBORDecodable, CBORError, CBORCodable};
 
-use super::{cbor::{CBOR, CBORCase}, varint::{EncodeVarInt, MajorType}};
+use super::{CBORCase, varint::{EncodeVarInt, MajorType}};
 
 use anyhow::bail;
 

@@ -1,8 +1,10 @@
+import_stdlib!();
+
 use anyhow::bail;
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
+use crate::{CBOR, CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
+use super::varint::{EncodeVarInt, MajorType};
 
 impl CBOREncodable for &str {
     fn cbor(&self) -> CBOR {

@@ -1,3 +1,5 @@
+import_stdlib!();
+
 use crate::{CBOREncodable, CBOR, Simple, CBORDecodable, CBORCodable, CBORError, CBORCase};
 
 use anyhow::bail;

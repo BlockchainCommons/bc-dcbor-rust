@@ -12,12 +12,13 @@ categories = ["data-structures", "encoding"]
 documentation = "https://docs.rs/dcbor"
 
 [dependencies]
-chrono = "0.4.28"
-half = "=2.2.1"
-hex = "0.4.3"
-thiserror = "1.0.48"
-anyhow = "1.0"
-bytes = "1.5.0"
+chrono = { version = "0.4.28", default-features = true  }
+half = { version = "=2.2.1", default-features = false }
+hex = { version = "0.4.3", default-features = true }
+thiserror-no-std = { version = "2.0.2" }
+anyhow = { version = "1.0", default-features = false }
+bytes = { version = "1.5.0", default-features = false }
+hashbrown = { version = "0.14.3", optional = true }
 
 [dev-dependencies]
 indoc = "2.0.0"
@@ -25,4 +26,7 @@ version-sync = "0.9"
 hex-literal = "0.4.1"
 
 [features]
+default = ["std"]
+std = ["half/std", "chrono/std", "hex/std", "bytes/std", "anyhow/std"]
+no_std = ["hashbrown"]
 multithreaded = []

@@ -1,14 +1,16 @@
+import_stdlib!();
+
 use bytes::Bytes;
 
-use crate::{tag::Tag, Simple, error::CBORError, decode::decode_cbor, CBOREncodable};
+use crate::{Map, tag::Tag, Simple, error::CBORError, decode::decode_cbor, CBOREncodable};
 
-use super::{Map, string_util::flanked};
+use super::string_util::flanked;
 
 #[cfg(feature = "multithreaded")]
-use std::sync::Arc as RefCounted;
+use sync::Arc as RefCounted;
 
 #[cfg(not(feature = "multithreaded"))]
-use std::rc::Rc as RefCounted;
+use rc::Rc as RefCounted;
 
 /// A symbolic representation of CBOR data.
 #[derive(Clone)]
@@ -249,8 +251,8 @@ fn format_map(m: &Map) -> String {
     flanked(&s.join(", "), "{", "}")
 }
 
-impl std::fmt::Debug for CBOR {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for CBOR {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.case() {
             CBORCase::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
             CBORCase::Negative(x) => f.debug_tuple("negative").field(x).finish(),
@@ -264,8 +266,8 @@ impl std::fmt::Debug for CBOR {
     }
 }
 
-impl std::fmt::Display for CBOR {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for CBOR {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self.case() {
             CBORCase::Unsigned(x) => format!("{}", x),
             CBORCase::Negative(x) => format!("{}", x),

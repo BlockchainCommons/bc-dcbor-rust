@@ -1,5 +1,7 @@
 #![doc(html_root_url = "https://docs.rs/dcbor/0.11.2")]
 #![warn(rust_2018_idioms)]
+// #![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 //! # dCBOR: Deterministic CBOR Codec
 //!
@@ -60,6 +62,9 @@
 //! See the unit tests For further examples, including encoding and decoding
 //! arrays with heterogenous elements, maps, and user-defined types with custom
 //! CBOR tags.
+
+#[macro_use]
+mod stdlib;
 
 mod cbor;
 pub use cbor::*;

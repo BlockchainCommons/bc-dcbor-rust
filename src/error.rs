@@ -1,9 +1,9 @@
-use std::str::Utf8Error;
+import_stdlib!();
+
 use crate::tag::Tag;
-use thiserror::Error;
 
 /// An error encountered while decoding or parsing CBOR.
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 pub enum CBORError {
     #[error("early end of CBOR data")]
     Underrun,
@@ -18,7 +18,7 @@ pub enum CBORError {
     InvalidSimpleValue,
 
     #[error("an invalidly-encoded UTF-8 string was encountered in the CBOR ({0:?})")]
-    InvalidString(Utf8Error),
+    InvalidString(str::Utf8Error),
 
     #[error("the decoded CBOR had {0} extra bytes at the end")]
     UnusedData(usize),
@@ -42,8 +42,10 @@ pub enum CBORError {
     WrongTag(Tag, Tag),
 }
 
-impl From<Utf8Error> for CBORError {
-    fn from(err: Utf8Error) -> Self {
+// impl StdError for CBORError {}
+
+impl From<str::Utf8Error> for CBORError {
+    fn from(err: str::Utf8Error) -> Self {
         CBORError::InvalidString(err)
     }
 }

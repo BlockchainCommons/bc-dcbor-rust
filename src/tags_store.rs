@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+import_stdlib!();
 
 use crate::Tag;
 

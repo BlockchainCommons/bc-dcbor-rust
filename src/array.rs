@@ -1,8 +1,8 @@
-use std::collections::{VecDeque, HashSet};
+import_stdlib!();
 
-use crate::{cbor_encodable::CBOREncodable, CBORDecodable, error::CBORError, CBORCase};
+use crate::{CBOR, cbor_encodable::CBOREncodable, CBORDecodable, error::CBORError, CBORCase};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
+use super::varint::{EncodeVarInt, MajorType};
 
 use anyhow::bail;
 
@@ -144,7 +144,7 @@ impl<T> From<HashSet<T>> for CBOR where T: CBOREncodable {
     }
 }
 
-impl<T> TryFrom<CBOR> for HashSet<T> where T: CBORDecodable + Eq + std::hash::Hash + Clone {
+impl<T> TryFrom<CBOR> for HashSet<T> where T: CBORDecodable + Eq + hash::Hash + Clone {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {

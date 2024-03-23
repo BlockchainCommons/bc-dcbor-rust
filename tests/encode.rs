@@ -1,4 +1,25 @@
-use std::collections::{HashMap, BTreeMap, VecDeque, HashSet};
+#[cfg(feature = "std")]
+mod with_std {
+    pub use std::collections::{HashMap, HashSet, BTreeMap, VecDeque};
+    pub use std::fmt::{self};
+}
+
+#[cfg(feature = "no_std")]
+pub mod without_std {
+    extern crate alloc;
+    pub use alloc::{
+        fmt::{self},
+        collections::{BTreeMap, VecDeque},
+    };
+    pub use hashbrown::{HashMap, HashSet};
+}
+
+#[cfg(feature = "std")]
+use with_std::*;
+
+#[cfg(not(feature = "std"))]
+#[cfg(feature = "no_std")]
+use without_std::*;
 
 use bytes::Bytes;
 use dcbor::{prelude::*, CBORCase};
@@ -428,8 +449,8 @@ fn encode_date() {
 
 fn test_convert<T>(value: T)
 where
-    T: PartialEq + Clone + Into<CBOR> + TryFrom<CBOR> + std::fmt::Debug,
-    T::Error: std::fmt::Debug,
+    T: PartialEq + Clone + Into<CBOR> + TryFrom<CBOR> + fmt::Debug,
+    T::Error: fmt::Debug,
 {
     let cbor = value.clone().into();
     let value2 = cbor.try_into().unwrap();

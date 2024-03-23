@@ -1,8 +1,8 @@
-use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues, HashMap};
+import_stdlib!();
 
-use crate::{cbor_encodable::CBOREncodable, CBORError, CBORDecodable, CBORCase};
+use crate::{CBOR, CBOREncodable, CBORError, CBORDecodable, CBORCase};
 
-use super::{cbor::CBOR, varint::{EncodeVarInt, MajorType}};
+use super::varint::{EncodeVarInt, MajorType};
 
 /// A CBOR map.
 ///
@@ -124,8 +124,8 @@ impl From<Map> for CBOR {
     }
 }
 
-impl std::fmt::Debug for Map {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Map {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("{:?}", self.0))
     }
 }
@@ -169,8 +169,8 @@ impl PartialEq for MapValue {
     }
 }
 
-impl std::fmt::Debug for MapValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for MapValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("({:?}, {:?})", self.key, self.value))
     }
 }
@@ -195,19 +195,19 @@ impl Eq for MapKey {
 }
 
 impl PartialOrd for MapKey {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl Ord for MapKey {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
         self.0.cmp(&other.0)
     }
 }
 
-impl std::fmt::Debug for MapKey {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for MapKey {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("0x{}", hex::encode(&self.0)))
     }
 }
@@ -236,8 +236,8 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable
     }
 }
 
-impl<K, V> TryFrom<CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::hash::Hash) + Clone, V: CBORDecodable + Clone {
-    type Error = Box<dyn std::error::Error>;
+impl<K, V> TryFrom<CBOR> for HashMap<K, V> where K: CBORDecodable + cmp::Eq + (hash::Hash) + Clone, V: CBORDecodable + Clone {
+    type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.case() {
@@ -248,7 +248,7 @@ impl<K, V> TryFrom<CBOR> for HashMap<K, V> where K: CBORDecodable + std::cmp::Eq
                 }
                 Ok(container)
             },
-            _ => Err(Box::new(CBORError::WrongType))
+            _ => Err(anyhow::Error::msg(CBORError::WrongType))
         }
     }
 }
@@ -265,8 +265,8 @@ impl<K, V> From<BTreeMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodabl
     }
 }
 
-impl<K, V> TryFrom<CBOR> for BTreeMap<K, V> where K: CBORDecodable + std::cmp::Eq + (std::cmp::Ord) + Clone, V: CBORDecodable + Clone {
-    type Error = Box<dyn std::error::Error>;
+impl<K, V> TryFrom<CBOR> for BTreeMap<K, V> where K: CBORDecodable + cmp::Eq + (cmp::Ord) + Clone, V: CBORDecodable + Clone {
+    type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.case() {
@@ -277,7 +277,7 @@ impl<K, V> TryFrom<CBOR> for BTreeMap<K, V> where K: CBORDecodable + std::cmp::E
                 }
                 Ok(container)
             },
-            _ => Err(Box::new(CBORError::WrongType))
+            _ => Err(anyhow::Error::msg(Box::new(CBORError::WrongType)))
         }
     }
 }

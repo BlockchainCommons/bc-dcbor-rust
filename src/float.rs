@@ -1,7 +1,11 @@
+import_stdlib!();
 
-use crate::{CBOREncodable, CBOR, Simple, varint::{EncodeVarInt, MajorType}, CBORDecodable, CBORCodable, CBORError, CBORCase, ExactFrom};
 use half::f16;
 use anyhow::bail;
+
+use crate::{CBOREncodable, CBOR, Simple, CBORDecodable, CBORCodable, CBORError, CBORCase, ExactFrom};
+
+use super::varint::{EncodeVarInt, MajorType};
 
 static CBOR_NAN: [u8; 3] = [0xf9, 0x7e, 0x00];
 
