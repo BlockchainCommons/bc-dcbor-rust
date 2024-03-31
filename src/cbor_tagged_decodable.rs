@@ -14,10 +14,11 @@ pub trait CBORTaggedDecodable: CBORDecodable + CBORTagged {
     fn from_tagged_cbor(cbor: &CBOR) -> anyhow::Result<Self> where Self: Sized {
         match cbor.case() {
             CBORCase::Tagged(tag, item) => {
-                if *tag == Self::CBOR_TAG {
+                let cbor_tags = Self::cbor_tags();
+                if cbor_tags.iter().any(|t| t == tag) {
                     Self::from_untagged_cbor(item)
                 } else {
-                    bail!(CBORError::WrongTag(Self::CBOR_TAG, tag.clone()))
+                    bail!(CBORError::WrongTag(cbor_tags[0].clone(), tag.clone()))
                 }
             },
             _ => bail!(CBORError::WrongType)

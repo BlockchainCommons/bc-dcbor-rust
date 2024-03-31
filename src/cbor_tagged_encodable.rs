@@ -12,7 +12,7 @@ pub trait CBORTaggedEncodable: CBOREncodable + CBORTagged {
 
     /// Returns the tagged CBOR encoding of this instance.
     fn tagged_cbor(&self) -> CBOR {
-        CBORCase::Tagged(Self::CBOR_TAG, Box::new(self.untagged_cbor())).into()
+        CBORCase::Tagged(Self::cbor_tags()[0].clone(), Box::new(self.untagged_cbor())).into()
     }
 
     /// Returns the tagged value in CBOR binary representation.

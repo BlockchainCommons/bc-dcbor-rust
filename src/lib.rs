@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.12.0")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.13.0")]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -20,7 +20,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.12.0"
+//! dcbor = "0.13.0"
 //! ```
 //!
 //! # Features
@@ -32,7 +32,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.12.0"
+//! version = "0.13.0"
 //! features = ["multithreaded"]
 //! ```
 //!
@@ -43,7 +43,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.12.0"
+//! version = "0.13.0"
 //! default-features = false
 //! features = ["no_std"]
 //! ```

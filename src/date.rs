@@ -137,7 +137,9 @@ impl TryFrom<CBOR> for Date {
 impl CBORCodable for Date { }
 
 impl CBORTagged for Date {
-    const CBOR_TAG: Tag = Tag::new(1);
+    fn cbor_tags() -> Vec<Tag> {
+        vec![Tag::new(1)]
+    }
 }
 
 impl CBORTaggedEncodable for Date {
