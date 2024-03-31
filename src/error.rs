@@ -3,7 +3,7 @@ import_stdlib!();
 use crate::tag::Tag;
 
 /// An error encountered while decoding or parsing CBOR.
-#[derive(Debug, thiserror_no_std::Error)]
+#[derive(Debug, ThisError)]
 pub enum CBORError {
     #[error("early end of CBOR data")]
     Underrun,

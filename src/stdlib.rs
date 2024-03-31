@@ -15,6 +15,7 @@ pub mod with_std {
     pub use std::cmp::{self};
     pub use std::str::{self};
     pub use std::format;
+    pub use thiserror::Error as ThisError;
 }
 
 #[cfg(not(feature = "std"))]
@@ -38,6 +39,7 @@ pub mod without_std {
     pub use alloc::str::{self};
     pub use alloc::borrow::ToOwned;
     pub use alloc::format;
+    pub use thiserror_no_std::Error as ThisError;
 
     pub trait StdError: fmt::Debug + fmt::Display { }
 }

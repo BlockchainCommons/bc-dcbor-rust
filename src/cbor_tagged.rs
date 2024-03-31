@@ -1,3 +1,5 @@
+import_stdlib!();
+
 use crate::Tag;
 
 /// A type with an associated CBOR tag.
