@@ -14,7 +14,7 @@ macro_rules! impl_cbor {
             fn cbor(&self) -> CBOR {
                 #[allow(unused_comparisons)]
                 if *self < 0 {
-                    CBORCase::Negative(*self as i64).into()
+                    CBORCase::Negative(((-1 - (*self as i128)) as u64)).into()
                 } else {
                     CBORCase::Unsigned(*self as u64).into()
                 }
@@ -23,7 +23,7 @@ macro_rules! impl_cbor {
             fn cbor_data(&self) -> Vec<u8> {
                 #[allow(unused_comparisons)]
                 if *self < 0 {
-                    let n = (!*self as u64);
+                    let n = (-1 - (*self as i128)) as u64;
                     n.encode_varint(MajorType::Negative)
                 } else {
                     let n = *self as u64;
@@ -36,7 +36,10 @@ macro_rules! impl_cbor {
             fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
                 match cbor.case() {
                     CBORCase::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
-                    CBORCase::Negative(n) => Self::from_i64(*n, 0, <$type>::MAX as i64, |x| x as $type),
+                    CBORCase::Negative(n) => {
+                        let a = Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type)? as i128;
+                        Ok((-1 - a) as $type)
+                    }
                     _ => bail!(CBORError::WrongType),
                 }
             }

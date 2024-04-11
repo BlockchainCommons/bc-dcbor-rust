@@ -13,8 +13,10 @@ impl CBOREncodable for f64 {
     fn cbor(&self) -> CBOR {
         let n = *self;
         if n < 0.0f64 {
-            if let Some(i) = i64::exact_from_f64(n) {
-                return i.cbor();
+            if let Some(n) = i128::exact_from_f64(n) {
+                if let Some(i) = u64::exact_from_i128(-1 - n) {
+                    return CBORCase::Negative(i).into();
+                }
             }
         }
         if let Some(i) = u64::exact_from_f64(n) {
@@ -30,8 +32,11 @@ impl CBOREncodable for f64 {
             return f.cbor_data();
         }
         if n < 0.0f64 {
-            if let Some(i) = i64::exact_from_f64(n) {
-                return i.cbor_data();
+            if let Some(n) = i128::exact_from_f64(n) {
+                if let Some(i) = u64::exact_from_i128(-1 - n) {
+                    let cbor: CBOR = CBORCase::Negative(i).into();
+                    return cbor.cbor_data();
+                }
             }
         }
         if let Some(i) = u64::exact_from_f64(n) {
@@ -55,8 +60,8 @@ impl CBORDecodable for f64 {
                 }
             },
             CBORCase::Negative(n) => {
-                if let Some(f) = f64::exact_from_i64(*n) {
-                    Ok(f)
+                if let Some(f) = f64::exact_from_u64(*n) {
+                    Ok(-1f64 - f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
@@ -96,8 +101,8 @@ impl CBOREncodable for f32 {
     fn cbor(&self) -> CBOR {
         let n = *self;
         if n < 0.0f32 {
-            if let Some(i) = i32::exact_from_f32(n) {
-                return i.cbor();
+            if let Some(i) = u64::exact_from_f32(-1f32 - n) {
+                return CBORCase::Negative(i).into();
             }
         }
         if let Some(i) = u32::exact_from_f32(n) {
@@ -113,8 +118,9 @@ impl CBOREncodable for f32 {
             return f.cbor_data();
         }
         if n < 0.0f32 {
-            if let Some(i) = i32::exact_from_f32(n) {
-                return i.cbor_data();
+            if let Some(i) = u64::exact_from_f32(-1f32 - n) {
+                let cbor: CBOR = CBORCase::Negative(i).into();
+                return cbor.cbor_data();
             }
         }
         if let Some(i) = u32::exact_from_f32(n) {
@@ -138,7 +144,7 @@ impl CBORDecodable for f32 {
                 }
             },
             CBORCase::Negative(n) => {
-                if let Some(f) = f32::exact_from_i64(*n) {
+                if let Some(f) = f32::exact_from_u64(*n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
@@ -185,8 +191,8 @@ impl CBOREncodable for f16 {
     fn cbor(&self) -> CBOR {
         let n = self.to_f64();
         if n < 0.0 {
-            if let Some(i) = i16::exact_from_f64(n) {
-                return i.cbor();
+            if let Some(i) = u64::exact_from_f64(-1f64 - n) {
+                return CBORCase::Negative(i).into();
             }
         }
         if let Some(i) = u16::exact_from_f64(n) {
@@ -198,8 +204,9 @@ impl CBOREncodable for f16 {
     fn cbor_data(&self) -> Vec<u8> {
         let n = self.to_f64();
         if n < 0.0 {
-            if let Some(i) = i16::exact_from_f64(n) {
-                return i.cbor_data();
+            if let Some(i) = u64::exact_from_f64(-1f64 - n) {
+                let cbor: CBOR = CBORCase::Negative(i).into();
+                return cbor.cbor_data();
             }
         }
         if let Some(i) = u16::exact_from_f64(n) {
@@ -229,8 +236,12 @@ impl CBORDecodable for f16 {
                 }
             },
             CBORCase::Negative(n) => {
-                if let Some(f) = f16::exact_from_i64(*n) {
-                    Ok(f)
+                if let Some(f) = f64::exact_from_u64(*n) {
+                    if let Some(b) = f16::exact_from_f64(-1f64 - f) {
+                        Ok(b)
+                    } else {
+                        bail!(CBORError::OutOfRange);
+                    }
                 } else {
                     bail!(CBORError::OutOfRange);
                 }

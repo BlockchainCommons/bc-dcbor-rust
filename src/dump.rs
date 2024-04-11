@@ -31,7 +31,7 @@ impl CBOR {
     fn dump_items(&self, level: usize, tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
         match self.case() {
             CBORCase::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
-            CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", n)))),
+            CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", -1 - (*n as i128))))),
             CBORCase::ByteString(d) => {
                 let mut items = vec![
                     DumpItem::new(level, vec!(d.len().encode_varint(MajorType::Bytes)), Some(format!("bytes({})", d.len())))

@@ -33,7 +33,9 @@ pub enum CBORCase {
     /// Unsigned integer (major type 0).
     Unsigned(u64),
     /// Negative integer (major type 1).
-    Negative(i64),
+    ///
+    /// Actual value is -1 - n
+    Negative(u64),
     /// Byte string (major type 2).
     ByteString(Bytes),
     /// UTF-8 string (major type 3).
@@ -255,7 +257,7 @@ impl fmt::Debug for CBOR {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.case() {
             CBORCase::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
-            CBORCase::Negative(x) => f.debug_tuple("negative").field(x).finish(),
+            CBORCase::Negative(x) => f.debug_tuple("negative").field(&(-1 - (*x as i128))).finish(),
             CBORCase::ByteString(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
             CBORCase::Text(x) => f.debug_tuple("text").field(x).finish(),
             CBORCase::Array(x) => f.debug_tuple("array").field(x).finish(),
@@ -270,7 +272,7 @@ impl fmt::Display for CBOR {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self.case() {
             CBORCase::Unsigned(x) => format!("{}", x),
-            CBORCase::Negative(x) => format!("{}", x),
+            CBORCase::Negative(x) => format!("{}", -1 - (*x as i128)),
             CBORCase::ByteString(x) => format!("h'{}'", hex::encode(x)),
             CBORCase::Text(x) => format_string(x),
             CBORCase::Array(x) => format_array(x),

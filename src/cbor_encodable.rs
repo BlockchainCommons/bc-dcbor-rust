@@ -22,10 +22,7 @@ impl CBOREncodable for CBOR {
     fn cbor_data(&self) -> Vec<u8> {
         match self.case() {
             CBORCase::Unsigned(x) => x.cbor_data(),
-            CBORCase::Negative(x) => {
-                assert!(x < &0);
-                x.cbor_data()
-            },
+            CBORCase::Negative(x) => x.encode_varint(MajorType::Negative),
             CBORCase::ByteString(x) => {
                 let mut buf = x.len().encode_varint(MajorType::Bytes);
                 buf.extend(x);
