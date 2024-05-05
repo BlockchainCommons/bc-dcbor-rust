@@ -18,3 +18,11 @@ impl TryFrom<CBOR> for Bytes {
         }
     }
 }
+
+impl TryFrom<&CBOR> for Bytes {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &CBOR) -> Result<Self, Self::Error> {
+        value.clone().try_into()
+    }
+}

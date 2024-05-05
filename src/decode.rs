@@ -9,7 +9,8 @@ use super::varint::MajorType;
 /// Decode CBOR binary representation to symbolic representation.
 ///
 /// Returns an error if the data is not well-formed deterministic CBOR.
-pub fn decode_cbor(data: &[u8]) -> Result<CBOR, CBORError> {
+pub fn decode_cbor(data: impl AsRef<[u8]>) -> Result<CBOR, CBORError> {
+    let data = data.as_ref();
     let (cbor, len) = decode_cbor_internal(data)?;
     let remaining = data.len() - len;
     if remaining > 0 {

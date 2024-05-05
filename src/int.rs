@@ -73,7 +73,7 @@ impl_cbor!(i16);
 impl_cbor!(i32);
 impl_cbor!(i64);
 
-trait From64 {
+pub trait From64 {
     fn from_u64<F>(n: u64, max: u64, f: F) -> anyhow::Result<Self>
     where F: Fn(u64) -> Self, Self: Sized
     {
@@ -83,6 +83,7 @@ trait From64 {
         Ok(f(n))
     }
 
+    #[allow(dead_code)]
     fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> anyhow::Result<Self>
     where F: Fn(i64) -> Self, Self: Sized
     {

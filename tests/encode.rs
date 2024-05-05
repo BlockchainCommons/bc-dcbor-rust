@@ -203,7 +203,7 @@ fn encode_heterogenous_array() {
 
     let cbor = array.cbor();
     let data = cbor.cbor_data();
-    let decoded_cbor = CBOR::from_data(&data).unwrap();
+    let decoded_cbor = CBOR::from_data(data).unwrap();
     match decoded_cbor.case() {
         CBORCase::Array(a) => {
             assert_eq!(a[0], 1.cbor());
@@ -504,7 +504,7 @@ fn usage_test_1() {
 #[test]
 fn usage_test_2() {
     let data = hex!("831903e81907d0190bb8");
-    let cbor = CBOR::from_data(&data).unwrap();
+    let cbor = CBOR::from_data(data).unwrap();
     assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
     let array: Vec::<u32> = cbor.try_into().unwrap();
     assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");
@@ -531,13 +531,13 @@ fn encode_nan() {
 fn decode_nan() {
     // Canonical NaN decodes
     let canonical_nan_data = hex!("f97e00");
-    let d: f64 = CBOR::from_data(&canonical_nan_data).unwrap().into();
+    let d: f64 = CBOR::from_data(canonical_nan_data).unwrap().into();
     assert!(d.is_nan());
 
     // Non-canonical NaNs of any size return an error
-    CBOR::from_data(&hex!("f97e01")).unwrap_err();
-    CBOR::from_data(&hex!("faffc00001")).unwrap_err();
-    CBOR::from_data(&hex!("fb7ff9100000000001")).unwrap_err();
+    CBOR::from_data(hex!("f97e01")).unwrap_err();
+    CBOR::from_data(hex!("faffc00001")).unwrap_err();
+    CBOR::from_data(hex!("fb7ff9100000000001")).unwrap_err();
 }
 
 #[test]
@@ -558,16 +558,16 @@ fn decode_infinity() {
     let canonical_neg_infinity_data = hex!("f9fc00");
 
     // Canonical infinity decodes
-    let a: f64 = CBOR::from_data(&canonical_infinity_data).unwrap().into();
+    let a: f64 = CBOR::from_data(canonical_infinity_data).unwrap().into();
     assert_eq!(a, f64::INFINITY);
-    let a: f64 = CBOR::from_data(&canonical_neg_infinity_data).unwrap().into();
+    let a: f64 = CBOR::from_data(canonical_neg_infinity_data).unwrap().into();
     assert_eq!(a, f64::NEG_INFINITY);
 
     // Non-canonical +infinities return error
-    CBOR::from_data(&hex!("fa7f800000")).err().unwrap();
-    CBOR::from_data(&hex!("fb7ff0000000000000")).err().unwrap();
+    CBOR::from_data(hex!("fa7f800000")).err().unwrap();
+    CBOR::from_data(hex!("fb7ff0000000000000")).err().unwrap();
 
     // Non-canonical -infinities return error
-    CBOR::from_data(&hex!("faff800000")).err().unwrap();
-    CBOR::from_data(&hex!("fbfff0000000000000")).err().unwrap();
+    CBOR::from_data(hex!("faff800000")).err().unwrap();
+    CBOR::from_data(hex!("fbfff0000000000000")).err().unwrap();
 }

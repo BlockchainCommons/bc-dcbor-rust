@@ -53,7 +53,7 @@ pub enum CBORCase {
 /// Affordances for decoding CBOR from binary representation.
 impl CBOR {
     /// Decodes the given date into CBOR symbolic representation.
-    pub fn from_data(data: &[u8]) -> Result<CBOR, CBORError> {
+    pub fn from_data(data: impl AsRef<[u8]>) -> Result<CBOR, CBORError> {
         decode_cbor(data)
     }
 
@@ -63,7 +63,7 @@ impl CBOR {
     /// other characters.
     pub fn from_hex(hex: &str) -> Result<CBOR, CBORError> {
         let data = hex::decode(hex).unwrap();
-        Self::from_data(&data)
+        Self::from_data(data)
     }
 }
 

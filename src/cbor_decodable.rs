@@ -8,7 +8,7 @@ pub trait CBORDecodable: TryFrom<CBOR> + 'static {
     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> where Self: Sized;
 
     /// Creates an instance of this type from encoded CBOR binary data.
-    fn from_cbor_data(cbor_data: &[u8]) -> anyhow::Result<Self> where Self: Sized {
+    fn from_cbor_data(cbor_data: impl AsRef<[u8]>) -> anyhow::Result<Self> where Self: Sized {
         Self::from_cbor(&CBOR::from_data(cbor_data).map_err(anyhow::Error::msg)?)
     }
 }

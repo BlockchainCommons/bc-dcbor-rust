@@ -23,6 +23,7 @@ pub trait ExactFrom {
     ///    assert_eq!(i64::exact_from_f16(f16::from_f64(21.5)), None);
     ///
     /// - Parameter source: The value to convert.
+    #[allow(dead_code)]
     fn exact_from_f16(source: f16) -> Option<Self> where Self: Sized;
 
     /// Creates a target numeric value from the given `f32`, if it can be represented exactly.
@@ -75,10 +76,13 @@ pub trait ExactFrom {
     ///   assert_eq!(f64::exact_from_i64(-9223372036854775809i64), None);
     ///
     /// - Parameter source: The value to convert.
+    #[allow(dead_code)]
     fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized;
 
+    #[allow(dead_code)]
     fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized;
 
+    #[allow(dead_code)]
     fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized;
 }
 
