@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, tags_store::TagsStoreTrait, Date, cbor_decodable::CBORDecodable, CBORCase};
+use crate::{CBOR, tags_store::TagsStoreTrait, Date, CBORCase};
 
 use super::string_util::flanked;
 
@@ -46,7 +46,7 @@ impl CBOR {
             CBORCase::Tagged(tag, item) => {
                 let diag_item: DiagItem;
                 if annotate && tag.value() == 1 {
-                    match f64::from_cbor(item) {
+                    match <f64 as TryFrom<CBOR>>::try_from((**item).clone()) {
                         Ok(n) => {
                             let date = Date::from_timestamp(n).to_string();
                             diag_item = DiagItem::Item(date);

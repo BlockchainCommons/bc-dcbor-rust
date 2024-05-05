@@ -36,7 +36,11 @@ fn test_cbor(t: impl Into<CBOR>, expected_debug: &str, expected_display: &str, e
     assert_eq!(cbor, decoded_cbor);
 }
 
-fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBORDecodable + Into<CBOR> {
+fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str)
+where
+T: TryFrom<CBOR> + Into<CBOR>,
+<T as TryFrom<dcbor::CBOR>>::Error: std::fmt::Debug
+{
     let cbor = t.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
@@ -45,7 +49,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
 
     let decoded_cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
-    let t2 = T::from_cbor(&decoded_cbor).unwrap();
+    let t2 = T::try_from(decoded_cbor).unwrap();
 
     let cbor = t2.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
@@ -349,7 +353,7 @@ fn encode_float() {
 fn int_coerced_to_float() {
     let n = 42;
     let c: CBOR = n.into();
-    let f: f64 = c.clone().into();
+    let f: f64 = c.clone().try_into().unwrap();
     assert_eq!(f, n as f64);
     let c2: CBOR = f.into();
     assert_eq!(c2, c);
@@ -362,7 +366,7 @@ fn fail_float_coerced_to_int() {
     // Floating point values cannot be coerced to integer types.
     let n = 42.5;
     let c: CBOR = n.into();
-    let f: f64 = c.clone().into();
+    let f: f64 = c.clone().try_into().unwrap();
     assert_eq!(f, n);
     let a = i32::try_from(c);
     assert!(a.is_err());
@@ -505,7 +509,7 @@ fn usage_test_2() {
     let data = hex!("831903e81907d0190bb8");
     let cbor = CBOR::from_data(data).unwrap();
     assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
-    let array: Vec::<u32> = cbor.try_into().unwrap();
+    let array: Vec<u32> = cbor.try_into().unwrap();
     assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");
 }
 
@@ -530,7 +534,7 @@ fn encode_nan() {
 fn decode_nan() {
     // Canonical NaN decodes
     let canonical_nan_data = hex!("f97e00");
-    let d: f64 = CBOR::from_data(canonical_nan_data).unwrap().into();
+    let d: f64 = CBOR::from_data(canonical_nan_data).unwrap().try_into().unwrap();
     assert!(d.is_nan());
 
     // Non-canonical NaNs of any size return an error
@@ -557,9 +561,9 @@ fn decode_infinity() {
     let canonical_neg_infinity_data = hex!("f9fc00");
 
     // Canonical infinity decodes
-    let a: f64 = CBOR::from_data(canonical_infinity_data).unwrap().into();
+    let a: f64 = CBOR::from_data(canonical_infinity_data).unwrap().try_into().unwrap();
     assert_eq!(a, f64::INFINITY);
-    let a: f64 = CBOR::from_data(canonical_neg_infinity_data).unwrap().into();
+    let a: f64 = CBOR::from_data(canonical_neg_infinity_data).unwrap().try_into().unwrap();
     assert_eq!(a, f64::NEG_INFINITY);
 
     // Non-canonical +infinities return error

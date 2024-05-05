@@ -117,8 +117,6 @@ pub use tags_store::{TagsStoreTrait, TagsStore};
 mod tag;
 pub use tag::Tag;
 
-mod cbor_decodable;
-pub use cbor_decodable::CBORDecodable;
 mod cbor_codable;
 pub use cbor_codable::CBORCodable;
 

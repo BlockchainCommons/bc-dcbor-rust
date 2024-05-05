@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, CBORError, CBORDecodable, CBORCase};
+use crate::{CBOR, CBORError, CBORCase};
 
 use super::varint::{EncodeVarInt, MajorType};
 
@@ -64,10 +64,10 @@ impl Map {
     /// Returns `Some` if the key is present in the map, `None` otherwise.
     pub fn get<K, V>(&self, key: K) -> Option<V>
     where
-        K: Into<CBOR>, V: CBORDecodable
+        K: Into<CBOR>, V: TryFrom<CBOR>
     {
         match self.0.get(&MapKey::new(key.into().cbor_data())) {
-            Some(value) => V::from_cbor(&value.value).ok(),
+            Some(value) => V::try_from(value.value.clone()).ok(),
             None => None
         }
     }
@@ -77,7 +77,7 @@ impl Map {
     /// Returns `Ok` if the key is present in the map, `Err` otherwise.
     pub fn extract<K, V>(&self, key: K) -> Result<V, CBORError>
     where
-        K: Into<CBOR>, V: CBORDecodable
+        K: Into<CBOR>, V: TryFrom<CBOR>
     {
         match self.get(key) {
             Some(value) => Ok(value),
@@ -253,15 +253,22 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
     }
 }
 
-impl<K, V> TryFrom<CBOR> for HashMap<K, V> where K: CBORDecodable + cmp::Eq + (hash::Hash) + Clone, V: CBORDecodable + Clone {
+impl<K, V> TryFrom<CBOR> for HashMap<K, V>
+where
+K: TryFrom<CBOR> + cmp::Eq + hash::Hash + Clone, V: TryFrom<CBOR> + Clone,
+<K as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+<V as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+{
     type Error = anyhow::Error;
 
-    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
+    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
-                    container.insert(K::from_cbor(k)?.clone(), V::from_cbor(v)?.clone());
+                    let key = K::try_from(k.clone()).map_err(|e| e.into())?;
+                    let value = V::try_from(v.clone()).map_err(|e| e.into())?;
+                    container.insert(key, value);
                 }
                 Ok(container)
             },
@@ -282,15 +289,22 @@ impl<K, V> From<BTreeMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
     }
 }
 
-impl<K, V> TryFrom<CBOR> for BTreeMap<K, V> where K: CBORDecodable + cmp::Eq + (cmp::Ord) + Clone, V: CBORDecodable + Clone {
+impl<K, V> TryFrom<CBOR> for BTreeMap<K, V>
+where
+K: TryFrom<CBOR> + cmp::Eq + (cmp::Ord) + Clone, V: TryFrom<CBOR> + Clone,
+<K as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+<V as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+{
     type Error = anyhow::Error;
 
-    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
+    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
                 for (k, v) in map.iter() {
-                    container.insert(K::from_cbor(k)?.clone(), V::from_cbor(v)?.clone());
+                    let key = K::try_from(k.clone()).map_err(|e| e.into())?;
+                    let value = V::try_from(v.clone()).map_err(|e| e.into())?;
+                    container.insert(key, value);
                 }
                 Ok(container)
             },

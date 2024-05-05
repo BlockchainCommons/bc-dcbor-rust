@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, Simple, CBORDecodable, CBORError, CBORCase};
+use crate::{CBOR, Simple, CBORError, CBORCase};
 
 use anyhow::bail;
 
@@ -13,18 +13,14 @@ impl From<bool> for CBOR {
     }
 }
 
-impl CBORDecodable for bool {
-    fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
+impl TryFrom<CBOR> for bool {
+    type Error = anyhow::Error;
+
+    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Simple(Simple::False) => Ok(false),
             CBORCase::Simple(Simple::True) => Ok(true),
             _ => bail!(CBORError::WrongType),
         }
-    }
-}
-
-impl From<CBOR> for bool {
-    fn from(value: CBOR) -> Self {
-        Self::from_cbor(&value).unwrap()
     }
 }

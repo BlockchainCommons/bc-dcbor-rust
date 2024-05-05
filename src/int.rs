@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, CBORDecodable, CBORError};
+use crate::{CBOR, CBORError};
 
 use super::{CBORCase, varint::{EncodeVarInt, MajorType}};
 
@@ -21,19 +21,6 @@ macro_rules! impl_cbor {
             }
         }
 
-        impl CBORDecodable for $type {
-            fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-                match cbor.case() {
-                    CBORCase::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
-                    CBORCase::Negative(n) => {
-                        let a = Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type)? as i128;
-                        Ok((-1 - a) as $type)
-                    }
-                    _ => bail!(CBORError::WrongType),
-                }
-            }
-        }
-
         impl From<$type> for CBOR {
             fn from(value: $type) -> Self {
                 #[allow(unused_comparisons)]
@@ -48,8 +35,15 @@ macro_rules! impl_cbor {
         impl TryFrom<CBOR> for $type {
             type Error = anyhow::Error;
 
-            fn try_from(value: CBOR) -> Result<Self, Self::Error> {
-                Self::from_cbor(&value)
+            fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+                match cbor.case() {
+                    CBORCase::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
+                    CBORCase::Negative(n) => {
+                        let a = Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type)? as i128;
+                        Ok((-1 - a) as $type)
+                    }
+                    _ => bail!(CBORError::WrongType),
+                }
             }
         }
     };

@@ -2,7 +2,7 @@ import_stdlib!();
 
 use anyhow::bail;
 
-use crate::{float::f64_cbor_data, CBORCase, CBORDecodable, CBORError, CBOR};
+use crate::{float::f64_cbor_data, CBORCase, CBORError, CBOR};
 
 use super::varint::{EncodeVarInt, MajorType};
 
@@ -35,41 +35,20 @@ impl Simple {
     }
 }
 
-// impl CBOREncodable for Simple {
-//     fn cbor(&self) -> CBOR {
-//         CBORCase::Simple(self.clone()).into()
-//     }
-
-//     fn cbor_data(&self) -> Vec<u8> {
-//         match self {
-//             Self::False => 20u8.encode_varint(MajorType::Simple),
-//             Self::True => 21u8.encode_varint(MajorType::Simple),
-//             Self::Null => 22u8.encode_varint(MajorType::Simple),
-//             Self::Float(v) => v.cbor_data(),
-//         }
-//     }
-// }
-
 impl From<Simple> for CBOR {
     fn from(value: Simple) -> Self {
         CBORCase::Simple(value.clone()).into()
     }
 }
 
-impl CBORDecodable for Simple {
-    fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
+impl TryFrom<CBOR> for Simple {
+    type Error = anyhow::Error;
+
+    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
         match cbor.case() {
             CBORCase::Simple(simple) => Ok(simple.clone()),
             _ => bail!(CBORError::WrongType),
         }
-    }
-}
-
-impl TryFrom<CBOR> for Simple {
-    type Error = anyhow::Error;
-
-    fn try_from(value: CBOR) -> Result<Self, Self::Error> {
-        Self::from_cbor(&value)
     }
 }
 
