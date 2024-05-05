@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, CBOREncodable, CBORDecodable, CBORError, CBORCodable};
+use crate::{CBOR, CBORDecodable, CBORError};
 
 use super::{CBORCase, varint::{EncodeVarInt, MajorType}};
 
@@ -8,18 +8,7 @@ use anyhow::bail;
 
 macro_rules! impl_cbor {
     ($type: ty) => {
-        impl From64 for $type { }
-
-        impl CBOREncodable for $type {
-            fn cbor(&self) -> CBOR {
-                #[allow(unused_comparisons)]
-                if *self < 0 {
-                    CBORCase::Negative(((-1 - (*self as i128)) as u64)).into()
-                } else {
-                    CBORCase::Unsigned(*self as u64).into()
-                }
-            }
-
+        impl From64 for $type {
             fn cbor_data(&self) -> Vec<u8> {
                 #[allow(unused_comparisons)]
                 if *self < 0 {
@@ -45,11 +34,14 @@ macro_rules! impl_cbor {
             }
         }
 
-        impl CBORCodable for $type { }
-
         impl From<$type> for CBOR {
             fn from(value: $type) -> Self {
-                value.cbor()
+                #[allow(unused_comparisons)]
+                if value < 0 {
+                    CBORCase::Negative((-1 - (value as i128)) as u64).into()
+                } else {
+                    CBORCase::Unsigned(value as u64).into()
+                }
             }
         }
 
@@ -74,6 +66,8 @@ impl_cbor!(i32);
 impl_cbor!(i64);
 
 pub trait From64 {
+    fn cbor_data(&self) -> Vec<u8>;
+
     fn from_u64<F>(n: u64, max: u64, f: F) -> anyhow::Result<Self>
     where F: Fn(u64) -> Self, Self: Sized
     {

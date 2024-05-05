@@ -2,7 +2,7 @@ import_stdlib!();
 
 use bytes::Bytes;
 
-use crate::{Map, tag::Tag, Simple, error::CBORError, decode::decode_cbor, CBOREncodable};
+use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarInt, MajorType}, Map, Simple};
 
 use super::string_util::flanked;
 
@@ -64,6 +64,43 @@ impl CBOR {
     pub fn from_hex(hex: &str) -> Result<CBOR, CBORError> {
         let data = hex::decode(hex).unwrap();
         Self::from_data(data)
+    }
+
+    pub fn cbor(&self) -> CBOR {
+        self.clone()
+    }
+
+    pub fn cbor_data(&self) -> Vec<u8> {
+        match self.case() {
+            CBORCase::Unsigned(x) => x.encode_varint(MajorType::Unsigned),
+            CBORCase::Negative(x) => x.encode_varint(MajorType::Negative),
+            CBORCase::ByteString(x) => {
+                let mut buf = x.len().encode_varint(MajorType::Bytes);
+                buf.extend(x);
+                buf
+            },
+            CBORCase::Text(x) => {
+                let mut buf = x.len().encode_varint(MajorType::Text);
+                for byte in x.bytes() {
+                    buf.push(byte);
+                }
+                buf
+            },
+            CBORCase::Array(x) => {
+                let mut buf = x.len().encode_varint(MajorType::Array);
+                for item in x {
+                    buf.extend(item.cbor_data());
+                }
+                buf
+            },
+            CBORCase::Map(x) => x.cbor_data(),
+            CBORCase::Tagged(tag, item) => {
+                let mut buf = tag.value().encode_varint(MajorType::Tagged);
+                buf.extend(item.cbor_data());
+                buf
+            },
+            CBORCase::Simple(x) => x.cbor_data(),
+        }
     }
 }
 
@@ -147,8 +184,8 @@ impl CBOR {
     }
 
     /// Create a new CBOR value representing a tagged value.
-    pub fn tagged_value(tag: impl Into<Tag>, item: impl CBOREncodable) -> CBOR {
-        CBORCase::Tagged(tag.into(), Box::new(item.cbor())).into()
+    pub fn tagged_value(tag: impl Into<Tag>, item: impl Into<CBOR>) -> CBOR {
+        CBORCase::Tagged(tag.into(), Box::new(item.into())).into()
     }
 
     /// Extract the CBOR value as a tagged value.

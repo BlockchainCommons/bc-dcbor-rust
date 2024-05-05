@@ -1,28 +1,12 @@
 import_stdlib!();
 
-use crate::{CBOR, cbor_encodable::CBOREncodable, CBORDecodable, error::CBORError, CBORCase};
-
-use super::varint::{EncodeVarInt, MajorType};
+use crate::{CBOR, CBORDecodable, error::CBORError, CBORCase};
 
 use anyhow::bail;
 
-impl<T> CBOREncodable for Vec<T> where T: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        let mut buf = self.len().encode_varint(MajorType::Array);
-        for item in self {
-            buf.extend(item.cbor_data());
-        }
-        buf
-    }
-}
-
-impl<T> From<Vec<T>> for CBOR where T: CBOREncodable {
+impl<T> From<Vec<T>> for CBOR where T: Into<CBOR> {
     fn from(vec: Vec<T>) -> Self {
-        vec.cbor()
+        CBORCase::Array(vec.into_iter().map(|x| x.into()).collect()).into()
     }
 }
 
@@ -44,9 +28,9 @@ impl<T> TryFrom<CBOR> for Vec<T> where T: CBORDecodable + Clone {
     }
 }
 
-impl<T> From<&[T]> for CBOR where T: CBOREncodable {
+impl<T> From<&[T]> for CBOR where T: Into<CBOR> + Clone {
     fn from(array: &[T]) -> Self {
-        CBORCase::Array(array.iter().map(|x| x.cbor()).collect()).into()
+        CBORCase::Array(array.iter().map(|x| x.clone().into()).collect()).into()
     }
 }
 
@@ -66,43 +50,15 @@ impl<T> CBORDecodable for Vec<T> where T: CBORDecodable + Clone {
     }
 }
 
-impl<T, const N: usize> CBOREncodable for [T; N] where T: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        let mut buf = self.len().encode_varint(MajorType::Array);
-        for item in self {
-            buf.extend(item.cbor_data());
-        }
-        buf
-    }
-}
-
-impl<T, const N: usize> From<[T; N]> for CBOR where T: CBOREncodable {
+impl<T, const N: usize> From<[T; N]> for CBOR where T: Into<CBOR> {
     fn from(array: [T; N]) -> Self {
-        array.cbor()
+        CBORCase::Array(array.into_iter().map(|x| x.into()).collect()).into()
     }
 }
 
-impl<T> CBOREncodable for VecDeque<T> where T: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        let mut buf = self.len().encode_varint(MajorType::Array);
-        for item in self {
-            buf.extend(item.cbor_data());
-        }
-        buf
-    }
-}
-
-impl<T> From<VecDeque<T>> for CBOR where T: CBOREncodable {
+impl<T> From<VecDeque<T>> for CBOR where T: Into<CBOR> {
     fn from(deque: VecDeque<T>) -> Self {
-        deque.cbor()
+        CBORCase::Array(deque.into_iter().map(|x| x.into()).collect()).into()
     }
 }
 
@@ -124,23 +80,9 @@ impl<T> TryFrom<CBOR> for VecDeque<T> where T: CBORDecodable + Clone {
     }
 }
 
-impl<T> CBOREncodable for HashSet<T> where T: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Array(self.iter().map(|x| x.cbor()).collect()).into()
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        let mut buf = self.len().encode_varint(MajorType::Array);
-        for item in self {
-            buf.extend(item.cbor_data());
-        }
-        buf
-    }
-}
-
-impl<T> From<HashSet<T>> for CBOR where T: CBOREncodable {
+impl<T> From<HashSet<T>> for CBOR where T: Into<CBOR> {
     fn from(set: HashSet<T>) -> Self {
-        set.cbor()
+        CBORCase::Array(set.into_iter().map(|x| x.into()).collect()).into()
     }
 }
 

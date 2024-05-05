@@ -63,7 +63,7 @@
 //! # {
 //! use dcbor::prelude::*;
 //! let array = [1000, 2000, 3000];
-//! let cbor = array.cbor();
+//! let cbor: CBOR = array.into();
 //! assert_eq!(cbor.hex(), "831903e81907d0190bb8");
 //! # }
 //! # }
@@ -117,8 +117,6 @@ pub use tags_store::{TagsStoreTrait, TagsStore};
 mod tag;
 pub use tag::Tag;
 
-mod cbor_encodable;
-pub use cbor_encodable::CBOREncodable;
 mod cbor_decodable;
 pub use cbor_decodable::CBORDecodable;
 mod cbor_codable;

@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, CBOREncodable, CBORError, CBORDecodable, CBORCase};
+use crate::{CBOR, CBORError, CBORDecodable, CBORCase};
 
 use super::varint::{EncodeVarInt, MajorType};
 
@@ -64,9 +64,9 @@ impl Map {
     /// Returns `Some` if the key is present in the map, `None` otherwise.
     pub fn get<K, V>(&self, key: K) -> Option<V>
     where
-        K: CBOREncodable, V: CBORDecodable
+        K: Into<CBOR>, V: CBORDecodable
     {
-        match self.0.get(&MapKey::new(key.cbor_data())) {
+        match self.0.get(&MapKey::new(key.into().cbor_data())) {
             Some(value) => V::from_cbor(&value.value).ok(),
             None => None
         }
@@ -77,7 +77,7 @@ impl Map {
     /// Returns `Ok` if the key is present in the map, `Err` otherwise.
     pub fn extract<K, V>(&self, key: K) -> Result<V, CBORError>
     where
-        K: CBOREncodable, V: CBORDecodable
+        K: Into<CBOR>, V: CBORDecodable
     {
         match self.get(key) {
             Some(value) => Ok(value),
@@ -102,13 +102,30 @@ impl Eq for Map {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-impl CBOREncodable for Map {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Map(self.clone()).into()
-    }
+// impl CBOREncodable for Map {
+//     fn cbor(&self) -> CBOR {
+//         CBORCase::Map(self.clone()).into()
+//     }
 
-    fn cbor_data(&self) -> Vec<u8> {
-        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.cbor_data())).collect();
+//     fn cbor_data(&self) -> Vec<u8> {
+//         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.cbor_data())).collect();
+//         let mut buf = pairs.len().encode_varint(MajorType::Map);
+//         for pair in pairs {
+//             buf.extend(pair.0);
+//             buf.extend(pair.1);
+//         }
+//         buf
+//     }
+// }
+
+impl Map {
+    pub fn cbor_data(&self) -> Vec<u8> {
+        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| {
+            let a: Vec<u8> = x.0.0.to_owned();
+            let cbor: &CBOR = &x.1.value;
+            let b: Vec<u8> = cbor.cbor_data();
+            (a, b)
+        }).collect();
         let mut buf = pairs.len().encode_varint(MajorType::Map);
         for pair in pairs {
             buf.extend(pair.0);
@@ -120,7 +137,7 @@ impl CBOREncodable for Map {
 
 impl From<Map> for CBOR {
     fn from(value: Map) -> Self {
-        value.cbor()
+        CBORCase::Map(value.clone()).into()
     }
 }
 
@@ -214,25 +231,25 @@ impl fmt::Debug for MapKey {
 
 /// Convert a container to a CBOR Map where the container's items are
 /// pairs of CBOREncodable values.
-impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: CBOREncodable, V: CBOREncodable {
+impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: Into<CBOR>, V: Into<CBOR> {
     fn from(container: T) -> Self {
         let mut map = Map::new();
         for (k, v) in container {
-            map.insert(k.cbor(), v.cbor());
+            map.insert(k.into(), v.into());
         }
         map
     }
 }
 
-impl<K, V> CBOREncodable for HashMap<K, V> where K: CBOREncodable, V: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Map(Map::from(self.iter())).into()
-    }
-}
+// impl<K, V> CBOREncodable for HashMap<K, V> where K: CBOREncodable, V: CBOREncodable {
+//     fn cbor(&self) -> CBOR {
+//         CBORCase::Map(Map::from(self.iter())).into()
+//     }
+// }
 
-impl<K, V> From<HashMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable {
+impl<K, V> From<HashMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
     fn from(container: HashMap<K, V>) -> Self {
-        CBORCase::Map(Map::from(container.iter())).into()
+        CBORCase::Map(Map::from(container.into_iter())).into()
     }
 }
 
@@ -253,15 +270,15 @@ impl<K, V> TryFrom<CBOR> for HashMap<K, V> where K: CBORDecodable + cmp::Eq + (h
     }
 }
 
-impl<K, V> CBOREncodable for BTreeMap<K, V> where K: CBOREncodable, V: CBOREncodable {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Map(Map::from(self.iter())).into()
-    }
-}
+// impl<K, V> CBOREncodable for BTreeMap<K, V> where K: CBOREncodable, V: CBOREncodable {
+//     fn cbor(&self) -> CBOR {
+//         CBORCase::Map(Map::from(self.iter())).into()
+//     }
+// }
 
-impl<K, V> From<BTreeMap<K, V>> for CBOR where K: CBOREncodable, V: CBOREncodable {
+impl<K, V> From<BTreeMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
     fn from(container: BTreeMap<K, V>) -> Self {
-        CBORCase::Map(Map::from(container.iter())).into()
+        CBORCase::Map(Map::from(container.into_iter())).into()
     }
 }
 

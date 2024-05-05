@@ -46,7 +46,7 @@ fn format_simple() {
         "f6",
         "f6 # null"
     );
-    // run(Simple::new(100).cbor(),
+    // run(Simple::new(100).into(),
     //     "simple(100)",
     //     "simple(100)",
     //     "simple(100)",
@@ -58,7 +58,7 @@ fn format_simple() {
 
 #[test]
 fn format_unsigned() {
-    run(0.cbor(),
+    run(0.into(),
         "0",
         "unsigned(0)",
         "0",
@@ -67,7 +67,7 @@ fn format_unsigned() {
         "00 # unsigned(0)"
     );
 
-    run(23.cbor(),
+    run(23.into(),
         "23",
         "unsigned(23)",
         "23",
@@ -76,7 +76,7 @@ fn format_unsigned() {
         "17 # unsigned(23)"
     );
 
-    run(65546.cbor(),
+    run(65546.into(),
         "65546",
         "unsigned(65546)",
         "65546",
@@ -85,7 +85,7 @@ fn format_unsigned() {
         "1a0001000a # unsigned(65546)"
     );
 
-    run(1000000000.cbor(),
+    run(1000000000.into(),
         "1000000000",
         "unsigned(1000000000)",
         "1000000000",
@@ -97,7 +97,7 @@ fn format_unsigned() {
 
 #[test]
 fn format_negative() {
-    run((-1).cbor(),
+    run((-1).into(),
         "-1",
         "negative(-1)",
         "-1",
@@ -106,7 +106,7 @@ fn format_negative() {
         "20 # negative(-1)"
     );
 
-    run((-1000).cbor(),
+    run((-1000).into(),
         "-1000",
         "negative(-1000)",
         "-1000",
@@ -115,7 +115,7 @@ fn format_negative() {
         "3903e7 # negative(-1000)"
     );
 
-    run((-1000000).cbor(),
+    run((-1000000).into(),
         "-1000000",
         "negative(-1000000)",
         "-1000000",
@@ -127,7 +127,7 @@ fn format_negative() {
 
 #[test]
 fn format_string() {
-    run("Test".cbor(),
+    run("Test".into(),
         r#""Test""#,
         r#"text("Test")"#,
         r#""Test""#,
@@ -142,7 +142,7 @@ fn format_string() {
 
 #[test]
 fn format_simple_array() {
-    run([1, 2, 3].cbor(),
+    run([1, 2, 3].into(),
         "[1, 2, 3]",
         "array([unsigned(1), unsigned(2), unsigned(3)])",
         "[1, 2, 3]",
@@ -159,9 +159,9 @@ fn format_simple_array() {
 
 #[test]
 fn format_nested_array() {
-    let a = [1, 2, 3].cbor();
-    let b = ["A", "B", "C"].cbor();
-    let c = [a, b].cbor();
+    let a: CBOR = [1, 2, 3].into();
+    let b = ["A", "B", "C"].into();
+    let c = [a, b].into();
     run(c,
         r#"[[1, 2, 3], ["A", "B", "C"]]"#,
         r#"array([array([unsigned(1), unsigned(2), unsigned(3)]), array([text("A"), text("B"), text("C")])])"#,
@@ -200,7 +200,7 @@ fn format_map() {
     let mut map = Map::new();
     map.insert(1, "A");
     map.insert(2, "B");
-    run(map.cbor(),
+    run(map.into(),
         r#"{1: "A", 2: "B"}"#,
         r#"map({0x01: (unsigned(1), text("A")), 0x02: (unsigned(2), text("B"))})"#,
         r#"{1: "A", 2: "B"}"#,
@@ -220,7 +220,7 @@ fn format_map() {
 
 #[test]
 fn format_tagged() {
-    let a = CBOR::tagged_value(100, "Hello").cbor();
+    let a = CBOR::tagged_value(100, "Hello");
     run(a,
         r#"100("Hello")"#,
         r#"tagged(100, text("Hello"))"#,
@@ -237,7 +237,7 @@ fn format_tagged() {
 
 #[test]
 fn format_date() {
-    run(dcbor::Date::from_timestamp(-100.0).cbor(),
+    run(dcbor::Date::from_timestamp(-100.0).into(),
         "1(-100)",
         "tagged(1, negative(-100))",
         "1(-100)",
@@ -249,7 +249,7 @@ fn format_date() {
         "}.trim()
     );
 
-    run(dcbor::Date::from_timestamp(1647887071.0).cbor(),
+    run(dcbor::Date::from_timestamp(1647887071.0).into(),
         "1(1647887071)",
         "tagged(1, unsigned(1647887071))",
         "1(1647887071)",
@@ -264,7 +264,7 @@ fn format_date() {
 
 #[test]
 fn format_fractional_date() {
-    run(dcbor::Date::from_timestamp(0.5).cbor(),
+    run(dcbor::Date::from_timestamp(0.5).into(),
         "1(0.5)",
         "tagged(1, simple(0.5))",
         "1(0.5)",
@@ -399,15 +399,15 @@ fn format_structure_2() {
 fn format_key_order() {
     let mut m = Map::new();
     m.insert(-1, 3);
-    m.insert(vec![-1].cbor(), 7);
+    m.insert(vec![-1], 7);
     m.insert("z", 4);
     m.insert(10, 1);
     m.insert(false, 8);
     m.insert(100, 2);
     m.insert("aa", 5);
-    m.insert(vec![100].cbor(), 6);
+    m.insert(vec![100], 6);
 
-    let cbor = m.cbor();
+    let cbor: CBOR = m.into();
     let description = r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#;
     let debug_description = r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#;
     let diagnostic = indoc! {r#"

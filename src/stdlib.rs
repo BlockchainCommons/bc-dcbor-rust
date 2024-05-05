@@ -46,8 +46,10 @@ pub mod without_std {
 
 macro_rules! import_stdlib {
     () => {
+        #[allow(unused_imports)]
         #[cfg(feature = "std")]
         pub use $crate::stdlib::with_std::*;
+        #[allow(unused_imports)]
         #[cfg(not(feature = "std"))]
         pub use $crate::stdlib::without_std::*;
     };

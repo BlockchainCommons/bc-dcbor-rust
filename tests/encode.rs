@@ -26,8 +26,8 @@ use dcbor::{prelude::*, CBORCase};
 use half::f16;
 use hex_literal::hex;
 
-fn test_cbor(t: impl CBOREncodable, expected_debug: &str, expected_display: &str, expected_data: &str) {
-    let cbor = t.cbor();
+fn test_cbor(t: impl Into<CBOR>, expected_debug: &str, expected_display: &str, expected_data: &str) {
+    let cbor = t.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
@@ -36,8 +36,8 @@ fn test_cbor(t: impl CBOREncodable, expected_debug: &str, expected_display: &str
     assert_eq!(cbor, decoded_cbor);
 }
 
-fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBORCodable {
-    let cbor = t.cbor();
+fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str) where T: CBORDecodable + Into<CBOR> {
+    let cbor = t.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
@@ -47,7 +47,7 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
     assert_eq!(cbor, decoded_cbor);
     let t2 = T::from_cbor(&decoded_cbor).unwrap();
 
-    let cbor = t2.cbor();
+    let cbor = t2.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
     let data = cbor.cbor_data();
@@ -56,28 +56,28 @@ fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expe
 
 #[test]
 fn encode_unsigned() {
-    test_cbor_codable(0u8,        "unsigned(0)", "0", "00");
-    test_cbor_codable(0u16,       "unsigned(0)", "0", "00");
-    test_cbor_codable(0u32,       "unsigned(0)", "0", "00");
-    test_cbor_codable(0u64,       "unsigned(0)", "0", "00");
-    test_cbor_codable(0_usize, "unsigned(0)", "0", "00");
+    test_cbor_codable(0u8,      "unsigned(0)", "0", "00");
+    test_cbor_codable(0u16,     "unsigned(0)", "0", "00");
+    test_cbor_codable(0u32,     "unsigned(0)", "0", "00");
+    test_cbor_codable(0u64,     "unsigned(0)", "0", "00");
+    test_cbor_codable(0_usize,  "unsigned(0)", "0", "00");
 
-    test_cbor_codable(1u8,        "unsigned(1)", "1", "01");
-    test_cbor_codable(1u16,       "unsigned(1)", "1", "01");
-    test_cbor_codable(1u32,       "unsigned(1)", "1", "01");
-    test_cbor_codable(1u64,       "unsigned(1)", "1", "01");
-    test_cbor_codable(1_usize, "unsigned(1)", "1", "01");
+    test_cbor_codable(1u8,      "unsigned(1)", "1", "01");
+    test_cbor_codable(1u16,     "unsigned(1)", "1", "01");
+    test_cbor_codable(1u32,     "unsigned(1)", "1", "01");
+    test_cbor_codable(1u64,     "unsigned(1)", "1", "01");
+    test_cbor_codable(1_usize,  "unsigned(1)", "1", "01");
 
-    test_cbor_codable(23u8,        "unsigned(23)", "23", "17");
-    test_cbor_codable(23u16,       "unsigned(23)", "23", "17");
-    test_cbor_codable(23u32,       "unsigned(23)", "23", "17");
-    test_cbor_codable(23u64,       "unsigned(23)", "23", "17");
+    test_cbor_codable(23u8,     "unsigned(23)", "23", "17");
+    test_cbor_codable(23u16,    "unsigned(23)", "23", "17");
+    test_cbor_codable(23u32,    "unsigned(23)", "23", "17");
+    test_cbor_codable(23u64,    "unsigned(23)", "23", "17");
     test_cbor_codable(23_usize, "unsigned(23)", "23", "17");
 
-    test_cbor_codable(24u8,        "unsigned(24)", "24", "1818");
-    test_cbor_codable(24u16,       "unsigned(24)", "24", "1818");
-    test_cbor_codable(24u32,       "unsigned(24)", "24", "1818");
-    test_cbor_codable(24u64,       "unsigned(24)", "24", "1818");
+    test_cbor_codable(24u8,     "unsigned(24)", "24", "1818");
+    test_cbor_codable(24u16,    "unsigned(24)", "24", "1818");
+    test_cbor_codable(24u32,    "unsigned(24)", "24", "1818");
+    test_cbor_codable(24u64,    "unsigned(24)", "24", "1818");
     test_cbor_codable(24_usize, "unsigned(24)", "24", "1818");
 
     test_cbor_codable(u8::MAX,          "unsigned(255)", "255", "18ff");
@@ -195,20 +195,20 @@ fn encode_array() {
 
 #[test]
 fn encode_heterogenous_array() {
-    let array = vec![
-        1.cbor(),
-        "Hello".cbor(),
-        vec![1, 2, 3].cbor(),
+    let array: Vec<CBOR> = vec![
+        1.into(),
+        "Hello".into(),
+        vec![1, 2, 3].into(),
     ];
 
-    let cbor = array.cbor();
+    let cbor: CBOR = array.clone().into();
     let data = cbor.cbor_data();
     let decoded_cbor = CBOR::from_data(data).unwrap();
     match decoded_cbor.case() {
         CBORCase::Array(a) => {
-            assert_eq!(a[0], 1.cbor());
-            assert_eq!(a[1], "Hello".cbor());
-            assert_eq!(a[2], [1, 2, 3].cbor());
+            assert_eq!(a[0], 1.into());
+            assert_eq!(a[1], "Hello".into());
+            assert_eq!(a[2], [1, 2, 3].into());
         },
         _ => panic!(),
     };
@@ -223,13 +223,13 @@ fn encode_heterogenous_array() {
 fn encode_map() {
     let mut m = Map::new();
     m.insert(-1, 3);
-    m.insert(vec![-1].cbor(), 7);
+    m.insert(vec![-1], 7);
     m.insert("z", 4);
     m.insert(10, 1);
     m.insert(false, 8);
     m.insert(100, 2);
     m.insert("aa", 5);
-    m.insert(vec![100].cbor(), 6);
+    m.insert(vec![100], 6);
     test_cbor(m.clone(),
         r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#,
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
@@ -279,12 +279,11 @@ fn encode_envelope() {
     let bob = CBOR::tagged_value(200, CBOR::tagged_value(24, "Bob"));
     let knows_bob = CBOR::tagged_value(200, CBOR::tagged_value(221, [knows, bob]));
     let envelope = CBOR::tagged_value(200, [alice, knows_bob]);
-    let cbor = envelope.cbor();
-    assert_eq!(format!("{}", cbor), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
-    let bytes = cbor.cbor_data();
+    assert_eq!(format!("{}", envelope), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
+    let bytes = envelope.cbor_data();
     assert_eq!(format!("{}", hex::encode(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
     let decoded_cbor = CBOR::from_data(&bytes).unwrap();
-    assert_eq!(cbor, decoded_cbor);
+    assert_eq!(envelope, decoded_cbor);
 }
 
 #[test]
@@ -349,10 +348,10 @@ fn encode_float() {
 #[test]
 fn int_coerced_to_float() {
     let n = 42;
-    let c = n.cbor();
+    let c: CBOR = n.into();
     let f: f64 = c.clone().into();
     assert_eq!(f, n as f64);
-    let c2 = f.cbor();
+    let c2: CBOR = f.into();
     assert_eq!(c2, c);
     let i: i32 = c.try_into().unwrap();
     assert_eq!(i, n);
@@ -362,7 +361,7 @@ fn int_coerced_to_float() {
 fn fail_float_coerced_to_int() {
     // Floating point values cannot be coerced to integer types.
     let n = 42.5;
-    let c = n.cbor();
+    let c: CBOR = n.into();
     let f: f64 = c.clone().into();
     assert_eq!(f, n);
     let a = i32::try_from(c);
@@ -444,7 +443,7 @@ fn convert_hash_map() {
     h.insert(1, "A".to_string());
     h.insert(50, "B".to_string());
     h.insert(25, "C".to_string());
-    let m = h.cbor();
+    let m: CBOR = h.clone().into();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
     let h2: HashMap<i32, String> = m.try_into().unwrap();
     assert_eq!(h, h2);
@@ -456,7 +455,7 @@ fn convert_btree_map() {
     h.insert(1, "A".to_string());
     h.insert(50, "B".to_string());
     h.insert(25, "C".to_string());
-    let m = h.cbor();
+    let m: CBOR = h.clone().into();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
     let h2: BTreeMap<i32, String> = m.try_into().unwrap();
     assert_eq!(h, h2);
@@ -465,7 +464,7 @@ fn convert_btree_map() {
 #[test]
 fn convert_vector() {
     let v: Vec<i32> = vec![1, 50, 25];
-    let c = v.cbor();
+    let c: CBOR = v.clone().into();
     assert_eq!(c.diagnostic(), "[1, 50, 25]");
     let v2: Vec<i32> = c.try_into().unwrap();
     assert_eq!(v, v2);
@@ -477,7 +476,7 @@ fn convert_vecdeque() {
     v.push_back(1);
     v.push_back(50);
     v.push_back(25);
-    let c = v.cbor();
+    let c: CBOR = v.clone().into();
     assert_eq!(c.diagnostic(), "[1, 50, 25]");
     let v2: VecDeque<i32> = c.try_into().unwrap();
     assert_eq!(v, v2);
@@ -489,7 +488,7 @@ fn convert_hashset() {
     v.insert(1);
     v.insert(50);
     v.insert(25);
-    let c = v.cbor();
+    let c: CBOR = v.clone().into();
     let v2: HashSet<i32> = c.try_into().unwrap();
     assert_eq!(v, v2);
 }
@@ -497,7 +496,7 @@ fn convert_hashset() {
 #[test]
 fn usage_test_1() {
     let array = [1000, 2000, 3000];
-    let cbor = array.cbor();
+    let cbor: CBOR = array.into();
     assert_eq!(cbor.hex(), "831903e81907d0190bb8");
 }
 
@@ -516,15 +515,15 @@ fn encode_nan() {
 
     let nonstandard_f64_nan = f64::from_bits(0x7ff9100000000001);
     assert!(nonstandard_f64_nan.is_nan());
-    assert_eq!(nonstandard_f64_nan.cbor_data(), canonical_nan_data);
+    assert_eq!(Into::<CBOR>::into(nonstandard_f64_nan).cbor_data(), canonical_nan_data);
 
     let nonstandard_f32_nan = f32::from_bits(0xffc00001);
     assert!(nonstandard_f32_nan.is_nan());
-    assert_eq!(nonstandard_f32_nan.cbor_data(), canonical_nan_data);
+    assert_eq!(Into::<CBOR>::into(nonstandard_f32_nan).cbor_data(), canonical_nan_data);
 
     let nonstandard_f16_nan = f16::from_bits(0x7e01);
     assert!(nonstandard_f16_nan.is_nan());
-    assert_eq!(nonstandard_f16_nan.cbor_data(), canonical_nan_data);
+    assert_eq!(Into::<CBOR>::into(nonstandard_f16_nan).cbor_data(), canonical_nan_data);
 }
 
 #[test]
@@ -544,12 +543,12 @@ fn decode_nan() {
 fn encode_infinit() {
     let canonical_infinity_data = hex!("f97c00");
     let canonical_neg_infinity_data = hex!("f9fc00");
-    assert_eq!(f64::INFINITY.cbor_data(), canonical_infinity_data);
-    assert_eq!(f32::INFINITY.cbor_data(), canonical_infinity_data);
-    assert_eq!(f16::INFINITY.cbor_data(), canonical_infinity_data);
-    assert_eq!(f64::NEG_INFINITY.cbor_data(), canonical_neg_infinity_data);
-    assert_eq!(f32::NEG_INFINITY.cbor_data(), canonical_neg_infinity_data);
-    assert_eq!(f16::NEG_INFINITY.cbor_data(), canonical_neg_infinity_data);
+    assert_eq!(Into::<CBOR>::into(f64::INFINITY).cbor_data(), canonical_infinity_data);
+    assert_eq!(Into::<CBOR>::into(f32::INFINITY).cbor_data(), canonical_infinity_data);
+    assert_eq!(Into::<CBOR>::into(f16::INFINITY).cbor_data(), canonical_infinity_data);
+    assert_eq!(Into::<CBOR>::into(f64::NEG_INFINITY).cbor_data(), canonical_neg_infinity_data);
+    assert_eq!(Into::<CBOR>::into(f32::NEG_INFINITY).cbor_data(), canonical_neg_infinity_data);
+    assert_eq!(Into::<CBOR>::into(f16::NEG_INFINITY).cbor_data(), canonical_neg_infinity_data);
 }
 
 #[test]

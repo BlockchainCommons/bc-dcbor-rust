@@ -2,7 +2,7 @@ import_stdlib!();
 
 use anyhow::bail;
 
-use crate::{CBOR, CBOREncodable, CBORDecodable, CBORError, CBORCodable, CBORCase};
+use crate::{float::f64_cbor_data, CBORCase, CBORDecodable, CBORError, CBOR};
 
 use super::varint::{EncodeVarInt, MajorType};
 
@@ -24,26 +24,35 @@ impl Simple {
     pub fn name(&self) -> String {
         format!("{:?}", self)
     }
-}
 
-impl CBOREncodable for Simple {
-    fn cbor(&self) -> CBOR {
-        CBORCase::Simple(self.clone()).into()
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
+    pub fn cbor_data(&self) -> Vec<u8> {
         match self {
             Self::False => 20u8.encode_varint(MajorType::Simple),
             Self::True => 21u8.encode_varint(MajorType::Simple),
             Self::Null => 22u8.encode_varint(MajorType::Simple),
-            Self::Float(v) => v.cbor_data(),
+            Self::Float(v) => f64_cbor_data(*v),
         }
     }
 }
 
+// impl CBOREncodable for Simple {
+//     fn cbor(&self) -> CBOR {
+//         CBORCase::Simple(self.clone()).into()
+//     }
+
+//     fn cbor_data(&self) -> Vec<u8> {
+//         match self {
+//             Self::False => 20u8.encode_varint(MajorType::Simple),
+//             Self::True => 21u8.encode_varint(MajorType::Simple),
+//             Self::Null => 22u8.encode_varint(MajorType::Simple),
+//             Self::Float(v) => v.cbor_data(),
+//         }
+//     }
+// }
+
 impl From<Simple> for CBOR {
     fn from(value: Simple) -> Self {
-        value.cbor()
+        CBORCase::Simple(value.clone()).into()
     }
 }
 
@@ -63,8 +72,6 @@ impl TryFrom<CBOR> for Simple {
         Self::from_cbor(&value)
     }
 }
-
-impl CBORCodable for Simple { }
 
 impl PartialEq for Simple {
     fn eq(&self, other: &Self) -> bool {

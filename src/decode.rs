@@ -2,7 +2,7 @@ import_stdlib!();
 
 use half::f16;
 
-use crate::{CBOR, Map, error::CBORError, cbor_encodable::CBOREncodable, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
+use crate::{CBOR, Map, error::CBORError, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
 
 use super::varint::MajorType;
 
@@ -117,7 +117,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let string = str::from_utf8(buf)?;
-            Ok((string.cbor(), header_varint_len + data_len))
+            Ok((string.into(), header_varint_len + data_len))
         },
         MajorType::Array => {
             let mut pos = header_varint_len;
@@ -127,7 +127,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
                 items.push(item);
                 pos += item_len;
             }
-            Ok((items.cbor(), pos))
+            Ok((items.into(), pos))
         },
         MajorType::Map => {
             let mut pos = header_varint_len;
@@ -139,7 +139,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
                 pos += value_len;
                 map.insert_next(key, value)?;
             }
-            Ok((map.cbor(), pos))
+            Ok((map.into(), pos))
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
@@ -151,17 +151,17 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
                 3 => {
                     let f = f16::from_bits(value as u16);
                     validate_canonical_f16(f)?;
-                    Ok((f.cbor(), header_varint_len))
+                    Ok((f.into(), header_varint_len))
                 },
                 5 => {
                     let f = f32::from_bits(value as u32);
                     validate_canonical_f32(f)?;
-                    Ok((f.cbor(), header_varint_len))
+                    Ok((f.into(), header_varint_len))
                 },
                 9 => {
                     let f = f64::from_bits(value);
                     validate_canonical_f64(f)?;
-                    Ok((f.cbor(), header_varint_len))
+                    Ok((f.into(), header_varint_len))
                 },
                 _ => {
                     match value {

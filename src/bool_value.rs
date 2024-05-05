@@ -1,21 +1,14 @@
 import_stdlib!();
 
-use crate::{CBOREncodable, CBOR, Simple, CBORDecodable, CBORCodable, CBORError, CBORCase};
+use crate::{CBOR, Simple, CBORDecodable, CBORError, CBORCase};
 
 use anyhow::bail;
 
-impl CBOREncodable for bool {
-    fn cbor(&self) -> CBOR {
-        match self {
+impl From<bool> for CBOR {
+    fn from(value: bool) -> Self {
+        match value {
             false => CBORCase::Simple(Simple::False).into(),
             true => CBORCase::Simple(Simple::True).into(),
-        }
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        match self {
-            false => Simple::False.cbor_data(),
-            true => Simple::True.cbor_data()
         }
     }
 }
@@ -27,14 +20,6 @@ impl CBORDecodable for bool {
             CBORCase::Simple(Simple::True) => Ok(true),
             _ => bail!(CBORError::WrongType),
         }
-    }
-}
-
-impl CBORCodable for bool { }
-
-impl From<bool> for CBOR {
-    fn from(value: bool) -> Self {
-        value.cbor()
     }
 }
 

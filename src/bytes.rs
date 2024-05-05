@@ -4,7 +4,7 @@ use crate::{CBOR, CBORCase};
 
 impl From<Bytes> for CBOR {
     fn from(value: Bytes) -> Self {
-        CBORCase::ByteString(value).into()
+        CBORCase::ByteString(value.clone()).into()
     }
 }
 

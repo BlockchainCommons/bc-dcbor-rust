@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, tags_store::TagsStoreTrait, CBOREncodable, CBORCase};
+use crate::{CBOR, tags_store::TagsStoreTrait, CBORCase};
 
 use super::{string_util::{sanitized, flanked}, varint::{EncodeVarInt, MajorType}};
 

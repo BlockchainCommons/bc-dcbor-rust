@@ -6,7 +6,7 @@ use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, T
 
 use anyhow::bail;
 
-use crate::{CBORCodable, CBOREncodable, CBORTaggedEncodable, Tag, CBOR, CBORDecodable, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
+use crate::{CBORTaggedEncodable, Tag, CBOR, CBORDecodable, CBORTaggedDecodable, CBORTaggedCodable, CBORTagged};
 
 /// A CBOR-friendly representation of a date and time.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -100,23 +100,13 @@ impl From<DateTime<Utc>> for Date {
 
 impl From<Date> for CBOR {
     fn from(value: Date) -> Self {
-        value.cbor()
+        value.tagged_cbor()
     }
 }
 
 impl AsRef<Date> for Date {
     fn as_ref(&self) -> &Self {
         self
-    }
-}
-
-impl CBOREncodable for Date {
-    fn cbor(&self) -> CBOR {
-        self.tagged_cbor()
-    }
-
-    fn cbor_data(&self) -> Vec<u8> {
-        self.tagged_cbor().cbor_data()
     }
 }
 
@@ -134,8 +124,6 @@ impl TryFrom<CBOR> for Date {
     }
 }
 
-impl CBORCodable for Date { }
-
 impl CBORTagged for Date {
     fn cbor_tags() -> Vec<Tag> {
         vec![Tag::new(1)]
@@ -144,7 +132,7 @@ impl CBORTagged for Date {
 
 impl CBORTaggedEncodable for Date {
     fn untagged_cbor(&self) -> CBOR {
-        self.timestamp().cbor()
+        self.timestamp().into()
     }
 }
 
