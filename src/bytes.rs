@@ -12,9 +12,9 @@ impl TryFrom<CBOR> for Bytes {
     type Error = anyhow::Error;
 
     fn try_from(value: CBOR) -> anyhow::Result<Self> {
-        match value.case() {
-            CBORCase::ByteString(b) => Ok(b.clone()),
-            _ => Err(anyhow::anyhow!("Cannot convert {:?} to Bytes", value))
+        match value.into_case() {
+            CBORCase::ByteString(b) => Ok(b),
+            _ => Err(anyhow::anyhow!("Cannot convert CBOR value to Bytes"))
         }
     }
 }

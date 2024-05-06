@@ -36,10 +36,10 @@ macro_rules! impl_cbor {
             type Error = anyhow::Error;
 
             fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-                match cbor.case() {
-                    CBORCase::Unsigned(n) => Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type),
+                match cbor.into_case() {
+                    CBORCase::Unsigned(n) => Self::from_u64(n, <$type>::MAX as u64, |x| x as $type),
                     CBORCase::Negative(n) => {
-                        let a = Self::from_u64(*n, <$type>::MAX as u64, |x| x as $type)? as i128;
+                        let a = Self::from_u64(n, <$type>::MAX as u64, |x| x as $type)? as i128;
                         Ok((-1 - a) as $type)
                     }
                     _ => bail!(CBORError::WrongType),

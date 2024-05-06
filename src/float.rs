@@ -63,22 +63,22 @@ pub(crate) fn validate_canonical_f64(n: f64) -> Result<(), CBORError> {
 impl TryFrom<CBOR> for f64 {
     type Error = anyhow::Error;
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Unsigned(n) => {
-                if let Some(f) = f64::exact_from_u64(*n) {
+                if let Some(f) = f64::exact_from_u64(n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Negative(n) => {
-                if let Some(f) = f64::exact_from_u64(*n) {
+                if let Some(f) = f64::exact_from_u64(n) {
                     Ok(-1f64 - f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
-            CBORCase::Simple(Simple::Float(n)) => Ok(*n),
+            CBORCase::Simple(Simple::Float(n)) => Ok(n),
             _ => bail!(CBORError::WrongType)
         }
     }
@@ -120,35 +120,6 @@ pub fn f32_cbor_data(value: f32) -> Vec<u8> {
     n.to_bits().encode_int(MajorType::Simple)
 }
 
-// impl CBORDecodable for f32 {
-//     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-//         match cbor.case() {
-//             CBORCase::Unsigned(n) => {
-//                 if let Some(f) = f32::exact_from_u64(*n) {
-//                     Ok(f)
-//                 } else {
-//                     bail!(CBORError::OutOfRange);
-//                 }
-//             },
-//             CBORCase::Negative(n) => {
-//                 if let Some(f) = f32::exact_from_u64(*n) {
-//                     Ok(f)
-//                 } else {
-//                     bail!(CBORError::OutOfRange);
-//                 }
-//             },
-//             CBORCase::Simple(Simple::Float(n)) => {
-//                 if let Some(f) = f32::exact_from_f64(*n) {
-//                     Ok(f)
-//                 } else {
-//                     bail!(CBORError::OutOfRange);
-//                 }
-//             },
-//             _ => bail!(CBORError::WrongType)
-//         }
-//     }
-// }
-
 pub(crate) fn validate_canonical_f32(n: f32) -> Result<(), CBORError> {
     if
         n == f16::from_f32(n).to_f32() ||
@@ -164,23 +135,23 @@ impl TryFrom<CBOR> for f32 {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Unsigned(n) => {
-                if let Some(f) = f32::exact_from_u64(*n) {
+                if let Some(f) = f32::exact_from_u64(n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Negative(n) => {
-                if let Some(f) = f32::exact_from_u64(*n) {
+                if let Some(f) = f32::exact_from_u64(n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Simple(Simple::Float(n)) => {
-                if let Some(f) = f32::exact_from_f64(*n) {
+                if let Some(f) = f32::exact_from_f64(n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
@@ -223,53 +194,20 @@ pub fn f16_cbor_data(value: f16) -> Vec<u8> {
     value.to_bits().encode_int(MajorType::Simple)
 }
 
-// impl CBORDecodable for f16 {
-//     fn from_cbor(cbor: &CBOR) -> anyhow::Result<Self> {
-//         match cbor.case() {
-//             CBORCase::Unsigned(n) => {
-//                 if let Some(f) = f16::exact_from_u64(*n) {
-//                     Ok(f)
-//                 } else {
-//                     bail!(CBORError::OutOfRange);
-//                 }
-//             },
-//             CBORCase::Negative(n) => {
-//                 if let Some(f) = f64::exact_from_u64(*n) {
-//                     if let Some(b) = f16::exact_from_f64(-1f64 - f) {
-//                         Ok(b)
-//                     } else {
-//                         bail!(CBORError::OutOfRange);
-//                     }
-//                 } else {
-//                     bail!(CBORError::OutOfRange);
-//                 }
-//             },
-//             CBORCase::Simple(Simple::Float(n)) => {
-//                 if let Some(f) = f16::exact_from_f64(*n) {
-//                     Ok(f)
-//                 } else {
-//                     bail!(CBORError::OutOfRange);
-//                 }
-//             },
-//             _ => bail!(CBORError::WrongType)
-//         }
-//     }
-// }
-
 impl TryFrom<CBOR> for f16 {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Unsigned(n) => {
-                if let Some(f) = f16::exact_from_u64(*n) {
+                if let Some(f) = f16::exact_from_u64(n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);
                 }
             },
             CBORCase::Negative(n) => {
-                if let Some(f) = f64::exact_from_u64(*n) {
+                if let Some(f) = f64::exact_from_u64(n) {
                     if let Some(b) = f16::exact_from_f64(-1f64 - f) {
                         Ok(b)
                     } else {
@@ -280,7 +218,7 @@ impl TryFrom<CBOR> for f16 {
                 }
             },
             CBORCase::Simple(Simple::Float(n)) => {
-                if let Some(f) = f16::exact_from_f64(*n) {
+                if let Some(f) = f16::exact_from_f64(n) {
                     Ok(f)
                 } else {
                     bail!(CBORError::OutOfRange);

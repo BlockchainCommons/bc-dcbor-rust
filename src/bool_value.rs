@@ -17,7 +17,7 @@ impl TryFrom<CBOR> for bool {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Simple(Simple::False) => Ok(false),
             CBORCase::Simple(Simple::True) => Ok(true),
             _ => bail!(CBORError::WrongType),

@@ -20,7 +20,7 @@ impl CBOR {
     }
 
     fn diag_item(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
-        match self.case() {
+        match self.as_case() {
             CBORCase::Unsigned(_) | CBORCase::Negative(_) | CBORCase::ByteString(_) |
             CBORCase::Text(_) | CBORCase::Simple(_) => DiagItem::Item(format!("{}", self)),
 

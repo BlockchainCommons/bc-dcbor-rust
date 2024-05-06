@@ -45,8 +45,8 @@ impl TryFrom<CBOR> for Simple {
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
-            CBORCase::Simple(simple) => Ok(simple.clone()),
+        match cbor.into_case() {
+            CBORCase::Simple(simple) => Ok(simple),
             _ => bail!(CBORError::WrongType),
         }
     }

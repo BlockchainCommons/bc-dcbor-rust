@@ -24,12 +24,12 @@ T: TryFrom<CBOR> + Clone,
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = Vec::new();
-                for cbor in cbor_array.clone() {
+                for cbor in cbor_array {
                     let element = T::try_from(cbor).map_err(|e| e.into())?;
-                    result.push(element.clone());
+                    result.push(element);
                 }
                 Ok(result)
             },
@@ -58,12 +58,12 @@ T: TryFrom<CBOR> + Clone,
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = VecDeque::new();
-                for cbor in cbor_array.clone() {
+                for cbor in cbor_array {
                     let element = T::try_from(cbor).map_err(|e| e.into())?;
-                    result.push_back(element.clone());
+                    result.push_back(element);
                 }
                 Ok(result)
             },
@@ -86,12 +86,12 @@ T: TryFrom<CBOR> + Eq + hash::Hash + Clone,
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = HashSet::new();
-                for cbor in cbor_array.clone() {
+                for cbor in cbor_array {
                     let element = T::try_from(cbor).map_err(|e| e.into())?;
-                    result.insert(element.clone());
+                    result.insert(element);
                 }
                 Ok(result)
             },

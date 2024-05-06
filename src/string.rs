@@ -19,8 +19,8 @@ impl From<String> for CBOR {
 impl TryFrom<CBOR> for String {
     type Error = anyhow::Error;
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
-            CBORCase::Text(s) => Ok(s.clone()),
+        match cbor.into_case() {
+            CBORCase::Text(s) => Ok(s),
             _ => bail!(CBORError::WrongType),
         }
     }

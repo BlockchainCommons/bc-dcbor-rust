@@ -102,22 +102,6 @@ impl Eq for Map {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-// impl CBOREncodable for Map {
-//     fn cbor(&self) -> CBOR {
-//         CBORCase::Map(self.clone()).into()
-//     }
-
-//     fn cbor_data(&self) -> Vec<u8> {
-//         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| (x.0.0.to_owned(), x.1.value.cbor_data())).collect();
-//         let mut buf = pairs.len().encode_varint(MajorType::Map);
-//         for pair in pairs {
-//             buf.extend(pair.0);
-//             buf.extend(pair.1);
-//         }
-//         buf
-//     }
-// }
-
 impl Map {
     pub fn cbor_data(&self) -> Vec<u8> {
         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| {
@@ -241,12 +225,6 @@ impl<T, K, V> From<T> for Map where T: IntoIterator<Item=(K, V)>, K: Into<CBOR>,
     }
 }
 
-// impl<K, V> CBOREncodable for HashMap<K, V> where K: CBOREncodable, V: CBOREncodable {
-//     fn cbor(&self) -> CBOR {
-//         CBORCase::Map(Map::from(self.iter())).into()
-//     }
-// }
-
 impl<K, V> From<HashMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
     fn from(container: HashMap<K, V>) -> Self {
         CBORCase::Map(Map::from(container.into_iter())).into()
@@ -262,7 +240,7 @@ K: TryFrom<CBOR> + cmp::Eq + hash::Hash + Clone, V: TryFrom<CBOR> + Clone,
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
@@ -276,12 +254,6 @@ K: TryFrom<CBOR> + cmp::Eq + hash::Hash + Clone, V: TryFrom<CBOR> + Clone,
         }
     }
 }
-
-// impl<K, V> CBOREncodable for BTreeMap<K, V> where K: CBOREncodable, V: CBOREncodable {
-//     fn cbor(&self) -> CBOR {
-//         CBORCase::Map(Map::from(self.iter())).into()
-//     }
-// }
 
 impl<K, V> From<BTreeMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
     fn from(container: BTreeMap<K, V>) -> Self {
@@ -298,7 +270,7 @@ K: TryFrom<CBOR> + cmp::Eq + (cmp::Ord) + Clone, V: TryFrom<CBOR> + Clone,
     type Error = anyhow::Error;
 
     fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
                 for (k, v) in map.iter() {

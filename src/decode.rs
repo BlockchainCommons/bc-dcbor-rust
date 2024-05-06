@@ -9,12 +9,12 @@ use super::varint::MajorType;
 /// Decode CBOR binary representation to symbolic representation.
 ///
 /// Returns an error if the data is not well-formed deterministic CBOR.
-pub fn decode_cbor(data: impl AsRef<[u8]>) -> Result<CBOR, CBORError> {
+pub fn decode_cbor(data: impl AsRef<[u8]>) -> anyhow::Result<CBOR> {
     let data = data.as_ref();
     let (cbor, len) = decode_cbor_internal(data)?;
     let remaining = data.len() - len;
     if remaining > 0 {
-        return Err(CBORError::UnusedData(remaining));
+        return Err(CBORError::UnusedData(remaining).into());
     }
     Ok(cbor)
 }
@@ -143,7 +143,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
         },
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
-            let tagged = CBOR::tagged_value(value, item);
+            let tagged = CBOR::to_tagged_value(value, item);
             Ok((tagged, header_varint_len + item_len))
         },
         MajorType::Simple => {

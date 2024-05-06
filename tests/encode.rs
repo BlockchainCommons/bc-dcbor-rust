@@ -30,7 +30,7 @@ fn test_cbor(t: impl Into<CBOR>, expected_debug: &str, expected_display: &str, e
     let cbor = t.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
-    let data = cbor.cbor_data();
+    let data = cbor.clone().cbor_data();
     assert_eq!(hex::encode(&data), expected_data);
     let decoded_cbor = CBOR::from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
@@ -44,7 +44,7 @@ T: TryFrom<CBOR> + Into<CBOR>,
     let cbor = t.into();
     assert_eq!(format!("{:?}", cbor), expected_debug);
     assert_eq!(format!("{}", cbor), expected_display);
-    let data = cbor.cbor_data();
+    let data = cbor.clone().cbor_data();
     assert_eq!(hex::encode(&data), expected_data);
 
     let decoded_cbor = CBOR::from_data(&data).unwrap();
@@ -208,7 +208,7 @@ fn encode_heterogenous_array() {
     let cbor: CBOR = array.clone().into();
     let data = cbor.cbor_data();
     let decoded_cbor = CBOR::from_data(data).unwrap();
-    match decoded_cbor.case() {
+    match decoded_cbor.into_case() {
         CBORCase::Array(a) => {
             assert_eq!(a[0], 1.into());
             assert_eq!(a[1], "Hello".into());
@@ -252,14 +252,15 @@ fn encode_anders_map() {
     let mut m = Map::new();
     m.insert(1, 45.7);
     m.insert(2, "Hi there!");
-    assert_eq!(m.cbor_data(), hex!("a201fb4046d9999999999a0269486920746865726521"));
+    assert_eq!(m.clone().cbor_data(), hex!("a201fb4046d9999999999a0269486920746865726521"));
     assert_eq!(m.extract::<i32, f64>(1).unwrap(), 45.7);
 }
 
 #[test]
 fn encode_map_misordered() {
     let cbor = CBOR::from_hex("a2026141016142");
-    if let Err(CBORError::MisorderedMapKey) = cbor {
+    if let Err(e) = cbor {
+        assert_eq!(format!("{}", e), "the decoded CBOR map has keys that are not in canonical order");
     } else {
         panic!("Expected MisorderedMapKey error");
     }
@@ -267,7 +268,7 @@ fn encode_map_misordered() {
 
 #[test]
 fn encode_tagged() {
-    test_cbor(CBOR::tagged_value(1, "Hello"), r#"tagged(1, text("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
+    test_cbor(CBOR::to_tagged_value(1, "Hello"), r#"tagged(1, text("Hello"))"#, r#"1("Hello")"#, "c16548656c6c6f");
 }
 
 #[test]
@@ -278,13 +279,13 @@ fn encode_value() {
 
 #[test]
 fn encode_envelope() {
-    let alice = CBOR::tagged_value(200, CBOR::tagged_value(24, "Alice"));
-    let knows = CBOR::tagged_value(200, CBOR::tagged_value(24, "knows"));
-    let bob = CBOR::tagged_value(200, CBOR::tagged_value(24, "Bob"));
-    let knows_bob = CBOR::tagged_value(200, CBOR::tagged_value(221, [knows, bob]));
-    let envelope = CBOR::tagged_value(200, [alice, knows_bob]);
+    let alice = CBOR::to_tagged_value(200, CBOR::to_tagged_value(24, "Alice"));
+    let knows = CBOR::to_tagged_value(200, CBOR::to_tagged_value(24, "knows"));
+    let bob = CBOR::to_tagged_value(200, CBOR::to_tagged_value(24, "Bob"));
+    let knows_bob = CBOR::to_tagged_value(200, CBOR::to_tagged_value(221, [knows, bob]));
+    let envelope = CBOR::to_tagged_value(200, [alice, knows_bob]);
     assert_eq!(format!("{}", envelope), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
-    let bytes = envelope.cbor_data();
+    let bytes = envelope.clone().cbor_data();
     assert_eq!(format!("{}", hex::encode(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
     let decoded_cbor = CBOR::from_data(&bytes).unwrap();
     assert_eq!(envelope, decoded_cbor);
@@ -375,7 +376,8 @@ fn fail_float_coerced_to_int() {
 #[test]
 fn non_canonical_float_1() {
     // Non-canonical representation of 1.5 that could be represented at a smaller width.
-    if let Err(CBORError::NonCanonicalNumeric) = CBOR::from_hex("FB3FF8000000000000") {
+    if let Err(e) = CBOR::from_hex("FB3FF8000000000000") {
+        assert_eq!(format!("{}", e), "a CBOR numeric value was encoded in non-canonical form");
     } else {
         panic!("Expected NonCanonicalNumeric error");
     }
@@ -384,7 +386,8 @@ fn non_canonical_float_1() {
 #[test]
 fn non_canonical_float_2() {
     // Non-canonical representation of a floating point value that could be represented as an integer.
-    if let Err(CBORError::NonCanonicalNumeric) = CBOR::from_hex("F94A00") {
+    if let Err(e) = CBOR::from_hex("F94A00") {
+        assert_eq!(format!("{}", e), "a CBOR numeric value was encoded in non-canonical form");
     } else {
         panic!("Expected NonCanonicalNumeric error");
     }
@@ -392,7 +395,8 @@ fn non_canonical_float_2() {
 
 #[test]
 fn unused_data() {
-    if let Err(CBORError::UnusedData(1)) = CBOR::from_hex("0001") {
+    if let Err(e) = CBOR::from_hex("0001") {
+        assert_eq!(format!("{}", e), "the decoded CBOR had 1 extra bytes at the end");
     } else {
         panic!("Expected UnusedData error");
     }

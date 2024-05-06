@@ -118,7 +118,7 @@ mod tag;
 pub use tag::Tag;
 
 mod cbor_codable;
-pub use cbor_codable::CBORCodable;
+pub use cbor_codable::{CBOREncodable, CBORDecodable, CBORCodable};
 
 mod cbor_tagged;
 pub use cbor_tagged::CBORTagged;

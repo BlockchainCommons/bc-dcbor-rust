@@ -12,13 +12,13 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
 
     /// Creates an instance of this type by decoding it from tagged CBOR.
     fn from_tagged_cbor(cbor: CBOR) -> anyhow::Result<Self> where Self: Sized {
-        match cbor.case() {
+        match cbor.into_case() {
             CBORCase::Tagged(tag, item) => {
                 let cbor_tags = Self::cbor_tags();
-                if cbor_tags.iter().any(|t| t == tag) {
-                    Self::from_untagged_cbor(*item.clone())
+                if cbor_tags.iter().any(|t| *t == tag) {
+                    Self::from_untagged_cbor(*item)
                 } else {
-                    bail!(CBORError::WrongTag(cbor_tags[0].clone(), tag.clone()))
+                    bail!(CBORError::WrongTag(cbor_tags[0].clone(), tag))
                 }
             },
             _ => bail!(CBORError::WrongType)

@@ -220,7 +220,7 @@ fn format_map() {
 
 #[test]
 fn format_tagged() {
-    let a = CBOR::tagged_value(100, "Hello");
+    let a = CBOR::to_tagged_value(100, "Hello");
     run(a,
         r#"100("Hello")"#,
         r#"tagged(100, text("Hello"))"#,
