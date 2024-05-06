@@ -46,7 +46,7 @@ impl CBOR {
             CBORCase::Tagged(tag, item) => {
                 let diag_item: DiagItem;
                 if annotate && tag.value() == 1 {
-                    match <f64 as TryFrom<CBOR>>::try_from((**item).clone()) {
+                    match <f64 as TryFrom<CBOR>>::try_from(item.clone()) {
                         Ok(n) => {
                             let date = Date::from_timestamp(n).to_string();
                             diag_item = DiagItem::Item(date);

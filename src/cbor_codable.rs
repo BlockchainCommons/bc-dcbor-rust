@@ -1,16 +1,16 @@
 use crate::CBOR;
 
-pub trait CBOREncodable: Into<CBOR> {
-    fn into_cbor(self) -> CBOR {
-        self.into()
+pub trait CBOREncodable: Into<CBOR> + Clone {
+    fn to_cbor(&self) -> CBOR {
+        self.clone().into()
     }
 
-    fn into_cbor_data(self) -> Vec<u8> {
-        self.into().cbor_data()
+    fn to_cbor_data(&self) -> Vec<u8> {
+        self.to_cbor().cbor_data()
     }
 }
 
-impl<T> CBOREncodable for T where T: Into<CBOR> { }
+impl<T> CBOREncodable for T where T: Into<CBOR> + Clone { }
 
 pub trait CBORDecodable: TryFrom<CBOR> { }
 

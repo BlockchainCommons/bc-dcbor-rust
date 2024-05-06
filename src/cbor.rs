@@ -53,7 +53,7 @@ pub enum CBORCase {
     /// Map (major type 5).
     Map(Map),
     /// Tagged value (major type 6).
-    Tagged(Tag, Box<CBOR>),
+    Tagged(Tag, CBOR),
     /// Simple value (major type 7).
     Simple(Simple)
 }
@@ -127,7 +127,7 @@ impl CBOR {
 
     /// Create a new CBOR value representing a tagged value.
     pub fn to_tagged_value(tag: impl Into<Tag>, item: impl Into<CBOR>) -> CBOR {
-        CBORCase::Tagged(tag.into(), Box::new(item.into())).into()
+        CBORCase::Tagged(tag.into(), item.into()).into()
     }
 }
 
@@ -181,7 +181,7 @@ impl CBOR {
     /// Returns `Ok` if the value is a tagged value, `Err` otherwise.
     pub fn try_into_tagged_value(self) -> anyhow::Result<(Tag, CBOR)> {
         match self.into_case() {
-            CBORCase::Tagged(tag, value) => Ok((tag, *value)),
+            CBORCase::Tagged(tag, value) => Ok((tag, value)),
             _ => bail!(CBORError::WrongType)
         }
     }

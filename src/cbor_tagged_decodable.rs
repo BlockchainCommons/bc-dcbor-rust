@@ -16,7 +16,7 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
             CBORCase::Tagged(tag, item) => {
                 let cbor_tags = Self::cbor_tags();
                 if cbor_tags.iter().any(|t| *t == tag) {
-                    Self::from_untagged_cbor(*item)
+                    Self::from_untagged_cbor(item)
                 } else {
                     bail!(CBORError::WrongTag(cbor_tags[0].clone(), tag))
                 }
