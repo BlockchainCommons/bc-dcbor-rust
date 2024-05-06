@@ -1,5 +1,7 @@
 import_stdlib!();
 
+use anyhow::bail;
+
 use crate::{CBOR, CBORError, CBORCase};
 
 use super::varint::{EncodeVarInt, MajorType};
@@ -39,7 +41,7 @@ impl Map {
         self.0.insert(MapKey::new(key.cbor_data()), MapValue::new(key, value));
     }
 
-    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<(), CBORError> {
+    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> anyhow::Result<()> {
         match self.0.last_key_value() {
             None => {
                 self.insert(key, value);
@@ -48,10 +50,10 @@ impl Map {
             Some(entry) => {
                 let new_key = MapKey::new(key.cbor_data());
                 if self.0.contains_key(&new_key) {
-                    return Err(CBORError::DuplicateMapKey)
+                    bail!(CBORError::DuplicateMapKey)
                 }
                 if entry.0 >= &new_key {
-                    return Err(CBORError::MisorderedMapKey)
+                    bail!(CBORError::MisorderedMapKey)
                 }
                 self.0.insert(new_key, MapValue::new(key, value));
                 Ok(())
@@ -75,13 +77,13 @@ impl Map {
     /// Get a value from the map, given a key.
     ///
     /// Returns `Ok` if the key is present in the map, `Err` otherwise.
-    pub fn extract<K, V>(&self, key: K) -> Result<V, CBORError>
+    pub fn extract<K, V>(&self, key: K) -> anyhow::Result<V>
     where
         K: Into<CBOR>, V: TryFrom<CBOR>
     {
         match self.get(key) {
             Some(value) => Ok(value),
-            None => Err(CBORError::MissingMapKey)
+            None => bail!(CBORError::MissingMapKey)
         }
     }
 }
@@ -233,9 +235,8 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
 
 impl<K, V> TryFrom<CBOR> for HashMap<K, V>
 where
-K: TryFrom<CBOR> + cmp::Eq + hash::Hash + Clone, V: TryFrom<CBOR> + Clone,
-<K as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
-<V as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+    K: TryFrom<CBOR, Error = anyhow::Error> + cmp::Eq + hash::Hash + Clone,
+    V: TryFrom<CBOR, Error = anyhow::Error> + Clone,
 {
     type Error = anyhow::Error;
 
@@ -244,9 +245,7 @@ K: TryFrom<CBOR> + cmp::Eq + hash::Hash + Clone, V: TryFrom<CBOR> + Clone,
             CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
-                    let key = K::try_from(k.clone()).map_err(|e| e.into())?;
-                    let value = V::try_from(v.clone()).map_err(|e| e.into())?;
-                    container.insert(key, value);
+                    container.insert(k.clone().try_into()?, v.clone().try_into()?);
                 }
                 Ok(container)
             },
@@ -255,7 +254,11 @@ K: TryFrom<CBOR> + cmp::Eq + hash::Hash + Clone, V: TryFrom<CBOR> + Clone,
     }
 }
 
-impl<K, V> From<BTreeMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
+impl<K, V> From<BTreeMap<K, V>> for CBOR
+where
+    K: Into<CBOR>,
+    V: Into<CBOR>,
+{
     fn from(container: BTreeMap<K, V>) -> Self {
         CBORCase::Map(Map::from(container.into_iter())).into()
     }
@@ -263,9 +266,8 @@ impl<K, V> From<BTreeMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
 
 impl<K, V> TryFrom<CBOR> for BTreeMap<K, V>
 where
-K: TryFrom<CBOR> + cmp::Eq + (cmp::Ord) + Clone, V: TryFrom<CBOR> + Clone,
-<K as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
-<V as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+    K: TryFrom<CBOR, Error = anyhow::Error> + cmp::Eq + (cmp::Ord) + Clone,
+    V: TryFrom<CBOR, Error = anyhow::Error> + Clone,
 {
     type Error = anyhow::Error;
 
@@ -274,8 +276,8 @@ K: TryFrom<CBOR> + cmp::Eq + (cmp::Ord) + Clone, V: TryFrom<CBOR> + Clone,
             CBORCase::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
                 for (k, v) in map.iter() {
-                    let key = K::try_from(k.clone()).map_err(|e| e.into())?;
-                    let value = V::try_from(v.clone()).map_err(|e| e.into())?;
+                    let key = k.clone().try_into()?;
+                    let value = v.clone().try_into()?;
                     container.insert(key, value);
                 }
                 Ok(container)

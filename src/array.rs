@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, error::CBORError, CBORCase};
+use crate::{error::CBORError, CBORCase, CBOR};
 
 use anyhow::bail;
 
@@ -18,8 +18,7 @@ impl<T> From<&[T]> for CBOR where T: Into<CBOR> + Clone {
 
 impl<T> TryFrom<CBOR> for Vec<T>
 where
-T: TryFrom<CBOR> + Clone,
-<T as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+    T: TryFrom<CBOR, Error = anyhow::Error> + Clone,
 {
     type Error = anyhow::Error;
 
@@ -28,12 +27,11 @@ T: TryFrom<CBOR> + Clone,
             CBORCase::Array(cbor_array) => {
                 let mut result = Vec::new();
                 for cbor in cbor_array {
-                    let element = T::try_from(cbor).map_err(|e| e.into())?;
-                    result.push(element);
+                    result.push(cbor.try_into()?);
                 }
                 Ok(result)
             },
-            _ => bail!(CBORError::WrongType)
+            _ => panic!()
         }
     }
 }
@@ -52,8 +50,7 @@ impl<T> From<VecDeque<T>> for CBOR where T: Into<CBOR> {
 
 impl<T> TryFrom<CBOR> for VecDeque<T>
 where
-T: TryFrom<CBOR> + Clone,
-<T as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+    T: TryFrom<CBOR, Error = anyhow::Error> + Clone,
 {
     type Error = anyhow::Error;
 
@@ -62,8 +59,7 @@ T: TryFrom<CBOR> + Clone,
             CBORCase::Array(cbor_array) => {
                 let mut result = VecDeque::new();
                 for cbor in cbor_array {
-                    let element = T::try_from(cbor).map_err(|e| e.into())?;
-                    result.push_back(element);
+                    result.push_back(cbor.try_into()?);
                 }
                 Ok(result)
             },
@@ -80,8 +76,7 @@ impl<T> From<HashSet<T>> for CBOR where T: Into<CBOR> {
 
 impl<T> TryFrom<CBOR> for HashSet<T>
 where
-T: TryFrom<CBOR> + Eq + hash::Hash + Clone,
-<T as TryFrom<CBOR>>::Error: Into<anyhow::Error>,
+    T: TryFrom<CBOR, Error = anyhow::Error> + Eq + hash::Hash + Clone,
 {
     type Error = anyhow::Error;
 
@@ -90,8 +85,7 @@ T: TryFrom<CBOR> + Eq + hash::Hash + Clone,
             CBORCase::Array(cbor_array) => {
                 let mut result = HashSet::new();
                 for cbor in cbor_array {
-                    let element = T::try_from(cbor).map_err(|e| e.into())?;
-                    result.insert(element);
+                    result.insert(cbor.try_into()?);
                 }
                 Ok(result)
             },

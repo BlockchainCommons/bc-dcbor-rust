@@ -1,5 +1,6 @@
 import_stdlib!();
 
+use anyhow::bail;
 use half::f16;
 
 use crate::{CBOR, Map, error::CBORError, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
@@ -100,9 +101,9 @@ fn parse_bytes(data: &[u8], len: usize) -> Result<&[u8], CBORError> {
     Ok(&data[0..len])
 }
 
-fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
+fn decode_cbor_internal(data: &[u8]) -> anyhow::Result<(CBOR, usize)> {
     if data.is_empty() {
-        return Err(CBORError::Underrun)
+        bail!(CBORError::Underrun)
     }
     let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
@@ -169,7 +170,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize), CBORError> {
                         21 => Ok((CBOR::r#true(), header_varint_len)),
                         22 => Ok((CBOR::null(), header_varint_len)),
                         _ => {
-                            Err(CBORError::InvalidSimpleValue)
+                            bail!(CBORError::InvalidSimpleValue)
                         },
                     }
                 }

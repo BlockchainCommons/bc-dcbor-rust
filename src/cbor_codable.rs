@@ -12,23 +12,7 @@ pub trait CBOREncodable: Into<CBOR> {
 
 impl<T> CBOREncodable for T where T: Into<CBOR> { }
 
-pub trait CBORDecodable: TryFrom<CBOR>
-{
-    fn from_cbor(cbor: CBOR) -> anyhow::Result<Self>
-    where <Self as TryFrom<CBOR>>::Error: Into<anyhow::Error>
-    {
-        Self::try_from(cbor).map_err(|e| e.into())
-    }
-
-    fn from_cbor_data(data: &[u8]) -> anyhow::Result<Self>
-    where
-    <Self as TryFrom<CBOR>>::Error: Into<anyhow::Error> + std::error::Error + Send + Sync + 'static,
-    {
-        let cbor = CBOR::from_data(data)?;
-        let result: Self = Self::try_from(cbor)?;
-        Ok(result)
-    }
-}
+pub trait CBORDecodable: TryFrom<CBOR> { }
 
 impl<T> CBORDecodable for T where T: TryFrom<CBOR> { }
 

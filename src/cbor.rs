@@ -1,6 +1,7 @@
 import_stdlib!();
 
 use bytes::Bytes;
+use anyhow::bail;
 
 use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarInt, MajorType}, Map, Simple};
 
@@ -134,50 +135,54 @@ impl CBOR {
     /// Extract the CBOR value as a byte string.
     ///
     /// Returns `Ok` if the value is a byte string, `Err` otherwise.
-    pub fn try_into_byte_string(self) -> Result<Bytes, CBORError> {
+    pub fn try_into_byte_string(self) -> anyhow::Result<Bytes> {
         match self.into_case() {
             CBORCase::ByteString(b) => Ok(b),
-            _ => Err(CBORError::WrongType)
+            _ => bail!(CBORError::WrongType)
         }
+    }
+
+    pub fn into_byte_string(self) -> Option<Bytes> {
+        self.try_into_byte_string().ok()
     }
 
     /// Extract the CBOR value as a text string.
     ///
     /// Returns `Ok` if the value is a text string, `Err` otherwise.
-    pub fn try_into_text(self) -> Result<String, CBORError> {
+    pub fn try_into_text(self) -> anyhow::Result<String> {
         match self.into_case() {
             CBORCase::Text(t) => Ok(t),
-            _ => Err(CBORError::WrongType)
+            _ => bail!(CBORError::WrongType)
         }
     }
 
     /// Extract the CBOR value as an array.
     ///
     /// Returns `Ok` if the value is an array, `Err` otherwise.
-    pub fn try_into_array(self) -> Result<Vec<CBOR>, CBORError> {
+    pub fn try_into_array(self) -> anyhow::Result<Vec<CBOR>> {
         match self.into_case() {
             CBORCase::Array(a) => Ok(a),
-            _ => Err(CBORError::WrongType)
+            _ => bail!(CBORError::WrongType)
         }
     }
 
     /// Extract the CBOR value as a map.
     ///
     /// Returns `Ok` if the value is a map, `Err` otherwise.
-    pub fn try_into_map(self) -> Result<Map, CBORError> {
+    pub fn try_into_map(self) -> anyhow::Result<Map> {
         match self.into_case() {
             CBORCase::Map(m) => Ok(m),
-            _ => Err(CBORError::WrongType)
+            _ => bail!(CBORError::WrongType)
         }
     }
 
     /// Extract the CBOR value as a tagged value.
     ///
     /// Returns `Ok` if the value is a tagged value, `Err` otherwise.
-    pub fn try_into_tagged_value(self) -> Result<(Tag, CBOR), CBORError> {
+    pub fn try_into_tagged_value(self) -> anyhow::Result<(Tag, CBOR)> {
         match self.into_case() {
             CBORCase::Tagged(tag, value) => Ok((tag, *value)),
-            _ => Err(CBORError::WrongType)
+            _ => bail!(CBORError::WrongType)
         }
     }
 
@@ -185,93 +190,26 @@ impl CBOR {
     ///
     /// Returns `Ok` if the value is a tagged value with the expected tag, `Err`
     /// otherwise.
-    pub fn try_into_expected_tagged_value(self, expected_tag: impl Into<Tag>) -> Result<CBOR, CBORError> {
+    pub fn try_into_expected_tagged_value(self, expected_tag: impl Into<Tag>) -> anyhow::Result<CBOR> {
         let (tag, value) = self.try_into_tagged_value()?;
         let expected_tag = expected_tag.into();
         if tag == expected_tag {
             Ok(value)
         } else {
-            Err(CBORError::WrongTag(expected_tag, tag))
+            bail!(CBORError::WrongTag(expected_tag, tag))
         }
     }
 
     /// Extract the CBOR value as a simple value.
     ///
     /// Returns `Ok` if the value is a simple value, `Err` otherwise.
-    pub fn try_into_simple_value(self) -> Result<Simple, CBORError> {
+    pub fn try_into_simple_value(self) -> anyhow::Result<Simple> {
         match self.into_case() {
             CBORCase::Simple(s) => Ok(s),
-            _ => Err(CBORError::WrongType)
+            _ => bail!(CBORError::WrongType)
         }
     }
 }
-
-// impl CBOR {
-//     /// Extract the CBOR value as a byte string.
-//     ///
-//     /// Returns `Some` if the value is a byte string, `None` otherwise.
-//     pub fn as_byte_string(&self) -> Option<Bytes> {
-//         match self.as_case() {
-//             CBORCase::ByteString(b) => Some(b).cloned(),
-//             _ => None
-//         }
-//     }
-
-//     /// Extract the CBOR value as a text string.
-//     ///
-//     /// Returns `Some` if the value is a text string, `None` otherwise.
-//     pub fn as_text(&self) -> Option<String> {
-//         match self.as_case() {
-//             CBORCase::Text(t) => Some(t).cloned(),
-//             _ => None
-//         }
-//     }
-
-//     /// Extract the CBOR value as an array.
-//     ///
-//     /// Returns `Some` if the value is an array, `None` otherwise.
-//     pub fn as_array(&self) -> Option<&Vec<CBOR>> {
-//         match self.as_case() {
-//             CBORCase::Array(a) => Some(a),
-//             _ => None
-//         }
-//     }
-
-//     /// Extract the CBOR value as a map.
-//     ///
-//     /// Returns `Some` if the value is a map, `None` otherwise.
-//     pub fn as_map(&self) -> Option<&Map> {
-//         match self.as_case() {
-//             CBORCase::Map(m) => Some(m),
-//             _ => None
-//         }
-//     }
-
-//     /// Create a new CBOR value representing a tagged value.
-//     pub fn tagged_value(tag: impl Into<Tag>, item: impl Into<CBOR>) -> CBOR {
-//         CBORCase::Tagged(tag.into(), Box::new(item.into())).into()
-//     }
-
-//     /// Extract the CBOR value as a tagged value.
-//     ///
-//     /// Returns `Some` if the value is a tagged value, `None` otherwise.
-//     pub fn as_tagged_value(&self) -> Option<(&Tag, &CBOR)> {
-//         match self.as_case() {
-//             CBORCase::Tagged(t, v) => Some((t, v)),
-//             _ => None
-//         }
-//     }
-
-//     /// Extract the CBOR value as a simple value.
-//     ///
-//     /// Returns `Some` if the value is a simple value, `None` otherwise.
-//     pub fn as_simple_value(&self) -> Option<&Simple> {
-//         match self.as_case() {
-//             CBORCase::Simple(s) => Some(s),
-//             _ => None
-//         }
-//     }
-// }
 
 /// Associated constants for common CBOR simple values.
 impl CBOR {
