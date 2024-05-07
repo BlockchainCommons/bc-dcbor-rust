@@ -1,7 +1,7 @@
 import_stdlib!();
 
 use half::f16;
-use anyhow::bail;
+use anyhow::{bail, Result, Error};
 
 use crate::{int::From64, CBORCase, CBORError, ExactFrom, Simple, CBOR};
 
@@ -49,20 +49,21 @@ pub fn f64_cbor_data(value: f64) -> Vec<u8> {
     n.to_bits().encode_int(MajorType::Simple)
 }
 
-pub(crate) fn validate_canonical_f64(n: f64) -> Result<(), CBORError> {
+pub(crate) fn validate_canonical_f64(n: f64) -> Result<()> {
     if
         n == n as f32 as f64 ||
         n == n as i64 as f64 ||
         n.is_nan()
     {
-        return Err(CBORError::NonCanonicalNumeric);
+        bail!(CBORError::NonCanonicalNumeric);
     }
     Ok(())
 }
 
 impl TryFrom<CBOR> for f64 {
-    type Error = anyhow::Error;
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    type Error = Error;
+    
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Unsigned(n) => {
                 if let Some(f) = f64::exact_from_u64(n) {
@@ -120,21 +121,21 @@ pub fn f32_cbor_data(value: f32) -> Vec<u8> {
     n.to_bits().encode_int(MajorType::Simple)
 }
 
-pub(crate) fn validate_canonical_f32(n: f32) -> Result<(), CBORError> {
+pub(crate) fn validate_canonical_f32(n: f32) -> Result<()> {
     if
         n == f16::from_f32(n).to_f32() ||
         n == n as i32 as f32 ||
         n.is_nan()
     {
-        return Err(CBORError::NonCanonicalNumeric);
+        bail!(CBORError::NonCanonicalNumeric);
     }
     Ok(())
 }
 
 impl TryFrom<CBOR> for f32 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Unsigned(n) => {
                 if let Some(f) = f32::exact_from_u64(n) {
@@ -195,9 +196,9 @@ pub fn f16_cbor_data(value: f16) -> Vec<u8> {
 }
 
 impl TryFrom<CBOR> for f16 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Unsigned(n) => {
                 if let Some(f) = f16::exact_from_u64(n) {
@@ -229,13 +230,13 @@ impl TryFrom<CBOR> for f16 {
     }
 }
 
-pub(crate) fn validate_canonical_f16(n: f16) -> Result<(), CBORError> {
+pub(crate) fn validate_canonical_f16(n: f16) -> Result<()> {
     let f = n.to_f64();
     if
         f == f as i64 as f64 ||
         n.is_nan() && n.to_bits() != 0x7e00
     {
-        return Err(CBORError::NonCanonicalNumeric);
+        bail!(CBORError::NonCanonicalNumeric);
     }
     Ok(())
 }

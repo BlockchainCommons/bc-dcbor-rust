@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.13.3")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.14.0")]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -20,7 +20,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.13.3"
+//! dcbor = "0.14.0"
 //! ```
 //!
 //! # Features
@@ -32,7 +32,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.13.3"
+//! version = "0.14.0"
 //! features = ["multithreaded"]
 //! ```
 //!
@@ -43,7 +43,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.13.3"
+//! version = "0.14.0"
 //! default-features = false
 //! features = ["no_std"]
 //! ```
@@ -76,7 +76,7 @@
 //! # {
 //! use dcbor::prelude::*;
 //! let data = hex_literal::hex!("831903e81907d0190bb8");
-//! let cbor = CBOR::from_data(&data).unwrap();
+//! let cbor = CBOR::try_from_data(&data).unwrap();
 //! assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
 //! let array: Vec::<u32> = cbor.try_into().unwrap();
 //! assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");

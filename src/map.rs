@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use anyhow::bail;
+use anyhow::{bail, Error, Result};
 
 use crate::{CBOR, CBORError, CBORCase};
 
@@ -41,7 +41,7 @@ impl Map {
         self.0.insert(MapKey::new(key.to_cbor_data()), MapValue::new(key, value));
     }
 
-    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> anyhow::Result<()> {
+    pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<()> {
         match self.0.last_key_value() {
             None => {
                 self.insert(key, value);
@@ -77,7 +77,7 @@ impl Map {
     /// Get a value from the map, given a key.
     ///
     /// Returns `Ok` if the key is present in the map, `Err` otherwise.
-    pub fn extract<K, V>(&self, key: K) -> anyhow::Result<V>
+    pub fn extract<K, V>(&self, key: K) -> Result<V>
     where
         K: Into<CBOR>, V: TryFrom<CBOR>
     {
@@ -236,12 +236,12 @@ impl<K, V> From<HashMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
 
 impl<K, V> TryFrom<CBOR> for HashMap<K, V>
 where
-    K: TryFrom<CBOR, Error = anyhow::Error> + cmp::Eq + hash::Hash + Clone,
-    V: TryFrom<CBOR, Error = anyhow::Error> + Clone,
+    K: TryFrom<CBOR, Error = Error> + cmp::Eq + hash::Hash + Clone,
+    V: TryFrom<CBOR, Error = Error> + Clone,
 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
@@ -250,7 +250,7 @@ where
                 }
                 Ok(container)
             },
-            _ => Err(anyhow::Error::msg(CBORError::WrongType))
+            _ => Err(Error::msg(CBORError::WrongType))
         }
     }
 }
@@ -267,12 +267,12 @@ where
 
 impl<K, V> TryFrom<CBOR> for BTreeMap<K, V>
 where
-    K: TryFrom<CBOR, Error = anyhow::Error> + cmp::Eq + (cmp::Ord) + Clone,
-    V: TryFrom<CBOR, Error = anyhow::Error> + Clone,
+    K: TryFrom<CBOR, Error = Error> + cmp::Eq + (cmp::Ord) + Clone,
+    V: TryFrom<CBOR, Error = Error> + Clone,
 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Map(map) => {
                 let mut container = <BTreeMap<K, V>>::new();
@@ -283,7 +283,7 @@ where
                 }
                 Ok(container)
             },
-            _ => Err(anyhow::Error::msg(Box::new(CBORError::WrongType)))
+            _ => Err(Error::msg(Box::new(CBORError::WrongType)))
         }
     }
 }

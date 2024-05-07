@@ -1,4 +1,4 @@
-use anyhow::bail;
+use anyhow::{bail, Result, Error};
 
 use crate::{CBOR, CBORError, CBORTagged, CBORCase};
 
@@ -8,10 +8,10 @@ use crate::{CBOR, CBORError, CBORTagged, CBORCase};
 /// associated constant and implement the `from_untagged_cbor` function.
 pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
     /// Creates an instance of this type by decoding it from untagged CBOR.
-    fn from_untagged_cbor(cbor: CBOR) -> anyhow::Result<Self> where Self: Sized;
+    fn from_untagged_cbor(cbor: CBOR) -> Result<Self> where Self: Sized;
 
     /// Creates an instance of this type by decoding it from tagged CBOR.
-    fn from_tagged_cbor(cbor: CBOR) -> anyhow::Result<Self> where Self: Sized {
+    fn from_tagged_cbor(cbor: CBOR) -> Result<Self> where Self: Sized {
         match cbor.into_case() {
             CBORCase::Tagged(tag, item) => {
                 let cbor_tags = Self::cbor_tags();
@@ -26,12 +26,12 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
     }
 
     /// Creates an instance of this type by decoding it from binary encoded tagged CBOR.
-    fn from_tagged_cbor_data(data: impl AsRef<[u8]>) -> anyhow::Result<Self> where Self: Sized {
-        Self::from_tagged_cbor(CBOR::try_from_data(data).map_err(anyhow::Error::msg)?)
+    fn from_tagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self> where Self: Sized {
+        Self::from_tagged_cbor(CBOR::try_from_data(data).map_err(Error::msg)?)
     }
 
     /// Creates an instance of this type by decoding it from binary encoded untagged CBOR.
-    fn from_untagged_cbor_data(data: impl AsRef<[u8]>) -> anyhow::Result<Self> where Self: Sized {
-        Self::from_untagged_cbor(CBOR::try_from_data(data).map_err(anyhow::Error::msg)?)
+    fn from_untagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self> where Self: Sized {
+        Self::from_untagged_cbor(CBOR::try_from_data(data).map_err(Error::msg)?)
     }
 }

@@ -2,7 +2,7 @@ import_stdlib!();
 
 use crate::{error::CBORError, CBORCase, CBOR};
 
-use anyhow::bail;
+use anyhow::{bail, Error, Result};
 
 impl<T> From<Vec<T>> for CBOR where T: Into<CBOR> {
     fn from(vec: Vec<T>) -> Self {
@@ -18,11 +18,11 @@ impl<T> From<&[T]> for CBOR where T: Into<CBOR> + Clone {
 
 impl<T> TryFrom<CBOR> for Vec<T>
 where
-    T: TryFrom<CBOR, Error = anyhow::Error> + Clone,
+    T: TryFrom<CBOR, Error = Error> + Clone,
 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = Vec::new();
@@ -50,11 +50,11 @@ impl<T> From<VecDeque<T>> for CBOR where T: Into<CBOR> {
 
 impl<T> TryFrom<CBOR> for VecDeque<T>
 where
-    T: TryFrom<CBOR, Error = anyhow::Error> + Clone,
+    T: TryFrom<CBOR, Error = Error> + Clone,
 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = VecDeque::new();
@@ -76,11 +76,11 @@ impl<T> From<HashSet<T>> for CBOR where T: Into<CBOR> {
 
 impl<T> TryFrom<CBOR> for HashSet<T>
 where
-    T: TryFrom<CBOR, Error = anyhow::Error> + Eq + hash::Hash + Clone,
+    T: TryFrom<CBOR, Error = Error> + Eq + hash::Hash + Clone,
 {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = HashSet::new();

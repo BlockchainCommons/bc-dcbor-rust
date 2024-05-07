@@ -4,7 +4,7 @@ use ops::{Add, Sub};
 
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
 
-use anyhow::bail;
+use anyhow::{bail, Error, Result};
 
 use crate::{CBORTaggedEncodable, Tag, CBOR, CBORTaggedDecodable, CBORTagged};
 
@@ -26,7 +26,7 @@ impl Date {
     }
 
     /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
-    pub fn new_from_string(value: &str) -> anyhow::Result<Self> {
+    pub fn new_from_string(value: &str) -> Result<Self> {
         // try parsing as DateTime
         if let Ok(dt) = DateTime::parse_from_rfc3339(value) {
             return Ok(Self::from_datetime(dt.with_timezone(&Utc)));
@@ -85,9 +85,9 @@ impl Default for Date {
 }
 
 impl TryFrom<&str> for Date {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(value: &str) -> anyhow::Result<Self> {
+    fn try_from(value: &str) -> Result<Self> {
         Self::new_from_string(value)
     }
 }
@@ -111,9 +111,9 @@ impl AsRef<Date> for Date {
 }
 
 impl TryFrom<CBOR> for Date {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         Self::from_tagged_cbor(cbor)
     }
 }
@@ -131,7 +131,7 @@ impl CBORTaggedEncodable for Date {
 }
 
 impl CBORTaggedDecodable for Date {
-    fn from_untagged_cbor(cbor: CBOR) -> anyhow::Result<Self> {
+    fn from_untagged_cbor(cbor: CBOR) -> Result<Self> {
         let n = cbor.clone().try_into()?;
         Ok(Date::from_timestamp(n))
     }

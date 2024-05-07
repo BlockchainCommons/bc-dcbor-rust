@@ -1,3 +1,5 @@
+import_stdlib!();
+
 use crate::CBOR;
 
 pub trait CBOREncodable: Into<CBOR> + Clone {

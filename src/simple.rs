@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use anyhow::bail;
+use anyhow::{bail, Error, Result};
 
 use crate::{float::f64_cbor_data, CBORCase, CBORError, CBOR};
 
@@ -42,9 +42,9 @@ impl From<Simple> for CBOR {
 }
 
 impl TryFrom<CBOR> for Simple {
-    type Error = anyhow::Error;
+    type Error = Error;
 
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Simple(simple) => Ok(simple),
             _ => bail!(CBORError::WrongType),

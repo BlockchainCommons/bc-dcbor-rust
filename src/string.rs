@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use anyhow::bail;
+use anyhow::{bail, Error, Result};
 
 use crate::{CBOR, CBORError, CBORCase};
 
@@ -17,8 +17,8 @@ impl From<String> for CBOR {
 }
 
 impl TryFrom<CBOR> for String {
-    type Error = anyhow::Error;
-    fn try_from(cbor: CBOR) -> anyhow::Result<Self> {
+    type Error = Error;
+    fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Text(s) => Ok(s),
             _ => bail!(CBORError::WrongType),
