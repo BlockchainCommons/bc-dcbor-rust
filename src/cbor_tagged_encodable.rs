@@ -17,6 +17,6 @@ pub trait CBORTaggedEncodable: CBORTagged {
 
     /// Returns the tagged value in CBOR binary representation.
     fn tagged_cbor_data(&self) -> Vec<u8> {
-        self.tagged_cbor().cbor_data()
+        self.tagged_cbor().to_cbor_data()
     }
 }

@@ -61,7 +61,7 @@ pub enum CBORCase {
 /// Affordances for decoding CBOR from binary representation.
 impl CBOR {
     /// Decodes the given date into CBOR symbolic representation.
-    pub fn from_data(data: impl AsRef<[u8]>) -> anyhow::Result<CBOR> {
+    pub fn try_from_data(data: impl AsRef<[u8]>) -> anyhow::Result<CBOR> {
         decode_cbor(data)
     }
 
@@ -69,16 +69,12 @@ impl CBOR {
     ///
     /// Panics if the string is not well-formed hexadecimal with no spaces or
     /// other characters.
-    pub fn from_hex(hex: &str) -> anyhow::Result<CBOR> {
+    pub fn try_from_hex(hex: &str) -> anyhow::Result<CBOR> {
         let data = hex::decode(hex).unwrap();
-        Self::from_data(data)
+        Self::try_from_data(data)
     }
 
-    pub fn cbor(&self) -> CBOR {
-        self.clone()
-    }
-
-    pub fn cbor_data(&self) -> Vec<u8> {
+    pub fn to_cbor_data(&self) -> Vec<u8> {
         match self.as_case() {
             CBORCase::Unsigned(x) => x.encode_varint(MajorType::Unsigned),
             CBORCase::Negative(x) => x.encode_varint(MajorType::Negative),
@@ -97,14 +93,14 @@ impl CBOR {
             CBORCase::Array(x) => {
                 let mut buf = x.len().encode_varint(MajorType::Array);
                 for item in x {
-                    buf.extend(item.cbor_data());
+                    buf.extend(item.to_cbor_data());
                 }
                 buf
             },
             CBORCase::Map(x) => x.cbor_data(),
             CBORCase::Tagged(tag, item) => {
                 let mut buf = tag.value().encode_varint(MajorType::Tagged);
-                buf.extend(item.cbor_data());
+                buf.extend(item.to_cbor_data());
                 buf
             },
             CBORCase::Simple(x) => x.cbor_data(),

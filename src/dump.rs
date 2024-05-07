@@ -8,7 +8,7 @@ use super::{string_util::{sanitized, flanked}, varint::{EncodeVarInt, MajorType}
 impl CBOR {
     /// Returns the encoded hexadecimal representation of this CBOR.
     pub fn hex(&self) -> String {
-        hex::encode(self.cbor_data())
+        hex::encode(self.to_cbor_data())
     }
 
     /// Returns the encoded hexadecimal representation of this CBOR.
@@ -30,8 +30,8 @@ impl CBOR {
 
     fn dump_items(&self, level: usize, tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
         match self.as_case() {
-            CBORCase::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("unsigned({})", n)))),
-            CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.cbor_data()), Some(format!("negative({})", -1 - (*n as i128))))),
+            CBORCase::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.to_cbor_data()), Some(format!("unsigned({})", n)))),
+            CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.to_cbor_data()), Some(format!("negative({})", -1 - (*n as i128))))),
             CBORCase::ByteString(d) => {
                 let mut items = vec![
                     DumpItem::new(level, vec!(d.len().encode_varint(MajorType::Bytes)), Some(format!("bytes({})", d.len())))
@@ -109,6 +109,7 @@ impl CBOR {
     }
 }
 
+#[derive(Debug)]
 struct DumpItem {
     level: usize,
     data: Vec<Vec<u8>>,

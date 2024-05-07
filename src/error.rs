@@ -42,8 +42,6 @@ pub enum CBORError {
     WrongTag(Tag, Tag),
 }
 
-// impl StdError for CBORError {}
-
 impl From<str::Utf8Error> for CBORError {
     fn from(err: str::Utf8Error) -> Self {
         CBORError::InvalidString(err)

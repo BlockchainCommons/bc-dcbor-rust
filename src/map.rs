@@ -38,7 +38,7 @@ impl Map {
     pub fn insert(&mut self, key: impl Into<CBOR>, value: impl Into<CBOR>) {
         let key = key.into();
         let value = value.into();
-        self.0.insert(MapKey::new(key.cbor_data()), MapValue::new(key, value));
+        self.0.insert(MapKey::new(key.to_cbor_data()), MapValue::new(key, value));
     }
 
     pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> anyhow::Result<()> {
@@ -48,7 +48,7 @@ impl Map {
                 Ok(())
             },
             Some(entry) => {
-                let new_key = MapKey::new(key.cbor_data());
+                let new_key = MapKey::new(key.to_cbor_data());
                 if self.0.contains_key(&new_key) {
                     bail!(CBORError::DuplicateMapKey)
                 }
@@ -68,7 +68,7 @@ impl Map {
     where
         K: Into<CBOR>, V: TryFrom<CBOR>
     {
-        match self.0.get(&MapKey::new(key.into().cbor_data())) {
+        match self.0.get(&MapKey::new(key.into().to_cbor_data())) {
             Some(value) => V::try_from(value.value.clone()).ok(),
             None => None
         }
@@ -109,7 +109,7 @@ impl Map {
         let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0.iter().map(|x| {
             let a: Vec<u8> = x.0.0.to_owned();
             let cbor: &CBOR = &x.1.value;
-            let b: Vec<u8> = cbor.cbor_data();
+            let b: Vec<u8> = cbor.to_cbor_data();
             (a, b)
         }).collect();
         let mut buf = pairs.len().encode_varint(MajorType::Map);
@@ -137,6 +137,7 @@ impl fmt::Debug for Map {
 ///
 /// This iterator always returns the entries in lexicographic order by the key's
 /// binary-encoded CBOR value.
+#[derive(Debug)]
 pub struct MapIter<'a>(BTreeMapValues<'a, MapKey, MapValue>);
 
 impl<'a> MapIter<'a> {

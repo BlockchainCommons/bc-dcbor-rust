@@ -6,7 +6,7 @@ pub trait CBOREncodable: Into<CBOR> + Clone {
     }
 
     fn to_cbor_data(&self) -> Vec<u8> {
-        self.to_cbor().cbor_data()
+        self.to_cbor().to_cbor_data()
     }
 }
 

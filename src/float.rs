@@ -36,7 +36,7 @@ pub fn f64_cbor_data(value: f64) -> Vec<u8> {
         if let Some(n) = i128::exact_from_f64(n) {
             if let Some(i) = u64::exact_from_i128(-1 - n) {
                 let cbor: CBOR = CBORCase::Negative(i).into();
-                return cbor.cbor_data();
+                return cbor.to_cbor_data();
             }
         }
     }
@@ -108,7 +108,7 @@ pub fn f32_cbor_data(value: f32) -> Vec<u8> {
     if n < 0.0f32 {
         if let Some(i) = u64::exact_from_f32(-1f32 - n) {
             let cbor: CBOR = CBORCase::Negative(i).into();
-            return cbor.cbor_data();
+            return cbor.to_cbor_data();
         }
     }
     if let Some(i) = u32::exact_from_f32(n) {
@@ -182,7 +182,7 @@ pub fn f16_cbor_data(value: f16) -> Vec<u8> {
     if n < 0.0 {
         if let Some(i) = u64::exact_from_f64(-1f64 - n) {
             let cbor: CBOR = CBORCase::Negative(i).into();
-            return cbor.cbor_data();
+            return cbor.to_cbor_data();
         }
     }
     if let Some(i) = u16::exact_from_f64(n) {
