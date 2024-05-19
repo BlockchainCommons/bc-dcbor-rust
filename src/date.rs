@@ -1,5 +1,7 @@
 import_stdlib!();
 
+use std::time::Duration;
+
 use ops::{Add, Sub};
 
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
@@ -26,14 +28,15 @@ impl Date {
     }
 
     /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
-    pub fn new_from_string(value: &str) -> Result<Self> {
+    pub fn from_string(value: impl Into<String>) -> Result<Self> {
+        let value = value.into();
         // try parsing as DateTime
-        if let Ok(dt) = DateTime::parse_from_rfc3339(value) {
+        if let Ok(dt) = DateTime::parse_from_rfc3339(&value) {
             return Ok(Self::from_datetime(dt.with_timezone(&Utc)));
         }
 
         // try parsing as just a date (with assumed zero time)
-        if let Ok(d) = NaiveDate::parse_from_str(value, "%Y-%m-%d") {
+        if let Ok(d) = NaiveDate::parse_from_str(&value, "%Y-%m-%d") {
             let dt = NaiveDateTime::new(d, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
             return Ok(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
         }
@@ -44,6 +47,11 @@ impl Date {
     /// Creates a new `Date` containing the current date and time.
     pub fn now() -> Self {
         Self::from_datetime(Utc::now())
+    }
+
+    /// Creates a new `Date` containing the current date and time plus the given duration.
+    pub fn with_duration_from_now(duration: Duration) -> Self {
+        Self::now() + duration
     }
 
     /// Returns the underlying chrono `DateTime` struct.
@@ -69,6 +77,33 @@ impl Add<f64> for Date {
     }
 }
 
+// Support subtracting seconds as f64
+impl Sub<f64> for Date {
+    type Output = Self;
+
+    fn sub(self, rhs: f64) -> Self::Output {
+        Self::from_timestamp(self.timestamp() - rhs)
+    }
+}
+
+// Support adding a duration
+impl Add<Duration> for Date {
+    type Output = Self;
+
+    fn add(self, rhs: Duration) -> Self::Output {
+        Self::from_timestamp(self.timestamp() + rhs.as_secs_f64())
+    }
+}
+
+// Support subtracting a duration
+impl Sub<Duration> for Date {
+    type Output = Self;
+
+    fn sub(self, rhs: Duration) -> Self::Output {
+        Self::from_timestamp(self.timestamp() - rhs.as_secs_f64())
+    }
+}
+
 // Support subtracting another date and returning the number of seconds as f64
 impl Sub for Date {
     type Output = f64;
@@ -88,7 +123,7 @@ impl TryFrom<&str> for Date {
     type Error = Error;
 
     fn try_from(value: &str) -> Result<Self> {
-        Self::new_from_string(value)
+        Self::from_string(value)
     }
 }
 
