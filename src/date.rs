@@ -1,7 +1,5 @@
 import_stdlib!();
 
-use std::time::Duration;
-
 use ops::{Add, Sub};
 
 use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};

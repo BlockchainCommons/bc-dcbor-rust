@@ -14,6 +14,7 @@ pub mod with_std {
     pub use std::ops::{self};
     pub use std::cmp::{self};
     pub use std::str::{self};
+    pub use std::time::Duration;
     pub use std::format;
     pub use thiserror::Error as ThisError;
 }
@@ -33,6 +34,7 @@ pub mod without_std {
     pub use core::hash::{self};
     pub use core::ops::{self};
     pub use core::cmp::{self};
+    pub use core::time::Duration;
     pub use alloc::rc::{self};
     pub use alloc::sync::{self};
     pub use alloc::string::ToString;
