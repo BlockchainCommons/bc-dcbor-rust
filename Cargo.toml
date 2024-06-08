@@ -8,7 +8,7 @@ keywords = ["encoding", "cbor", "binary", "format", "serialization"]
 repository = "https://github.com/BlockchainCommons/bc-dcbor-rust"
 readme = "README.md"
 license = "BSD-2-Clause-Patent"
-categories = ["data-structures", "encoding"]
+categories = ["data-structures", "encoding", "no-std"]
 documentation = "https://docs.rs/dcbor"
 
 [dependencies]
