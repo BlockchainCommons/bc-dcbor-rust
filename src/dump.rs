@@ -34,7 +34,7 @@ impl CBOR {
             CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.to_cbor_data()), Some(format!("negative({})", -1 - (*n as i128))))),
             CBORCase::ByteString(d) => {
                 let mut items = vec![
-                    DumpItem::new(level, vec!(d.len().encode_varint(MajorType::Bytes)), Some(format!("bytes({})", d.len())))
+                    DumpItem::new(level, vec!(d.len().encode_varint(MajorType::ByteString)), Some(format!("bytes({})", d.len())))
                 ];
                 if !d.is_empty() {
                     let mut note: Option<String> = None;

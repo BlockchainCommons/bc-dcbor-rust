@@ -24,7 +24,7 @@ fn parse_header(header: u8) -> (MajorType, u8) {
     let major_type = match header >> 5 {
         0 => MajorType::Unsigned,
         1 => MajorType::Negative,
-        2 => MajorType::Bytes,
+        2 => MajorType::ByteString,
         3 => MajorType::Text,
         4 => MajorType::Array,
         5 => MajorType::Map,
@@ -109,7 +109,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
     match major_type {
         MajorType::Unsigned => Ok((CBORCase::Unsigned(value).into(), header_varint_len)),
         MajorType::Negative => Ok((CBORCase::Negative(value).into(), header_varint_len)),
-        MajorType::Bytes => {
+        MajorType::ByteString => {
             let data_len = value as usize;
             let bytes = parse_bytes(&data[header_varint_len..], data_len)?.to_vec().into();
             Ok((CBORCase::ByteString(bytes).into(), header_varint_len + data_len))

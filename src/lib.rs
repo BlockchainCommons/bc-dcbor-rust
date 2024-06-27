@@ -94,7 +94,8 @@ mod stdlib;
 mod cbor;
 pub use cbor::*;
 
-mod bytes;
+mod byte_string;
+pub use byte_string::ByteString;
 
 mod bool_value;
 

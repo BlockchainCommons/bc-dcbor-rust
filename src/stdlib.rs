@@ -2,6 +2,7 @@
 pub mod with_std {
     pub use std::{fmt, str::FromStr};
 
+    pub use std::array::TryFromSliceError;
     pub use std::string::String;
     pub use std::vec::Vec;
     pub use std::string::ToString;
@@ -11,7 +12,7 @@ pub mod with_std {
     pub use std::hash::{self};
     pub use std::rc::{self};
     pub use std::sync::{self};
-    pub use std::ops::{self};
+    pub use std::ops::{self, Deref};
     pub use std::cmp::{self};
     pub use std::str::{self};
     pub use std::time::Duration;
@@ -24,6 +25,7 @@ pub mod with_std {
 pub mod without_std {
     extern crate alloc;
 
+    pub use core::array::TryFromSliceError;
     pub use alloc::fmt::{self};
     pub use alloc::string::String;
     pub use alloc::vec;
@@ -32,7 +34,7 @@ pub mod without_std {
     pub use alloc::collections::{BTreeMap, btree_map::Values as BTreeMapValues, VecDeque};
     pub use hashbrown::{HashSet, HashMap};
     pub use core::hash::{self};
-    pub use core::ops::{self};
+    pub use core::ops::{self, Deref};
     pub use core::cmp::{self};
     pub use core::time::Duration;
     pub use alloc::rc::{self};

@@ -4,7 +4,7 @@ import_stdlib!();
 pub enum MajorType {
     Unsigned,
     Negative,
-    Bytes,
+    ByteString,
     Text,
     Array,
     Map,
@@ -16,7 +16,7 @@ fn type_bits(t: MajorType) -> u8 {
     let b = match t {
         MajorType::Unsigned => 0,
         MajorType::Negative => 1,
-        MajorType::Bytes => 2,
+        MajorType::ByteString => 2,
         MajorType::Text => 3,
         MajorType::Array => 4,
         MajorType::Map => 5,

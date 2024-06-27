@@ -1,9 +1,8 @@
 import_stdlib!();
 
-use bytes::Bytes;
 use anyhow::{bail, Result};
 
-use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarInt, MajorType}, Map, Simple};
+use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarInt, MajorType}, Map, Simple, ByteString};
 
 use super::string_util::flanked;
 
@@ -45,7 +44,7 @@ pub enum CBORCase {
     /// Actual value is -1 - n
     Negative(u64),
     /// Byte string (major type 2).
-    ByteString(Bytes),
+    ByteString(ByteString),
     /// UTF-8 string (major type 3).
     Text(String),
     /// Array (major type 4).
@@ -79,7 +78,7 @@ impl CBOR {
             CBORCase::Unsigned(x) => x.encode_varint(MajorType::Unsigned),
             CBORCase::Negative(x) => x.encode_varint(MajorType::Negative),
             CBORCase::ByteString(x) => {
-                let mut buf = x.len().encode_varint(MajorType::Bytes);
+                let mut buf = x.len().encode_varint(MajorType::ByteString);
                 buf.extend(x);
                 buf
             },
@@ -111,7 +110,7 @@ impl CBOR {
 impl CBOR {
     /// Create a new CBOR value representing a byte string.
     pub fn to_byte_string(data: impl AsRef<[u8]>) -> CBOR {
-        CBORCase::ByteString(Bytes::copy_from_slice(data.as_ref())).into()
+        CBORCase::ByteString(data.as_ref().into()).into()
     }
 
     /// Create a new CBOR value representing a byte string given as a hexadecimal string.
@@ -131,14 +130,14 @@ impl CBOR {
     /// Extract the CBOR value as a byte string.
     ///
     /// Returns `Ok` if the value is a byte string, `Err` otherwise.
-    pub fn try_into_byte_string(self) -> Result<Bytes> {
+    pub fn try_into_byte_string(self) -> Result<Vec<u8>> {
         match self.into_case() {
-            CBORCase::ByteString(b) => Ok(b),
+            CBORCase::ByteString(b) => Ok(b.into()),
             _ => bail!(CBORError::WrongType)
         }
     }
 
-    pub fn into_byte_string(self) -> Option<Bytes> {
+    pub fn into_byte_string(self) -> Option<Vec<u8>> {
         self.try_into_byte_string().ok()
     }
 
