@@ -35,6 +35,12 @@ fn test_cbor(t: impl Into<CBOR>, expected_debug: &str, expected_display: &str, e
     assert_eq!(cbor, decoded_cbor);
 }
 
+fn test_cbor_decode(data: &str, expected_debug: &str, expected_display: &str) {
+    let cbor = CBOR::try_from_hex(data).unwrap();
+    assert_eq!(format!("{:?}", cbor), expected_debug);
+    assert_eq!(format!("{}", cbor), expected_display);
+}
+
 fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str)
 where
 T: TryFrom<CBOR> + Into<CBOR>,
@@ -247,6 +253,23 @@ fn encode_map() {
 }
 
 #[test]
+fn encode_map_with_map_keys() {
+    let mut k1 = Map::new();
+    k1.insert(1, 2);
+
+    let mut k2 = Map::new();
+    k2.insert(3, 4);
+
+    let mut m = Map::new();
+    m.insert(k1, 5);
+    m.insert(k2, 6);
+    test_cbor(m.clone(),
+        r#"map({0xa10102: (map({0x01: (unsigned(1), unsigned(2))}), unsigned(5)), 0xa10304: (map({0x03: (unsigned(3), unsigned(4))}), unsigned(6))})"#,
+        r#"{{1: 2}: 5, {3: 4}: 6}"#,
+        "a2a1010205a1030406");
+}
+
+#[test]
 fn encode_anders_map() {
     let mut m = Map::new();
     m.insert(1, 45.7);
@@ -330,11 +353,34 @@ fn encode_float() {
     // Most negative double that converts to int64.
     test_cbor(-9223372036854774784.0, "negative(-9223372036854774784)", "-9223372036854774784", "3b7ffffffffffffbff");
 
+    // Int64 with too much precision to be a float.
+    test_cbor(-9223372036854775807i64, "negative(-9223372036854775807)", "-9223372036854775807", "3b7ffffffffffffffe");
+
+    // Most negative encoded as 65-bit neg
+    // Can only be decoded as bignum
+    test_cbor_decode("3b8000000000000000", "negative(-9223372036854775809)", "-9223372036854775809");
+
     // Largest double that can convert to uint64, almost UINT64_MAX.
     test_cbor(18446744073709550000.0, "unsigned(18446744073709549568)", "18446744073709549568", "1bfffffffffffff800");
 
     // Just too large to convert to uint64, but converts to a single, just over UINT64_MAX.
     test_cbor(18446744073709552000.0, "simple(1.8446744073709552e19)", "1.8446744073709552e19", "fa5f800000");
+
+    // Least negative float not representable as Int64
+    test_cbor(-9223372036854777856.0, "negative(-9223372036854777856)", "-9223372036854777856", "3b80000000000007ff");
+
+    // Next to most negative float encodable as 65-bit neg
+    test_cbor(-18446744073709549568.0, "negative(-18446744073709549568)", "-18446744073709549568", "3bfffffffffffff7ff");
+
+    // 65-bit neg encoded
+    // not representable as double
+    test_cbor_decode("3bfffffffffffffffe", "negative(-18446744073709551615)", "-18446744073709551615");
+
+    // Most negative encodable as a 65-bit neg
+    test_cbor(-18446744073709551616.0, "negative(-18446744073709551616)", "-18446744073709551616", "3bffffffffffffffff");
+
+    // Least negative whole integer that must be encoded as float in DCBOR (there are lots of non-whole-integer floats in the range of this table that must be DCBOR encoded as floats).
+    test_cbor(-18446744073709555712.0, "simple(-1.8446744073709556e19)", "-1.8446744073709556e19", "fbc3f0000000000001");
 
     // Large negative that converts to negative int.
     test_cbor(-18446742974197924000.0, "negative(-18446742974197923840)", "-18446742974197923840", "3bfffffeffffffffff");
