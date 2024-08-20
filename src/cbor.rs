@@ -1,6 +1,7 @@
 import_stdlib!();
 
 use anyhow::{bail, Result};
+use unicode_normalization::UnicodeNormalization;
 
 use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarInt, MajorType}, Map, Simple, ByteString};
 
@@ -83,10 +84,9 @@ impl CBOR {
                 buf
             },
             CBORCase::Text(x) => {
-                let mut buf = x.len().encode_varint(MajorType::Text);
-                for byte in x.bytes() {
-                    buf.push(byte);
-                }
+                let nfc = x.nfc().collect::<String>();
+                let mut buf = nfc.len().encode_varint(MajorType::Text);
+                buf.extend(nfc.as_bytes());
                 buf
             },
             CBORCase::Array(x) => {

@@ -2,6 +2,7 @@ import_stdlib!();
 
 use anyhow::{bail, Result, Error};
 use half::f16;
+use unicode_normalization::is_nfc;
 
 use crate::{CBOR, Map, error::CBORError, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
 
@@ -118,6 +119,9 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
             let string = str::from_utf8(buf).map_err(Error::msg)?;
+            if !is_nfc(string) {
+                bail!(CBORError::NonCanonicalString)
+            }
             Ok((string.into(), header_varint_len + data_len))
         },
         MajorType::Array => {

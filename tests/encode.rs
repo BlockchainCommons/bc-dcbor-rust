@@ -196,6 +196,35 @@ fn encode_string() {
 }
 
 #[test]
+fn test_normalized_string() {
+    let composed_e_acute = "\u{00E9}"; // é in NFC
+    let decomposed_e_acute = "\u{0065}\u{0301}"; // e followed by ́ (combining acute accent) in NFD
+
+    // Unlike in Swift, where string comparison is aware of compositional
+    // differences, in Rust string comparison is not.
+    assert_ne!(composed_e_acute, decomposed_e_acute);
+
+    // And of course they serialize differently, which is not what we
+    // want for determinism.
+    let utf8_1 = composed_e_acute.as_bytes();
+    let utf8_2 = decomposed_e_acute.as_bytes();
+    assert_ne!(utf8_1, utf8_2);
+
+    // But serializing them as dCBOR yields the same data.
+    let cbor1 = CBOR::from(composed_e_acute).to_cbor_data();
+    let cbor2 = CBOR::from(decomposed_e_acute).to_cbor_data();
+    assert_eq!(cbor1, cbor2);
+
+    let cbor_data = hex!("6365cc81");
+    let cbor = CBOR::try_from_data(cbor_data);
+    if let Err(e) = cbor {
+        assert_eq!(format!("{}", e), "a CBOR string was not encoded in Unicode Canonical Normalization Form C");
+    } else {
+        panic!("Expected NonCanonicalString error");
+    }
+}
+
+#[test]
 fn encode_array() {
     test_cbor(vec![1, 2, 3], "array([unsigned(1), unsigned(2), unsigned(3)])", "[1, 2, 3]", "83010203");
     test_cbor([1, 2, 3], "array([unsigned(1), unsigned(2), unsigned(3)])", "[1, 2, 3]", "83010203");

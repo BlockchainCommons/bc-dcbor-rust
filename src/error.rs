@@ -20,6 +20,9 @@ pub enum CBORError {
     #[error("an invalidly-encoded UTF-8 string was encountered in the CBOR ({0:?})")]
     InvalidString(str::Utf8Error),
 
+    #[error("a CBOR string was not encoded in Unicode Canonical Normalization Form C")]
+    NonCanonicalString,
+
     #[error("the decoded CBOR had {0} extra bytes at the end")]
     UnusedData(usize),
 
