@@ -16,18 +16,18 @@ pub struct Tag {
 }
 
 impl Tag {
-    /// Creates a new CBOR tag with the given value and no name.
-    pub const fn new(value: TagValue) -> Tag {
-        Self { value, name: None }
-    }
-
     /// Creates a new CBOR tag with the given value and associated name.
-    pub fn new_with_name<N: Into<String>>(value: TagValue, name: N) -> Tag {
+    pub fn new(value: TagValue, name: impl Into<String>) -> Tag {
         Self { value, name: Some(TagName::Dynamic(name.into())) }
     }
 
+    /// Creates a new CBOR tag with the given value and no name.
+    pub const fn with_value(value: TagValue) -> Tag {
+        Self { value, name: None }
+    }
+
     /// Creates a new CBOR tag at compile time with the given value and associated name.
-    pub const fn new_with_static_name(value: TagValue, name: &'static str) -> Tag {
+    pub const fn with_static_name(value: TagValue, name: &'static str) -> Tag {
         Self { value, name: Some(TagName::Static(name)) }
     }
 
@@ -72,18 +72,18 @@ impl fmt::Display for Tag {
 
 impl From<TagValue> for Tag {
     fn from(value: TagValue) -> Self {
-        Tag::new(value)
+        Tag::with_value(value)
     }
 }
 
 impl From<i32> for Tag {
     fn from(value: i32) -> Self {
-        Tag::new(value as TagValue)
+        Tag::with_value(value as TagValue)
     }
 }
 
 impl From<usize> for Tag {
     fn from(value: usize) -> Self {
-        Tag::new(value as TagValue)
+        Tag::with_value(value as TagValue)
     }
 }

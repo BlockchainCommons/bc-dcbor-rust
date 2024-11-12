@@ -163,7 +163,7 @@ impl TryFrom<CBOR> for Date {
 
 impl CBORTagged for Date {
     fn cbor_tags() -> Vec<Tag> {
-        vec![Tag::new(1)]
+        vec![Tag::with_value(1)]
     }
 }
 

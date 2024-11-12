@@ -478,10 +478,10 @@ fn unused_data() {
 
 #[test]
 fn tag() {
-    let tag = Tag::new_with_name(1, "A");
+    let tag = Tag::new(1, "A");
     assert_eq!(format!("{}", tag), "A");
     assert_eq!(format!("{:?}", tag), r#"Tag { value: 1, name: Some(Dynamic("A")) }"#);
-    let tag = Tag::new(2);
+    let tag = Tag::with_value(2);
     assert_eq!(format!("{}", tag), "2");
     assert_eq!(format!("{:?}", tag), "Tag { value: 2, name: None }");
 }
