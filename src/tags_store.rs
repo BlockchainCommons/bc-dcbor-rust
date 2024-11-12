@@ -2,7 +2,7 @@ import_stdlib!();
 
 use crate::{Tag, TagValue, CBOR};
 
-pub type CBORSummarizer = fn (CBOR) -> anyhow::Result<String>;
+pub type CBORSummarizer = Arc<dyn Fn(CBOR) -> anyhow::Result<String> + Send + Sync>;
 
 /// A type that can map between tags and their names.
 pub trait TagsStoreTrait {
@@ -21,7 +21,7 @@ pub trait TagsStoreTrait {
 }
 
 /// A dictionary of mappings between tags and their names.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct TagsStore {
     tags_by_value: HashMap<u64, Tag>,
     tags_by_name: HashMap<String, Tag>,

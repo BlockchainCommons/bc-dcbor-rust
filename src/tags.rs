@@ -1,8 +1,7 @@
-use std::sync::{ Once, Mutex };
+use std::sync::{ Arc, Mutex, Once };
 
 use crate::{CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait};
 
-#[derive(Debug)]
 pub struct LazyTagsStore {
     init: Once,
     data: Mutex<Option<TagsStore>>,
@@ -51,17 +50,21 @@ macro_rules! with_tags_mut {
 
 pub const TAG_DATE: TagValue = 1;
 
-pub fn register_tags() {
+pub fn register_tags_in(tags_store: &mut TagsStore) {
     let tags = vec![
         (TAG_DATE, "date"),
     ];
+    for tag in tags.into_iter() {
+        tags_store.insert(Tag::new(tag.0, tag.1));
+    }
+    tags_store.set_summarizer(TAG_DATE, Arc::new(|untagged_cbor| {
+        Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?))
+    }));
+}
+
+pub fn register_tags() {
     with_tags_mut!(|tags_store: &mut TagsStore| {
-        for tag in tags.into_iter() {
-            tags_store.insert(Tag::new(tag.0, tag.1));
-        }
-        tags_store.set_summarizer(TAG_DATE, |value| {
-            Ok(format!("{}", Date::from_untagged_cbor(value)?))
-        });
+        register_tags_in(tags_store);
     });
 }
 

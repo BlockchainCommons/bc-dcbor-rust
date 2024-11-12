@@ -32,6 +32,10 @@ impl CBOR {
         })
     }
 
+    pub fn summary_opt(&self, tags: &dyn TagsStoreTrait) -> String {
+        self.diagnostic_opt(false, true, Some(tags))
+    }
+
     fn diag_item(&self, annotate: bool, summarize: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
         match self.as_case() {
             CBORCase::Unsigned(_) | CBORCase::Negative(_) | CBORCase::ByteString(_) |

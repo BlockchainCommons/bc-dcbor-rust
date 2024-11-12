@@ -8,6 +8,7 @@ pub mod with_std {
     pub use std::string::ToString;
     pub use std::borrow::ToOwned;
     pub use std::boxed::Box;
+    pub use std::sync::Arc;
     pub use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues, VecDeque, HashSet, HashMap};
     pub use std::hash::{self};
     pub use std::rc::{self};
@@ -31,6 +32,7 @@ pub mod without_std {
     pub use alloc::vec;
     pub use alloc::vec::Vec;
     pub use alloc::boxed::Box;
+    pub use alloc::sync::Arc;
     pub use alloc::collections::{BTreeMap, btree_map::Values as BTreeMapValues, VecDeque};
     pub use hashbrown::{HashSet, HashMap};
     pub use core::hash::{self};
