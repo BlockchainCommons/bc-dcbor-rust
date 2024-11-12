@@ -341,7 +341,7 @@ fn format_fractional_date() {
         "tagged(1, simple(0.5))",
         "1(0.5)",
         "1(0.5)   / date /",
-        "1970-01-01T00:00:00Z",
+        "1970-01-01",
         "c1f93800",
         indoc! {"
         c1          # tag(1) date
@@ -448,7 +448,7 @@ fn format_structure_2() {
             1:
             h'59f2293a5bce7d4de59e71b4207ac5d2',
             2:
-            2021-02-24T00:00:00Z,
+            2021-02-24,
             3:
             "Dark Purple Aqua Love",
             4:

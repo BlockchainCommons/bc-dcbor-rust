@@ -182,6 +182,11 @@ impl CBORTaggedDecodable for Date {
 
 impl fmt::Display for Date {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(self.datetime().to_rfc3339_opts(SecondsFormat::Secs, true).as_str())
+        let dt = self.datetime();
+        if dt.hour() == 0 && dt.minute() == 0 && dt.second() == 0 {
+            f.write_str(dt.date_naive().to_string().as_str())
+        } else {
+            f.write_str(dt.to_rfc3339_opts(SecondsFormat::Secs, true).as_str())
+        }
     }
 }
