@@ -35,3 +35,12 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
         Self::from_untagged_cbor(CBOR::try_from_data(data).map_err(Error::msg)?)
     }
 }
+
+// pub trait CBORDisplay: CBORTaggedDecodable + std::fmt::Display {
+//     fn format_untagged_cbor(cbor: CBOR) -> Result<String> {
+//         let instance = Self::from_untagged_cbor(cbor)?;
+//         Ok(instance.to_string())
+//     }
+// }
+
+// impl<T> CBORDisplay for T where T: CBORTaggedDecodable + std::fmt::Display {}

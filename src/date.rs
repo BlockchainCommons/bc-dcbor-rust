@@ -18,6 +18,16 @@ impl Date {
         Date(date_time)
     }
 
+    pub fn from_ymd(year: i32, month: u32, day: u32) -> Self {
+        let dt = Utc.with_ymd_and_hms(year, month, day, 0, 0, 0).unwrap();
+        Self::from_datetime(dt)
+    }
+
+    pub fn from_ymd_hms(year: i32, month: u32, day: u32, hour: u32, minute: u32, second: u32) -> Self {
+        let dt = Utc.with_ymd_and_hms(year, month, day, hour, minute, second).unwrap();
+        Self::from_datetime(dt)
+    }
+
     /// Creates a new `Date` from seconds since (or before) the Unix epoch.
     pub fn from_timestamp(seconds_since_unix_epoch: f64) -> Self {
         let whole_seconds_since_unix_epoch = seconds_since_unix_epoch.trunc() as i64;

@@ -10,8 +10,13 @@ pub use crate::{
     CBORTaggedCodable,
     CBORTaggedDecodable,
     CBORTaggedEncodable,
+    CBORSummarizer,
     Map,
     Tag,
+    TagValue,
     TagsStore,
     TagsStoreTrait,
+    with_tags,
+    with_tags_mut,
+    tags_for_values,
 };

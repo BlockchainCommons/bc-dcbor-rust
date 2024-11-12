@@ -6,31 +6,33 @@ enum TagName {
     Dynamic(String),
 }
 
+pub type TagValue = u64;
+
 /// A CBOR tag.
 #[derive(Debug, Clone)]
 pub struct Tag {
-    value: u64,
+    value: TagValue,
     name: Option<TagName>,
 }
 
 impl Tag {
     /// Creates a new CBOR tag with the given value and no name.
-    pub const fn new(value: u64) -> Tag {
+    pub const fn new(value: TagValue) -> Tag {
         Self { value, name: None }
     }
 
     /// Creates a new CBOR tag with the given value and associated name.
-    pub fn new_with_name<N: Into<String>>(value: u64, name: N) -> Tag {
+    pub fn new_with_name<N: Into<String>>(value: TagValue, name: N) -> Tag {
         Self { value, name: Some(TagName::Dynamic(name.into())) }
     }
 
     /// Creates a new CBOR tag at compile time with the given value and associated name.
-    pub const fn new_with_static_name(value: u64, name: &'static str) -> Tag {
+    pub const fn new_with_static_name(value: TagValue, name: &'static str) -> Tag {
         Self { value, name: Some(TagName::Static(name)) }
     }
 
     /// Returns the wrapped tag value.
-    pub fn value(&self) -> u64 {
+    pub fn value(&self) -> TagValue {
         self.value
     }
 
@@ -68,20 +70,20 @@ impl fmt::Display for Tag {
     }
 }
 
-impl From<u64> for Tag {
-    fn from(value: u64) -> Self {
+impl From<TagValue> for Tag {
+    fn from(value: TagValue) -> Self {
         Tag::new(value)
     }
 }
 
 impl From<i32> for Tag {
     fn from(value: i32) -> Self {
-        Tag::new(value as u64)
+        Tag::new(value as TagValue)
     }
 }
 
 impl From<usize> for Tag {
     fn from(value: usize) -> Self {
-        Tag::new(value as u64)
+        Tag::new(value as TagValue)
     }
 }

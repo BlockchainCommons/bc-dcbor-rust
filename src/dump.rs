@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, tags_store::TagsStoreTrait, CBORCase};
+use crate::{tags_store::TagsStoreTrait, with_tags, CBORCase, CBOR};
 
 use super::{string_util::{sanitized, flanked}, varint::{EncodeVarInt, MajorType}};
 
@@ -24,8 +24,17 @@ impl CBOR {
         let note_column = items.iter().fold(0, |largest, item| {
             largest.max(item.format_first_column().len())
         });
+        // Round up to nearest multiple of 4
+        let note_column = ((note_column + 4) & !3) - 1;
         let lines: Vec<_> = items.iter().map(|x| x.format(note_column)).collect();
         lines.join("\n")
+    }
+
+    /// Returns the encoded hexadecimal representation of this CBOR, with annotations.
+    pub fn hex_annotated(&self) -> String {
+        with_tags!(|tags: &dyn TagsStoreTrait| {
+            self.hex_opt(true, Some(tags))
+        })
     }
 
     fn dump_items(&self, level: usize, tags: Option<&dyn TagsStoreTrait>) -> Vec<DumpItem> {
@@ -125,7 +134,7 @@ impl DumpItem {
         let column_1 = self.format_first_column();
         let (column_2, padding) = {
             if let Some(note) = &self.note {
-                let padding_count = 1.max(40.min(note_column as i64) - (column_1.len() as i64) + 1);
+                let padding_count = 1.max(39.min(note_column as i64) - (column_1.len() as i64) + 1);
                 let padding = " ".repeat(padding_count.try_into().unwrap());
                 let column_2 = format!("# {}", note);
                 (column_2, padding)
@@ -137,7 +146,7 @@ impl DumpItem {
     }
 
     fn format_first_column(&self) -> String {
-        let indent = " ".repeat(self.level * 3);
+        let indent = " ".repeat(self.level * 4);
         let hex: Vec<_> = self.data.iter()
             .map(hex::encode)
             .filter(|x| !x.is_empty())

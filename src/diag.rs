@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBOR, tags_store::TagsStoreTrait, Date, CBORCase};
+use crate::{tags_store::TagsStoreTrait, with_tags, CBORCase, CBOR};
 
 use super::string_util::flanked;
 
@@ -10,16 +10,29 @@ impl CBOR {
     ///
     /// Optionally annotates the output, e.g. formatting dates and adding names
     /// of known tags.
-    pub fn diagnostic_opt(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> String {
-        self.diag_item(annotate, tags).format(annotate)
+    pub fn diagnostic_opt(&self, annotate: bool, summarize: bool, tags: Option<&dyn TagsStoreTrait>) -> String {
+        self.diag_item(annotate, summarize, tags).format(annotate)
     }
 
     /// Returns a representation of this CBOR in diagnostic notation.
     pub fn diagnostic(&self) -> String {
-        self.diagnostic_opt(false, None)
+        self.diagnostic_opt(false, false, None)
     }
 
-    fn diag_item(&self, annotate: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
+    /// Returns a representation of this CBOR in diagnostic notation, with annotations.
+    pub fn diagnostic_annotated(&self) -> String {
+        with_tags!(|tags: &dyn TagsStoreTrait| {
+            self.diagnostic_opt(true, false, Some(tags))
+        })
+    }
+
+    pub fn summary(&self) -> String {
+        with_tags!(|tags: &dyn TagsStoreTrait| {
+            self.diagnostic_opt(false, true, Some(tags))
+        })
+    }
+
+    fn diag_item(&self, annotate: bool, summarize: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
         match self.as_case() {
             CBORCase::Unsigned(_) | CBORCase::Negative(_) | CBORCase::ByteString(_) |
             CBORCase::Text(_) | CBORCase::Simple(_) => DiagItem::Item(format!("{}", self)),
@@ -27,7 +40,7 @@ impl CBOR {
             CBORCase::Array(a) => {
                 let begin = "[".to_string();
                 let end = "]".to_string();
-                let items = a.iter().map(|x| x.diag_item(annotate, tags)).collect();
+                let items = a.iter().map(|x| x.diag_item(annotate, summarize, tags)).collect();
                 let is_pairs = false;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
@@ -36,33 +49,34 @@ impl CBOR {
                 let begin = "{".to_string();
                 let end = "}".to_string();
                 let items = m.iter().flat_map(|(key, value)| vec![
-                    key.diag_item(annotate, tags),
-                    value.diag_item(annotate, tags)
+                    key.diag_item(annotate, summarize, tags),
+                    value.diag_item(annotate, summarize, tags)
                 ]).collect();
                 let is_pairs = true;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
             },
             CBORCase::Tagged(tag, item) => {
-                let diag_item: DiagItem;
-                if annotate && tag.value() == 1 {
-                    match <f64 as TryFrom<CBOR>>::try_from(item.clone()) {
-                        Ok(n) => {
-                            let date = Date::from_timestamp(n).to_string();
-                            diag_item = DiagItem::Item(date);
-                        },
-                        Err(_) => {
-                            diag_item = item.diag_item(annotate, tags);
-                        },
+                if summarize {
+                    if let Some(tags) = tags {
+                        if let Some(summarizer) = tags.summarizer(tag.value()) {
+                            match summarizer(item.clone()) {
+                                Ok(summary) => return DiagItem::Item(summary),
+                                Err(error) => return DiagItem::Item(format!("<error: {}>", error)),
+                            }
+                        }
                     }
-                } else {
-                    diag_item = item.diag_item(annotate, tags);
                 }
+                let diag_item = item.diag_item(annotate, summarize, tags);
                 let begin = tag.value().to_string() + "(";
                 let end = ")".to_string();
                 let items = vec![diag_item];
                 let is_pairs = false;
-                let comment = tags.as_ref().and_then(|x| x.assigned_name_for_tag(tag));
+                let comment = if annotate {
+                    tags.as_ref().and_then(|x| x.assigned_name_for_tag(tag))
+                } else {
+                    None
+                };
                 DiagItem::Group(begin, end, items, is_pairs, comment)
             },
         }
@@ -96,7 +110,7 @@ impl DiagItem {
     }
 
     fn format_line(&self, level: usize, string: &str, separator: &str, comment: Option<&str>) -> String {
-        let result = format!("{}{}{}", " ".repeat(level * 3), string, separator);
+        let result = format!("{}{}{}", " ".repeat(level * 4), string, separator);
         if let Some(comment) = comment {
             format!("{}   / {} /", result, comment)
         } else {

@@ -113,10 +113,13 @@ mod diag;
 mod dump;
 
 mod tags_store;
-pub use tags_store::{TagsStoreTrait, TagsStore};
+pub use tags_store::{TagsStoreTrait, TagsStore, CBORSummarizer};
 
 mod tag;
-pub use tag::Tag;
+pub use tag::{Tag, TagValue};
+
+mod tags;
+pub use tags::*;
 
 mod cbor_codable;
 pub use cbor_codable::{CBOREncodable, CBORDecodable, CBORCodable};
