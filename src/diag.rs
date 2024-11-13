@@ -39,7 +39,7 @@ impl CBOR {
     }
 
     pub fn summary_opt(&self, tags: &dyn TagsStoreTrait) -> String {
-        self.diagnostic_opt(false, true, false, Some(tags))
+        self.diagnostic_opt(false, true, true, Some(tags))
     }
 
     fn diag_item(&self, annotate: bool, summarize: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
