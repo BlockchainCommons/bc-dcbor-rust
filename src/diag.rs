@@ -10,30 +10,36 @@ impl CBOR {
     ///
     /// Optionally annotates the output, e.g. formatting dates and adding names
     /// of known tags.
-    pub fn diagnostic_opt(&self, annotate: bool, summarize: bool, tags: Option<&dyn TagsStoreTrait>) -> String {
-        self.diag_item(annotate, summarize, tags).format(annotate)
+    pub fn diagnostic_opt(&self, annotate: bool, summarize: bool, flat: bool, tags: Option<&dyn TagsStoreTrait>) -> String {
+        self.diag_item(annotate, summarize, tags).format(annotate, flat)
     }
 
     /// Returns a representation of this CBOR in diagnostic notation.
     pub fn diagnostic(&self) -> String {
-        self.diagnostic_opt(false, false, None)
+        self.diagnostic_opt(false, false, false, None)
     }
 
     /// Returns a representation of this CBOR in diagnostic notation, with annotations.
     pub fn diagnostic_annotated(&self) -> String {
         with_tags!(|tags: &dyn TagsStoreTrait| {
-            self.diagnostic_opt(true, false, Some(tags))
+            self.diagnostic_opt(true, false, false, Some(tags))
+        })
+    }
+
+    pub fn diagnostic_flat(&self) -> String {
+        with_tags!(|tags: &dyn TagsStoreTrait| {
+            self.diagnostic_opt(false, false, true, Some(tags))
         })
     }
 
     pub fn summary(&self) -> String {
         with_tags!(|tags: &dyn TagsStoreTrait| {
-            self.diagnostic_opt(false, true, Some(tags))
+            self.diagnostic_opt(false, true, true, Some(tags))
         })
     }
 
     pub fn summary_opt(&self, tags: &dyn TagsStoreTrait) -> String {
-        self.diagnostic_opt(false, true, Some(tags))
+        self.diagnostic_opt(false, true, false, Some(tags))
     }
 
     fn diag_item(&self, annotate: bool, summarize: bool, tags: Option<&dyn TagsStoreTrait>) -> DiagItem {
@@ -94,27 +100,28 @@ enum DiagItem {
 }
 
 impl DiagItem {
-    fn format(&self, annotate: bool) -> String {
-        self.format_opt(0, "", annotate)
+    fn format(&self, annotate: bool, flat: bool) -> String {
+        self.format_opt(0, "", annotate, flat)
     }
 
-    fn format_opt(&self, level: usize, separator: &str, annotate: bool) -> String {
+    fn format_opt(&self, level: usize, separator: &str, annotate: bool, flat: bool) -> String {
         match self {
             DiagItem::Item(string) => {
-                self.format_line(level, string, separator, None)
+                self.format_line(level, flat, string, separator, None)
             },
             DiagItem::Group(_, _, _, _, _) => {
-                if self.contains_group() || self.total_strings_len() > 20 || self.greatest_strings_len() > 20 {
+                if !flat && (self.contains_group() || self.total_strings_len() > 20 || self.greatest_strings_len() > 20) {
                     self.multiline_composition(level, separator, annotate)
                 } else {
-                    self.single_line_composition(level, separator, annotate)
+                    self.single_line_composition(level, separator, flat)
                 }
             },
         }
     }
 
-    fn format_line(&self, level: usize, string: &str, separator: &str, comment: Option<&str>) -> String {
-        let result = format!("{}{}{}", " ".repeat(level * 4), string, separator);
+    fn format_line(&self, level: usize, flat: bool, string: &str, separator: &str, comment: Option<&str>) -> String {
+        let indent = if flat { "".to_string() } else { " ".repeat(level * 4) };
+        let result = format!("{}{}{}", indent, string, separator);
         if let Some(comment) = comment {
             format!("{}   / {} /", result, comment)
         } else {
@@ -122,7 +129,7 @@ impl DiagItem {
         }
     }
 
-    fn single_line_composition(&self, level: usize, separator: &str, _annotate: bool) -> String {
+    fn single_line_composition(&self, level: usize, separator: &str, flat: bool) -> String {
         let string: String;
         let comment: Option<&str>;
         match self {
@@ -133,16 +140,18 @@ impl DiagItem {
             DiagItem::Group(begin, end, items, is_pairs, comm) => {
                 let components: Vec<String> = items.iter().map(|item| {
                     match item {
-                        DiagItem::Item(string) => string,
-                        DiagItem::Group(_, _, _, _, _) => "<group>",
-                    }.to_string()
+                        DiagItem::Item(string) => string.clone(),
+                        DiagItem::Group(_, _, _, _, _) => {
+                            item.single_line_composition(level + 1, separator, flat)
+                        }
+                    }
                 }).collect();
                 let pair_separator = if *is_pairs { ": " } else { ", " };
                 string = flanked(&Self::joined(&components, ", ", Some(pair_separator)), begin, end);
                 comment = comm.as_ref().map(|x| x.as_str());
             },
         };
-        self.format_line(level, &string, separator, comment)
+        self.format_line(level, flat, &string, separator, comment)
     }
 
     fn multiline_composition(&self, level: usize, separator: &str, annotate: bool) -> String {
@@ -150,7 +159,7 @@ impl DiagItem {
             DiagItem::Item(string) => string.to_owned(),
             DiagItem::Group(begin, end, items, is_pairs, comment) => {
                 let mut lines: Vec<String> = vec![];
-                lines.push(self.format_line(level, begin, "", comment.as_ref().map(|x| x.as_str())));
+                lines.push(self.format_line(level, false, begin, "", comment.as_ref().map(|x| x.as_str())));
                 for (index, item) in items.iter().enumerate() {
                     let separator = if index == items.len() - 1 {
                         ""
@@ -159,9 +168,9 @@ impl DiagItem {
                     } else {
                         ","
                     };
-                    lines.push(item.format_opt(level + 1, separator, annotate));
+                    lines.push(item.format_opt(level + 1, separator, annotate, false));
                 }
-                lines.push(self.format_line(level, end, separator, None));
+                lines.push(self.format_line(level, false, end, separator, None));
                 lines.join("\n")
             },
         }

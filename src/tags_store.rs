@@ -10,6 +10,7 @@ pub trait TagsStoreTrait {
     fn name_for_tag(&self, tag: &Tag) -> String;
     fn tag_for_value(&self, value: u64) -> Option<Tag>;
     fn tag_for_name(&self, name: &str) -> Option<Tag>;
+    fn name_for_value(&self, value: u64) -> String;
     fn summarizer(&self, tag: TagValue) -> Option<&CBORSummarizer>;
 
     fn name_for_tag_opt<T>(tag: &Tag, tags: Option<&T>) -> String where T: TagsStoreTrait, Self: Sized {
@@ -73,6 +74,12 @@ impl TagsStoreTrait for TagsStore {
 
     fn tag_for_value(&self, value: u64) -> Option<Tag> {
         self.tags_by_value.get(&value).cloned()
+    }
+
+    fn name_for_value(&self, value: u64) -> String {
+        self.tag_for_value(value)
+            .and_then(|tag| tag.name())
+            .unwrap_or_else(|| value.to_string())
     }
 
     fn summarizer(&self, tag: TagValue) -> Option<&CBORSummarizer> {

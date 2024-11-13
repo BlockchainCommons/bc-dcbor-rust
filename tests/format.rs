@@ -7,6 +7,7 @@ fn run(cbor: CBOR,
     expected_debug_description: &str,
     expected_diagnostic: &str,
     expected_diagnostic_annotated: &str,
+    expected_diagnostic_flat: &str,
     expected_summary: &str,
     expected_hex: &str,
     expected_hex_annotated: &str)
@@ -45,6 +46,13 @@ fn run(cbor: CBOR,
         assert_eq!(diagnostic_annotated, expected_diagnostic_annotated, "diagnostic_annotated");
     }
 
+    if expected_diagnostic_flat.is_empty() {
+        println!("diagnostic_flat:");
+        println!("{}", cbor.diagnostic_flat());
+    } else {
+        assert_eq!(cbor.diagnostic_flat(), expected_diagnostic_flat, "diagnostic_flat");
+    }
+
     let summary = cbor.summary();
     if expected_summary.is_empty() {
         println!("summary:");
@@ -78,6 +86,7 @@ fn format_simple_1() {
         "false",
         "false",
         "false",
+        "false",
         "f4",
         "f4  # false"
     );
@@ -88,6 +97,7 @@ fn format_simple_2() {
     run(CBOR::r#true(),
         "true",
         "simple(true)",
+        "true",
         "true",
         "true",
         "true",
@@ -104,6 +114,7 @@ fn format_simple_3() {
         "null",
         "null",
         "null",
+        "null",
         "f6",
         "f6  # null"
     );
@@ -117,6 +128,7 @@ fn format_unsigned() {
         "0",
         "0",
         "0",
+        "0",
         "00",
         "00  # unsigned(0)"
     );
@@ -124,6 +136,7 @@ fn format_unsigned() {
     run(23.into(),
         "23",
         "unsigned(23)",
+        "23",
         "23",
         "23",
         "23",
@@ -137,6 +150,7 @@ fn format_unsigned() {
         "65546",
         "65546",
         "65546",
+        "65546",
         "1a0001000a",
         "1a0001000a  # unsigned(65546)"
     );
@@ -144,6 +158,7 @@ fn format_unsigned() {
     run(1000000000.into(),
         "1000000000",
         "unsigned(1000000000)",
+        "1000000000",
         "1000000000",
         "1000000000",
         "1000000000",
@@ -160,6 +175,7 @@ fn format_negative() {
         "-1",
         "-1",
         "-1",
+        "-1",
         "20",
         "20  # negative(-1)"
     );
@@ -170,6 +186,7 @@ fn format_negative() {
         "-1000",
         "-1000",
         "-1000",
+        "-1000",
         "3903e7",
         "3903e7  # negative(-1000)"
     );
@@ -177,6 +194,7 @@ fn format_negative() {
     run((-1000000).into(),
         "-1000000",
         "negative(-1000000)",
+        "-1000000",
         "-1000000",
         "-1000000",
         "-1000000",
@@ -193,6 +211,7 @@ fn format_string() {
         r#""Test""#,
         r#""Test""#,
         r#""Test""#,
+        r#""Test""#,
         "6454657374",
         indoc! {r#"
         64              # text(4)
@@ -206,6 +225,7 @@ fn format_simple_array() {
     run([1, 2, 3].into(),
         "[1, 2, 3]",
         "array([unsigned(1), unsigned(2), unsigned(3)])",
+        "[1, 2, 3]",
         "[1, 2, 3]",
         "[1, 2, 3]",
         "[1, 2, 3]",
@@ -239,12 +259,8 @@ fn format_nested_array() {
             ["A", "B", "C"]
         ]
         "#}.trim(),
-        indoc! {r#"
-        [
-            [1, 2, 3],
-            ["A", "B", "C"]
-        ]
-        "#}.trim(),
+        r#"[[1, 2, 3], ["A", "B", "C"]]"#,
+        r#"[[1, 2, 3], ["A", "B", "C"]]"#,
         "828301020383614161426143",
         indoc! {r#"
         82              # array(2)
@@ -274,6 +290,7 @@ fn format_map() {
         r#"{1: "A", 2: "B"}"#,
         r#"{1: "A", 2: "B"}"#,
         r#"{1: "A", 2: "B"}"#,
+        r#"{1: "A", 2: "B"}"#,
         "a2016141026142",
         indoc! {r#"
         a2          # map(2)
@@ -296,6 +313,7 @@ fn format_tagged() {
         r#"100("Hello")"#,
         r#"100("Hello")"#,
         r#"100("Hello")"#,
+        r#"100("Hello")"#,
         "d8646548656c6c6f",
         indoc! {r#"
         d8 64               # tag(100)
@@ -312,6 +330,7 @@ fn format_date() {
         "tagged(1, negative(-100))",
         "1(-100)",
         "1(-100)   / date /",
+        "1(-100)",
         "1969-12-31T23:58:20Z",
         "c13863",
         indoc! {"
@@ -325,6 +344,7 @@ fn format_date() {
         "tagged(1, unsigned(1647887071))",
         "1(1647887071)",
         "1(1647887071)   / date /",
+        "1(1647887071)",
         "2022-03-21T18:24:31Z",
         "c11a6238c2df",
         indoc! {"
@@ -341,6 +361,7 @@ fn format_fractional_date() {
         "tagged(1, simple(0.5))",
         "1(0.5)",
         "1(0.5)   / date /",
+        "1(0.5)",
         "1970-01-01",
         "c1f93800",
         indoc! {"
@@ -378,6 +399,7 @@ fn format_structure() {
         ]
     )
     "}.trim();
+    let diagnostic_flat = "49([1, h'536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e', [707([1, h'2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a']), 707([1, h'0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900'])]])";
     let hex = "d83183015829536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e82d902c3820158402b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710ad902c3820158400f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900";
     let hex_annotated = indoc! {r#"
     d8 31                                   # tag(49)
@@ -402,7 +424,8 @@ fn format_structure() {
         debug_description,
         diagnostic,
         diagnostic,
-        diagnostic,
+        diagnostic_flat,
+        diagnostic_flat,
         hex,
         hex_annotated
     );
@@ -442,20 +465,8 @@ fn format_structure_2() {
         }
     )
     "#}.trim();
-    let summary = indoc! {r#"
-    300(
-        {
-            1:
-            h'59f2293a5bce7d4de59e71b4207ac5d2',
-            2:
-            2021-02-24,
-            3:
-            "Dark Purple Aqua Love",
-            4:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        }
-    )
-    "#}.trim();
+    let diagnostic_flat = r#"300({1: h'59f2293a5bce7d4de59e71b4207ac5d2', 2: 1(1614124800), 3: "Dark Purple Aqua Love", 4: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."})"#;
+    let summary = r#"300({1: h'59f2293a5bce7d4de59e71b4207ac5d2', 2: 2021-02-24, 3: "Dark Purple Aqua Love", 4: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."})"#;
     let hex = "d9012ca4015059f2293a5bce7d4de59e71b4207ac5d202c11a6035970003754461726b20507572706c652041717561204c6f766504787b4c6f72656d20697073756d20646f6c6f722073697420616d65742c20636f6e73656374657475722061646970697363696e6720656c69742c2073656420646f20656975736d6f642074656d706f7220696e6369646964756e74207574206c61626f726520657420646f6c6f7265206d61676e6120616c697175612e";
     let hex_annotated = indoc! {r#"
     d9 012c                                 # tag(300)
@@ -478,6 +489,7 @@ fn format_structure_2() {
         debug_description,
         diagnostic,
         diagnostic_annotated,
+        diagnostic_flat,
         summary,
         hex,
         hex_annotated
@@ -519,6 +531,7 @@ fn format_key_order() {
         8
     }
     "#}.trim();
+    let diagnostic_flat = r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#;
     let hex = "a80a011864022003617a046261610581186406812007f408";
     let hex_annotated = indoc! {r#"
     a8              # map(8)
@@ -548,7 +561,8 @@ fn format_key_order() {
         debug_description,
         diagnostic,
         diagnostic,
-        diagnostic,
+        diagnostic_flat,
+        diagnostic_flat,
         hex,
         hex_annotated
     );
