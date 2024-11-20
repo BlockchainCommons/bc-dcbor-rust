@@ -13,7 +13,7 @@ documentation = "https://docs.rs/dcbor"
 
 [dependencies]
 chrono = { version = "^0.4.28", default-features = true  }
-half = { version = "=2.2.1", default-features = false }
+half = { version = "^2.4", default-features = false }
 hex = { version = "^0.4.3", default-features = true }
 anyhow = { version = "^1.0.0", default-features = false }
 hashbrown = { version = "^0.14.3", optional = true }
