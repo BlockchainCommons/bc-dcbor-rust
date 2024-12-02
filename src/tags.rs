@@ -1,4 +1,4 @@
-use std::sync::{ Arc, Mutex, Once };
+import_stdlib!();
 
 use crate::{CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait};
 
@@ -7,13 +7,26 @@ pub struct LazyTagsStore {
     data: Mutex<Option<TagsStore>>,
 }
 
+#[cfg(feature = "std")]
 impl LazyTagsStore {
-    pub fn get(&self) -> std::sync::MutexGuard<'_, Option<TagsStore>> {
+    pub fn get(&self) -> MutexGuard<'_, Option<TagsStore>> {
         self.init.call_once(|| {
             let m = TagsStore::new([]);
             *self.data.lock().unwrap() = Some(m);
         });
         self.data.lock().unwrap()
+    }
+}
+
+#[cfg(not(feature = "std"))]
+#[cfg(feature = "no_std")]
+impl LazyTagsStore {
+    pub fn get(&self) -> MutexGuard<'_, Option<TagsStore>> {
+        self.init.call_once(|| {
+            let m = TagsStore::new([]);
+            *self.data.lock() = Some(m);
+        });
+        self.data.lock()
     }
 }
 
