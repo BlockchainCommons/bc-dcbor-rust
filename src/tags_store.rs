@@ -54,7 +54,14 @@ impl TagsStore {
     fn _insert(tag: Tag, tags_by_value: &mut HashMap<u64, Tag>, tags_by_name: &mut HashMap<String, Tag>) {
         let name = tag.name().unwrap();
         assert!(!name.is_empty());
-        tags_by_value.insert(tag.value(), tag.clone());
+        let result = tags_by_value.insert(tag.value(), tag.clone());
+        if let Some(old_value) = result {
+            // if the names don't match, we have a problem
+            let old_name = old_value.name().unwrap();
+            if old_name != name {
+                panic!("Attempt to register tag: {} '{}' with different name: '{}'", tag.value(), old_name, name);
+            }
+        }
         tags_by_name.insert(name, tag);
     }
 }
