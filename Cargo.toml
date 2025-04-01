@@ -1,6 +1,6 @@
 [package]
 name = "dcbor"
-version = "0.16.2"
+version = "0.16.3"
 edition = "2021"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
 authors = ["Blockchain Commons"]
@@ -8,12 +8,22 @@ repository = "https://github.com/BlockchainCommons/bc-dcbor-rust"
 readme = "README.md"
 license = "BSD-2-Clause-Patent"
 documentation = "https://docs.rs/dcbor"
-keywords = ["encoding", "cbor", "binary", "format", "serialization"] # Up to five
-categories = ["data-structures", "encoding", "no-std"] # https://crates.io/category_slugs
+keywords = [
+    "encoding",
+    "cbor",
+    "binary",
+    "format",
+    "serialization",
+] # Up to five
+categories = [
+    "data-structures",
+    "encoding",
+    "no-std",
+] # https://crates.io/category_slugs
 
 [dependencies]
 anyhow = { version = "^1.0.0", default-features = false }
-chrono = { version = "^0.4.28", default-features = true  }
+chrono = { version = "^0.4.28", default-features = true }
 half = { version = "^2.4.1", default-features = false }
 hashbrown = { version = "^0.14.3", optional = true }
 hex = { version = "^0.4.3", default-features = true }
