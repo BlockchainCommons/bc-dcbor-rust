@@ -1,5 +1,8 @@
 import_stdlib!();
 
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+
 use anyhow::{bail, Result};
 use unicode_normalization::UnicodeNormalization;
 
@@ -7,13 +10,71 @@ use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarI
 
 use super::string_util::flanked;
 
-#[cfg(feature = "multithreaded")]
-use sync::Arc as RefCounted;
+#[cfg(all(feature = "multithreaded", feature = "std"))]
+use std::sync::Arc as RefCounted;
 
-#[cfg(not(feature = "multithreaded"))]
-use rc::Rc as RefCounted;
+#[cfg(all(feature = "multithreaded", not(feature = "std")))]
+use alloc::sync::Arc as RefCounted;
+
+#[cfg(all(not(feature = "multithreaded"), feature = "std"))]
+use std::rc::Rc as RefCounted;
+
+#[cfg(all(not(feature = "multithreaded"), not(feature = "std")))]
+use alloc::rc::Rc as RefCounted;
 
 /// A symbolic representation of CBOR data.
+///
+/// The `CBOR` type is the central type in the dCBOR library, representing any CBOR data item using
+/// a reference-counted wrapper around a [`CBORCase`] enum. This design allows efficient sharing
+/// of CBOR data structures in memory without excessive copying.
+///
+/// # Features
+///
+/// - **Deterministic encoding**: Guarantees that semantically equivalent data structures
+///   will always be encoded to identical byte sequences
+/// - **Reference counting**: Enables efficient sharing of CBOR structures
+/// - **Type safety**: Uses Rust's type system to safely handle different CBOR data types
+/// - **Conversion traits**: Implements Rust's standard conversion traits for ergonomic use
+///
+/// # Thread Safety
+///
+/// With the `multithreaded` feature enabled, `CBOR` uses `Arc` for reference counting, making
+/// it thread-safe. Without this feature, it uses `Rc`, which is more efficient but not thread-safe.
+///
+/// # Example
+///
+/// ```
+/// use dcbor::prelude::*;
+///
+/// // 1. Create and round-trip a homogeneous array
+/// let array = CBOR::from(vec![1, 2, 3]);
+///
+/// // Encode to bytes
+/// let encoded = array.to_cbor_data();
+/// assert_eq!(hex::encode(&encoded), "83010203");
+///
+/// // Decode from bytes
+/// let decoded = CBOR::try_from_data(&encoded).unwrap();
+/// assert_eq!(decoded, array);
+///
+/// // 2. Create and round-trip a heterogeneous array
+/// let mixed_array: Vec<CBOR> = vec![
+///     1.into(),
+///     "Hello".into(),
+///     vec![1, 2, 3].into(),
+/// ];
+/// let mixed = CBOR::from(mixed_array);
+///
+/// // Encode the heterogeneous array to bytes
+/// let mixed_encoded = mixed.to_cbor_data();
+/// assert_eq!(hex::encode(&mixed_encoded), "83016548656c6c6f83010203");
+///
+/// // Decode from bytes
+/// let mixed_decoded = CBOR::try_from_data(&mixed_encoded).unwrap();
+/// assert_eq!(mixed_decoded, mixed);
+/// // Use diagnostic_flat() for a compact single-line representation
+/// assert_eq!(mixed_decoded.diagnostic_flat(), r#"[1, "Hello", [1, 2, 3]]"#);
+/// ```
 #[derive(Clone)]
 pub struct CBOR(RefCounted<CBORCase>);
 
@@ -37,43 +98,207 @@ impl From<CBORCase> for CBOR {
 }
 
 #[derive(Debug, Clone)]
+/// An enum representing all possible CBOR data types.
+///
+/// `CBORCase` is the core enum that represents all possible CBOR data types according to
+/// [RFC 8949](https://www.rfc-editor.org/rfc/rfc8949.html) and the dCBOR specification.
+/// Each variant corresponds to one of the eight major types in CBOR.
+///
+/// This enum is not typically used directly by users of the library. Instead, it's wrapped
+/// by the reference-counted [`CBOR`] type, which provides a more ergonomic API.
+///
+/// # Major Types
+///
+/// CBOR defines eight major types, numbered 0 through 7:
+///
+/// | Major Type | Name | Description |
+/// |------------|------|-------------|
+/// | 0 | Unsigned integer | A non-negative integer |
+/// | 1 | Negative integer | A negative integer |
+/// | 2 | Byte string | A sequence of bytes |
+/// | 3 | Text string | A UTF-8 string |
+/// | 4 | Array | A sequence of data items |
+/// | 5 | Map | A collection of key-value pairs |
+/// | 6 | Tagged value | A data item with a semantic tag |
+/// | 7 | Simple value | A simple value like true, false, null, or float |
+///
+/// # dCBOR Constraints
+///
+/// According to the dCBOR specification, deterministic encoding adds several constraints:
+///
+/// - Maps must have lexicographically ordered keys
+/// - Numeric values must use the smallest possible encoding
+/// - Floats with integer values are reduced to integers
+/// - All NaN values are canonicalized to a single representation
+/// - Strings must be in Unicode Normalization Form C (NFC)
+///
+/// # Example
+///
+/// ```
+/// use dcbor::prelude::*;
+/// use dcbor::{CBORCase, Simple};
+///
+/// // Create a CBOR value using the CBORCase enum
+/// let case = CBORCase::Array(vec![
+///     CBORCase::Unsigned(1).into(),
+///     CBORCase::Text("hello".to_string()).into(),
+///     CBORCase::Simple(Simple::True).into()
+/// ]);
+///
+/// // Wrap in the CBOR type for easier handling
+/// let cbor = CBOR::from(case);
+/// assert_eq!(cbor.diagnostic(), "[1, \"hello\", true]");
+/// ```
 pub enum CBORCase {
     /// Unsigned integer (major type 0).
+    ///
+    /// Represents a non-negative integer from 0 to 2^64-1.
     Unsigned(u64),
+
     /// Negative integer (major type 1).
     ///
-    /// Actual value is -1 - n
+    /// Actual value is -1 - n, allowing representation of negative integers
+    /// from -1 to -2^64.
     Negative(u64),
+
     /// Byte string (major type 2).
+    ///
+    /// Represents a sequence of bytes. In dCBOR, byte strings must use
+    /// the most compact representation possible.
     ByteString(ByteString),
+
     /// UTF-8 string (major type 3).
+    ///
+    /// Represents a UTF-8 encoded string. In dCBOR, text strings must
+    /// be in Unicode Normalization Form C (NFC).
     Text(String),
+
     /// Array (major type 4).
+    ///
+    /// Represents a sequence of CBOR data items. dCBOR does not support
+    /// indefinite-length arrays.
     Array(Vec<CBOR>),
+
     /// Map (major type 5).
+    ///
+    /// Represents a collection of key-value pairs. In dCBOR, map keys
+    /// must be in lexicographic order, and duplicate keys are not allowed.
     Map(Map),
+
     /// Tagged value (major type 6).
+    ///
+    /// Represents a data item with a semantic tag. The tag provides
+    /// additional information about how to interpret the data.
     Tagged(Tag, CBOR),
+
     /// Simple value (major type 7).
+    ///
+    /// Represents simple values like true, false, null, and floating-point
+    /// numbers. In dCBOR, only a limited set of simple values are allowed.
     Simple(Simple)
 }
 
-/// Affordances for decoding CBOR from binary representation.
+/// Methods for decoding CBOR from binary representation and encoding to binary.
 impl CBOR {
-    /// Decodes the given date into CBOR symbolic representation.
+    /// Decodes binary data into CBOR symbolic representation.
+    ///
+    /// This method parses the provided binary data according to the CBOR and dCBOR
+    /// specifications, validating that it follows all deterministic encoding rules.
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The binary data to decode, which can be any type that can be referenced
+    ///   as a byte slice (e.g., `Vec<u8>`, `&[u8]`, etc.)
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(CBOR)` - A CBOR value if decoding was successful
+    /// * `Err` - If the data is not valid CBOR or violates dCBOR encoding rules
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// // Decode a CBOR array [1, 2, 3]
+    /// let data = hex_literal::hex!("83010203");
+    /// let cbor = CBOR::try_from_data(&data).unwrap();
+    ///
+    /// // Get the array contents
+    /// let array: Vec<u64> = cbor.try_into().unwrap();
+    /// assert_eq!(array, vec![1, 2, 3]);
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// This method will return an error if:
+    /// - The data is not valid CBOR
+    /// - The data violates dCBOR encoding rules (e.g., non-canonical integer encoding)
+    /// - The data has content after the end of the CBOR item
     pub fn try_from_data(data: impl AsRef<[u8]>) -> Result<CBOR> {
         decode_cbor(data)
     }
 
-    /// Decodes the given data into CBOR symbolic representation given as a hexadecimal string.
+    /// Decodes a hexadecimal string into CBOR symbolic representation.
     ///
-    /// Panics if the string is not well-formed hexadecimal with no spaces or
-    /// other characters.
+    /// This is a convenience method that converts a hexadecimal string to binary data
+    /// and then calls [`try_from_data`](Self::try_from_data).
+    ///
+    /// # Arguments
+    ///
+    /// * `hex` - A string containing hexadecimal characters (no spaces or other characters)
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(CBOR)` - A CBOR value if decoding was successful
+    /// * `Err` - If the hex string is invalid or the resulting data is not valid dCBOR
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// // Decode a CBOR array [1, 2, 3] from hex
+    /// let cbor = CBOR::try_from_hex("83010203").unwrap();
+    /// assert_eq!(cbor.diagnostic(), "[1, 2, 3]");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the hex string is not well-formed hexadecimal
+    /// (contains non-hex characters or an odd number of digits).
     pub fn try_from_hex(hex: &str) -> Result<CBOR> {
         let data = hex::decode(hex).unwrap();
         Self::try_from_data(data)
     }
 
+    /// Encodes this CBOR value to binary data following dCBOR encoding rules.
+    ///
+    /// This method converts the CBOR value to a byte vector according to the dCBOR
+    /// specification, ensuring deterministic encoding.
+    ///
+    /// # Returns
+    ///
+    /// A `Vec<u8>` containing the encoded CBOR data.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// // Create a CBOR map
+    /// let mut map = Map::new();
+    /// map.insert(CBOR::from("key"), CBOR::from(123));
+    /// let cbor = CBOR::from(map);
+    ///
+    /// // Encode to binary
+    /// let encoded = cbor.to_cbor_data();
+    /// assert_eq!(hex::encode(&encoded), "a1636b6579187b");
+    ///
+    /// // Round-trip through encoding and decoding
+    /// let decoded = CBOR::try_from_data(&encoded).unwrap();
+    /// assert_eq!(decoded, cbor);
+    /// ```
     pub fn to_cbor_data(&self) -> Vec<u8> {
         match self.as_case() {
             CBORCase::Unsigned(x) => x.encode_varint(MajorType::Unsigned),
@@ -107,20 +332,108 @@ impl CBOR {
     }
 }
 
+/// Factory methods for creating CBOR values.
 impl CBOR {
-    /// Create a new CBOR value representing a byte string.
+    /// Creates a new CBOR value representing a byte string.
+    ///
+    /// This method creates a CBOR byte string (major type 2) from any type that
+    /// can be referenced as a byte slice.
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The bytes to include in the byte string, which can be any type that can be
+    ///   referenced as a byte slice (e.g., `Vec<u8>`, `&[u8]`, etc.)
+    ///
+    /// # Returns
+    ///
+    /// A new CBOR value representing the byte string.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use dcbor::prelude::*;
+    ///
+    /// // Create a CBOR byte string from a byte slice
+    /// let bytes = vec![0x01, 0x02, 0x03];
+    /// let cbor = CBOR::to_byte_string(&bytes);
+    ///
+    /// // Encode to CBOR binary
+    /// let encoded = cbor.to_cbor_data();
+    /// assert_eq!(hex::encode(&encoded), "43010203");
+    ///
+    /// // Convert back to bytes
+    /// let recovered: Vec<u8> = cbor.try_into().unwrap();
+    /// assert_eq!(recovered, vec![0x01, 0x02, 0x03]);
+    /// ```
     pub fn to_byte_string(data: impl AsRef<[u8]>) -> CBOR {
         CBORCase::ByteString(data.as_ref().into()).into()
     }
 
-    /// Create a new CBOR value representing a byte string given as a hexadecimal string.
+    /// Creates a new CBOR value representing a byte string from a hexadecimal string.
     ///
-    /// Panics if the string is not well-formed hexadecimal.
+    /// This is a convenience method that converts a hexadecimal string to a byte array
+    /// and then creates a CBOR byte string value.
+    ///
+    /// # Arguments
+    ///
+    /// * `hex` - A string containing hexadecimal characters (no spaces or other characters)
+    ///
+    /// # Returns
+    ///
+    /// A new CBOR value representing the byte string.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// // Create a CBOR byte string from a hex string
+    /// let cbor = CBOR::to_byte_string_from_hex("010203");
+    ///
+    /// // Get the diagnostic representation
+    /// assert_eq!(cbor.diagnostic(), "h'010203'");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method will panic if the hex string is not well-formed hexadecimal
+    /// (contains non-hex characters or an odd number of digits).
     pub fn to_byte_string_from_hex(hex: impl AsRef<str>) -> CBOR {
         Self::to_byte_string(hex::decode(hex.as_ref()).unwrap())
     }
 
-    /// Create a new CBOR value representing a tagged value.
+    /// Creates a new CBOR value representing a tagged value.
+    ///
+    /// This method creates a CBOR tagged value (major type 6) by applying a tag to
+    /// another CBOR value. Tags provide semantic information about how the tagged
+    /// data should be interpreted.
+    ///
+    /// # Arguments
+    ///
+    /// * `tag` - The tag to apply, which can be any type that can be converted to a `Tag`
+    /// * `item` - The CBOR value to tag, which can be any type that can be converted to `CBOR`
+    ///
+    /// # Returns
+    ///
+    /// A new CBOR value representing the tagged value.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// // Create a CBOR value with tag 42 applied to the string "hello"
+    /// let tagged = CBOR::to_tagged_value(42, "hello");
+    ///
+    /// // Get the diagnostic representation
+    /// assert_eq!(tagged.diagnostic(), "42(\"hello\")");
+    ///
+    /// // Extract the tag and the tagged value
+    /// let (tag, value) = tagged.try_into_tagged_value().unwrap();
+    /// assert_eq!(tag.value(), 42);
+    /// let s: String = value.try_into().unwrap();
+    /// assert_eq!(s, "hello");
+    /// ```
     pub fn to_tagged_value(tag: impl Into<Tag>, item: impl Into<CBOR>) -> CBOR {
         CBORCase::Tagged(tag.into(), item.into()).into()
     }

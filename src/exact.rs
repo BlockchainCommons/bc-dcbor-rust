@@ -1,6 +1,6 @@
 //! This module is based on the Swift `exactly` initializers.
-//! See https://github.com/apple/swift-evolution/blob/main/proposals/0080-failable-numeric-initializers.md
-//! See https://github.com/apple/swift/blob/main/stdlib/public/core/IntegerTypes.swift.gyb
+//! See <https://github.com/apple/swift-evolution/blob/main/proposals/0080-failable-numeric-initializers.md>
+//! See <https://github.com/apple/swift/blob/main/stdlib/public/core/IntegerTypes.swift.gyb>
 //!
 //! To expand the `.gyb` file, run:
 //! ```bash

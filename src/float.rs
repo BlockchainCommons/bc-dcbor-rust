@@ -7,6 +7,42 @@ use crate::{int::From64, CBORCase, CBORError, ExactFrom, Simple, CBOR};
 
 use super::varint::{EncodeVarInt, MajorType};
 
+/// # Floating Point Number Support in dCBOR
+/// 
+/// dCBOR provides canonical encoding for floating point values through implementation of the
+/// `From<T>` and `TryFrom<CBOR>` traits for `f16`, `f32`, and `f64` types.
+/// 
+/// Per the dCBOR specification, the canonical encoding rules ensure deterministic representation:
+/// 
+/// - Numeric reduction: Floating point values with zero fractional part in range [-2^63, 2^64-1] 
+///   are automatically encoded as integers (e.g., 42.0 becomes 42)
+/// - Values are encoded in the smallest possible representation that preserves their value
+/// - All NaN values are canonicalized to a single representation: 0xf97e00
+/// - Positive/negative infinity are canonicalized to half-precision representations
+/// 
+/// ## Example
+/// 
+/// ```
+/// use dcbor::prelude::*;
+/// 
+/// // Create CBOR from floating point values using `into()`
+/// let cbor_integer: CBOR = 42.0.into();  // Numeric reduction: encoded as integer 42
+/// let cbor_float: CBOR = 3.14159.into();  // Encoded as floating point
+/// let cbor_nan: CBOR = f64::NAN.into();  // Canonicalized to 0xf97e00
+/// 
+/// // Convert back to floating point
+/// let value_integer: f64 = cbor_integer.try_into().unwrap();
+/// assert_eq!(value_integer, 42.0);
+/// 
+/// // Maps can use numeric keys with automatic reduction
+/// let mut map = Map::new();
+/// map.insert(1.0, "integer key");    // 1.0 becomes 1
+/// map.insert(2, "another key");      // Integer directly
+/// 
+/// // Verify numeric reduction in maps
+/// let key_value: String = map.extract::<i32, String>(1).unwrap();
+/// assert_eq!(key_value, "integer key");
+/// ```
 static CBOR_NAN: [u8; 3] = [0xf9, 0x7e, 0x00];
 
 impl From<f64> for CBOR {
@@ -26,7 +62,7 @@ impl From<f64> for CBOR {
     }
 }
 
-pub fn f64_cbor_data(value: f64) -> Vec<u8> {
+pub(crate) fn f64_cbor_data(value: f64) -> Vec<u8> {
     let n = value;
     let f = n as f32;
     if f as f64 == n {
@@ -62,7 +98,7 @@ pub(crate) fn validate_canonical_f64(n: f64) -> Result<()> {
 
 impl TryFrom<CBOR> for f64 {
     type Error = Error;
-    
+
     fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Unsigned(n) => {
@@ -100,7 +136,7 @@ impl From<f32> for CBOR {
     }
 }
 
-pub fn f32_cbor_data(value: f32) -> Vec<u8> {
+pub(crate) fn f32_cbor_data(value: f32) -> Vec<u8> {
     let n = value;
     let f = f16::from_f32(n);
     if f.to_f32() == n {
@@ -178,7 +214,7 @@ impl From<f16> for CBOR {
     }
 }
 
-pub fn f16_cbor_data(value: f16) -> Vec<u8> {
+pub(crate) fn f16_cbor_data(value: f16) -> Vec<u8> {
     let n = value.to_f64();
     if n < 0.0 {
         if let Some(i) = u64::exact_from_f64(-1f64 - n) {

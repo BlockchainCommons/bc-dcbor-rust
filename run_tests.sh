@@ -14,16 +14,16 @@ section() {
 test_only_features() {
     local features="$1"
     section "no default + $features"
-    cargo test --no-default-features --features "$features" > /dev/null
+    cargo test --lib --bins --tests --benches --no-default-features --features "$features" > /dev/null
 }
 
 test_additional_features() {
     local features="$1"
     section "default + $features"
-    cargo test --features "$features" > /dev/null
+    cargo test --lib --bins --tests --benches --features "$features" > /dev/null
 }
 
-section "All Default Features"
+section "All Default Features and doctests"
 cargo test > /dev/null
 
 test_additional_features "multithreaded"

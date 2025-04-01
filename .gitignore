@@ -90,3 +90,4 @@ dkms.conf
 
 target/
 Cargo.lock
+cargo-docs/
