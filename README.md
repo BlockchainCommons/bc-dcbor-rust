@@ -6,18 +6,33 @@
 
 ---
 
-`dcbor` is a [CBOR](https://cbor.io) codec that focuses on writing and parsing "deterministic" CBOR per [§4.2 of RFC-8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-deterministically-encoded-c). It does not support parts of the spec forbidden by deterministic CBOR (such as indefinite length arrays and maps). It is strict in both what it writes and reads: in particular it will return decoding errors if variable-length integers are not encoded in their minimal form, or CBOR map keys are not in lexicographic order, or there is extra data past the end of the decoded CBOR item.
+`dcbor` implements the dCBOR application profile defined in the IETF Internet Draft [draft-mcnally-deterministic-cbor](https://datatracker.ietf.org/doc/draft-mcnally-deterministic-cbor/). As noted in [BCR-2024-002-dcbor](https://github.com/BlockchainCommons/bc-rust/blob/master/bc-research/papers/bcr-2024-002-dcbor.md), this specification now has several implementations by third parties and has been extensively discussed in the IETF CBOR working group, putting it on track to becoming a standard.
+
+The dCBOR application profile first requires conformance to CBOR Common Deterministic Encoding (CDE) rules, which include:
+
+- Integers must use their shortest possible representation
+- Floating-point numbers must use their shortest possible representation
+- Map keys must be sorted in bytewise lexicographic order
+- Indefinite-length items are not allowed
+
+On top of CDE, dCBOR adds these additional rules:
+
+- Maps must not contain duplicate keys
+- Numeric reduction: floating-point values that can be represented as integers in the range [-2^63, 2^64-1] must be encoded as integers
+- All NaN values must be reduced to a single canonical representation (quiet NaN with half-width representation 0xf97e00)
+- Only certain "simple values" are allowed: false (0xf4), true (0xf5), null (0xf6), and floating-point values
+- Text strings must be in Unicode Normalization Form C (NFC)
+
+dCBOR encoders must only emit CBOR conforming to these rules, and dCBOR decoders must validate that encoded CBOR conforms to these requirements.
+
+This deterministic approach ensures that semantically equivalent data items are encoded into identical byte streams, which is essential for applications requiring cryptographic verification, content-based addressing, and consistent hashing.
 
 ## Getting Started
 
 ```toml
 [dependencies]
-dcbor = "0.16.3"
+dcbor = "0.16.4"
 ```
-
-## Specification
-
-The current specification of the norms and practices guiding the creation of this implementation are currently found in this IETF Internet Draft: [draft-mcnally-deterministic-cbor](https://datatracker.ietf.org/doc/draft-mcnally-deterministic-cbor/).
 
 ## Related Projects
 
@@ -25,11 +40,11 @@ The current specification of the norms and practices guiding the creation of thi
 - [dCBOR Library for Swift](https://github.com/BlockchainCommons/BCSwiftDCBOR)
 - [dCBOR-CLI Reference App](https://github.com/BlockchainCommons/dcbor-cli)
 
-## Status - Community Review
+## Status - Production-Ready
 
-`dcbor` is currently in a community review stage. We would appreciate your consideration and/or testing of the libraries. Obviously, let us know if you find any mistakes or problems. But also let us know if the API meets your needs, if the functionality is easy to use, if the usage of Rust feels properly standardized, and if the library solves any problems you are encountering when doing this kind of coding. Also let us know how it could be improved and what else you'd need for this to be just right for your usage. Comments can be posted [to the Gordian Developer Community](https://github.com/BlockchainCommons/Gordian-Developer-Community/discussions/116).
+`dcbor` is now considered production-ready. The specification has been implemented by multiple third parties and extensively discussed in the IETF CBOR working group. The library provides a stable API that follows the dCBOR application profile.
 
-Because this library is still in a community review stage, it should not be used for production tasks until it has had further testing and auditing.
+We still welcome your feedback about the library. Let us know if the API meets your needs, if the functionality is easy to use, if the usage of Rust feels properly standardized, and if the library solves any problems you are encountering when doing this kind of coding. Comments can be posted [to the Gordian Developer Community](https://github.com/BlockchainCommons/Gordian-Developer-Community/discussions/116).
 
 See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
 
