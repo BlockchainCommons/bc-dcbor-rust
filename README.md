@@ -6,9 +6,7 @@
 
 ---
 
-`dcbor` implements the dCBOR application profile defined in the IETF Internet Draft [draft-mcnally-deterministic-cbor](https://datatracker.ietf.org/doc/draft-mcnally-deterministic-cbor/). As noted in [BCR-2024-002-dcbor](https://github.com/BlockchainCommons/bc-rust/blob/master/bc-research/papers/bcr-2024-002-dcbor.md), this specification now has several implementations by third parties and has been extensively discussed in the IETF CBOR working group, putting it on track to becoming a standard.
-
-The dCBOR application profile first requires conformance to CBOR Common Deterministic Encoding (CDE) rules, which include:
+`dcbor` implements the dCBOR application profile defined in the IETF Internet Draft [draft-mcnally-deterministic-cbor](https://datatracker.ietf.org/doc/draft-mcnally-deterministic-cbor/). The dCBOR application profile first requires conformance to CBOR Common Deterministic Encoding (CDE) rules, which include:
 
 - Integers must use their shortest possible representation
 - Floating-point numbers must use their shortest possible representation
@@ -31,7 +29,7 @@ This deterministic approach ensures that semantically equivalent data items are 
 
 ```toml
 [dependencies]
-dcbor = "0.16.4"
+dcbor = "0.16.5"
 ```
 
 ## Related Projects
