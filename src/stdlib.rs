@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 #[cfg(feature = "std")]
 #[doc(hidden)]
 pub(crate) mod with_std {
@@ -8,7 +10,7 @@ pub(crate) mod with_std {
     pub(crate) use std::borrow::ToOwned;
     pub(crate) use std::boxed::Box;
     pub(crate) use std::cmp;
-    pub(crate) use std::collections::{BTreeMap, btree_map::Values as BTreeMapValues, VecDeque, HashSet, HashMap};
+    pub(crate) use std::collections::{BTreeMap, BTreeSet, btree_map::Values as BTreeMapValues, VecDeque, HashSet, HashMap};
     pub(crate) use std::format;
     pub(crate) use std::hash;
     pub(crate) use std::ops::Deref;
@@ -27,7 +29,7 @@ pub(crate) mod without_std {
 
     pub(crate) use alloc::borrow::ToOwned;
     pub(crate) use alloc::boxed::Box;
-    pub(crate) use alloc::collections::{BTreeMap, btree_map::Values as BTreeMapValues, VecDeque};
+    pub(crate) use alloc::collections::{BTreeMap, BTreeSet, btree_map::Values as BTreeMapValues, VecDeque};
     pub(crate) use alloc::fmt;
     pub(crate) use alloc::format;
     // pub(crate) use alloc::rc; // Unused import

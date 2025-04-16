@@ -7,110 +7,110 @@ use crate::{CBOR, CBORError, CBORCase};
 use super::varint::{EncodeVarInt, MajorType};
 
 /// # Map Support in dCBOR
-/// 
-/// A deterministic CBOR map implementation that ensures maps with the same content always 
+///
+/// A deterministic CBOR map implementation that ensures maps with the same content always
 /// produce identical binary encodings, regardless of insertion order.
-/// 
+///
 /// ## Deterministic Map Representation
-/// 
+///
 /// The `Map` type follows strict deterministic encoding rules as specified by dCBOR:
-/// 
+///
 /// - Map keys are always sorted in lexicographic order of their encoded CBOR bytes
 /// - Duplicate keys are not allowed (enforced by the implementation)
 /// - Keys and values can be any type that implements `Into<CBOR>`
 /// - Numeric reduction is applied (e.g., 3.0 is stored as integer 3)
-/// 
-/// This deterministic encoding ensures that equivalent maps always produce identical byte 
+///
+/// This deterministic encoding ensures that equivalent maps always produce identical byte
 /// representations, which is crucial for applications that rely on consistent hashing,
 /// digital signatures, or other cryptographic operations.
-/// 
+///
 /// ## Features
-/// 
+///
 /// The `Map` type provides:
 /// - Built-in conversions from standard Rust collections like `HashMap` and `BTreeMap`
 /// - Type-safe conversions when extracting values with `get<K, V>()` and `extract<K, V>()`
 /// - Automatic deterministic ordering of keys
 /// - Prevention of duplicate keys
 /// - Support for heterogeneous key and value types
-/// 
+///
 /// ## Examples
-/// 
+///
 /// ### Creating and using maps
-/// 
+///
 /// ```
 /// use dcbor::prelude::*;
 /// use std::collections::HashMap;
-/// 
+///
 /// // Create a new Map directly
 /// let mut map = Map::new();
 /// map.insert(1, "one");                // Integer key
 /// map.insert("two", 2);                // String key
 /// map.insert([1, 2, 3], "array key");  // Array key
 /// map.insert(3.0, "numeric reduction"); // Float key (stored as integer 3)
-/// 
+///
 /// // Check the map size
 /// assert_eq!(map.len(), 4);
-/// 
+///
 /// // Create a CBOR value from the map
 /// let cbor_map: CBOR = map.into();
-/// 
+///
 /// // Round-trip through binary encoding
 /// let encoded = cbor_map.to_cbor_data();
 /// let decoded = CBOR::try_from_data(&encoded).unwrap();
-/// 
+///
 /// // View the diagnostic representation
 /// assert!(decoded.diagnostic_flat().contains(r#""two": 2"#));
 /// ```
-/// 
+///
 /// ### Converting from standard Rust collections
-/// 
+///
 /// ```
 /// use dcbor::prelude::*;
 /// use std::collections::{HashMap, BTreeMap};
-/// 
+///
 /// // Convert HashMap to CBOR Map
 /// let mut hash_map = HashMap::new();
 /// hash_map.insert("a", 1);
 /// hash_map.insert("b", 2);
 /// let cbor_from_hashmap: CBOR = hash_map.into();
-/// 
+///
 /// // Convert BTreeMap to CBOR Map
 /// let mut btree_map = BTreeMap::new();
 /// btree_map.insert("x", "value1");
 /// btree_map.insert("y", "value2");
 /// let cbor_from_btree: CBOR = btree_map.into();
 /// ```
-/// 
+///
 /// ### Type-safe extraction of values
-/// 
+///
 /// ```
 /// use dcbor::prelude::*;
-/// 
+///
 /// // Create a map with various types
 /// let mut typed_map = Map::new();
 /// typed_map.insert("number", 42);
 /// typed_map.insert("text", "hello");
 /// typed_map.insert("array", vec![1, 2, 3]);
-/// 
+///
 /// // Type-safe extraction
 /// let number: i32 = typed_map.extract("number").unwrap();
 /// let text: String = typed_map.extract("text").unwrap();
 /// let array: Vec<i32> = typed_map.extract("array").unwrap();
-/// 
+///
 /// assert_eq!(number, 42);
 /// assert_eq!(text, "hello");
 /// assert_eq!(array, vec![1, 2, 3]);
-/// 
+///
 /// // Using get() for optional extraction
 /// let present: Option<i32> = typed_map.get("number");
 /// let absent: Option<i32> = typed_map.get("missing");
-/// 
+///
 /// assert_eq!(present, Some(42));
 /// assert_eq!(absent, None);
 /// ```
-/// 
+///
 /// ## Implementation Details
-/// 
+///
 /// The `Map` implementation:
 /// - Uses a `BTreeMap` internally to maintain the sorted order of keys
 /// - Encodes keys with their CBOR representation for lexicographic sorting
@@ -120,7 +120,7 @@ pub struct Map(BTreeMap<MapKey, MapValue>);
 
 impl Map {
     /// Makes a new, empty CBOR `Map`.
-    pub fn new() -> Map {
+    pub fn new() -> Self {
         Map(BTreeMap::new())
     }
 
@@ -129,6 +129,7 @@ impl Map {
         self.0.len()
     }
 
+    /// Checks if the map is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
@@ -178,6 +179,15 @@ impl Map {
             Some(value) => V::try_from(value.value.clone()).ok(),
             None => None
         }
+    }
+
+    /// Tests if the map contains a key.
+    ///
+    pub fn contains_key<K>(&self, key: K) -> bool
+    where
+        K: Into<CBOR>
+    {
+        self.0.contains_key(&MapKey::new(key.into().to_cbor_data()))
     }
 
     /// Get a value from the map, given a key.
@@ -235,51 +245,51 @@ impl From<Map> for CBOR {
 
 impl fmt::Debug for Map {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_fmt(format_args!("{:?}", self.0))
+        write!(f, "{:?}", self.0)
     }
 }
 
 /// An iterator over the entries of a CBOR map.
 ///
-/// This iterator provides a way to traverse the key-value pairs in a CBOR map. 
-/// It always returns entries in lexicographic order by the key's binary-encoded 
+/// This iterator provides a way to traverse the key-value pairs in a CBOR map.
+/// It always returns entries in lexicographic order by the key's binary-encoded
 /// CBOR value, which is a requirement for deterministic encoding in dCBOR.
 ///
-/// Each item returned by the iterator is a tuple of references to the key and 
+/// Each item returned by the iterator is a tuple of references to the key and
 /// value CBOR objects: `(&'a CBOR, &'a CBOR)`.
 ///
 /// ## Examples
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// 
+///
 /// // Create a map with several entries
 /// let mut map = Map::new();
 /// map.insert(1, "one");
 /// map.insert(2, "two");
 /// map.insert(3, "three");
-/// 
+///
 /// // Iterate through the map entries
 /// for (key, value) in map.iter() {
 ///     // Process each key-value pair
 ///     let k_option: Option<i64> = key.clone().try_into().ok();
 ///     let v_option: Option<String> = value.clone().try_into().ok();
-///     
+///
 ///     if let (Some(k), Some(v)) = (k_option, v_option) {
 ///         // This would normally print entries in order: 1, 2, 3
 ///         assert!(k >= 1 && k <= 3);
 ///         assert!(v == "one" || v == "two" || v == "three");
 ///     }
 /// }
-/// 
+///
 /// // Use iterator methods directly
 /// let first_entry = map.iter().next().unwrap();
 /// let key_as_i64: i64 = first_entry.0.clone().try_into().unwrap();
 /// assert_eq!(key_as_i64, 1);
 /// ```
 ///
-/// Note that unlike standard Rust collections which may have implementation-specific 
-/// ordering, CBOR maps in dCBOR guarantee deterministic iteration order based on 
+/// Note that unlike standard Rust collections which may have implementation-specific
+/// ordering, CBOR maps in dCBOR guarantee deterministic iteration order based on
 /// the binary encoding of keys.
 #[derive(Debug)]
 pub struct MapIter<'a>(BTreeMapValues<'a, MapKey, MapValue>);

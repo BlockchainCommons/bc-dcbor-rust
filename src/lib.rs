@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.16.5")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.17.0")]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -15,7 +15,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.16.5"
+//! dcbor = "0.17.0"
 //! ```
 //!
 //! # Features
@@ -28,7 +28,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.16.5"
+//! version = "0.17.0"
 //! features = ["multithreaded"]
 //! ```
 //!
@@ -40,7 +40,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.16.5"
+//! version = "0.17.0"
 //! default-features = false
 //! features = ["no_std"]
 //! ```
@@ -93,6 +93,7 @@ mod bool_value;
 mod float;
 
 mod array;
+pub use array::CBORSortable;
 
 mod error;
 pub use error::CBORError;
@@ -131,6 +132,9 @@ mod int;
 
 mod map;
 pub use map::{Map, MapIter};
+
+mod set;
+pub use set::{Set, SetIter};
 
 mod string;
 

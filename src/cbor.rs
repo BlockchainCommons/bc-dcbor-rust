@@ -537,6 +537,32 @@ impl CBOR {
     }
 }
 
+impl CBOR {
+    /// Extract the CBOR value as a boolean.
+    pub fn try_into_bool(self) -> Result<bool> {
+        match self.into_case() {
+            CBORCase::Simple(Simple::True) => Ok(true),
+            CBORCase::Simple(Simple::False) => Ok(false),
+            _ => bail!(CBORError::WrongType)
+        }
+    }
+
+    /// Check if the CBOR value is true.
+    pub fn is_true(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Simple(Simple::True))
+    }
+
+    /// Check if the CBOR value is false.
+    pub fn is_false(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Simple(Simple::False))
+    }
+
+    /// Check if the CBOR value is null.
+    pub fn is_null(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Simple(Simple::Null))
+    }
+}
+
 impl PartialEq for CBOR {
     fn eq(&self, other: &Self) -> bool {
         match (self.as_case(), other.as_case()) {

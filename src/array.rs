@@ -5,31 +5,31 @@ use crate::{error::CBORError, CBORCase, CBOR};
 use anyhow::{bail, Error, Result};
 
 /// # Array Support in dCBOR
-/// 
+///
 /// dCBOR provides convenient conversions to and from CBOR arrays through implementation of the
 /// `From<T>` and `TryFrom<CBOR>` traits for various collection types. This enables idiomatic
 /// conversions using Rust's `.into()` method.
-/// 
+///
 /// Supported collection types:
 /// - Rust arrays (`[T; N]`)
 /// - Vectors (`Vec<T>`)
 /// - VecDeque (`VecDeque<T>`)
 /// - HashSet (`HashSet<T>`)
-/// 
+///
 /// For all of these, the elements must be convertible to CBOR via the `Into<CBOR>` trait.
-/// 
+///
 /// ## Examples
-/// 
+///
 /// ```
 /// use dcbor::prelude::*;
-/// 
+///
 /// // Create CBOR from Rust array (fixed size)
 /// let array_cbor: CBOR = [1, 2, 3].into();
-/// 
+///
 /// // Create CBOR from Vec
 /// let vec = vec![1, 2, 3];
 /// let vec_cbor: CBOR = vec.into();
-/// 
+///
 /// // Mixed types in Vec
 /// let mixed_vec: Vec<CBOR> = vec![
 ///     1.into(),                  // Integer
@@ -38,7 +38,7 @@ use anyhow::{bail, Error, Result};
 ///     true.into()                // Boolean
 /// ];
 /// let mixed_cbor: CBOR = mixed_vec.into();
-/// 
+///
 /// // Convert back to Vec
 /// let numbers: Vec<i32> = array_cbor.try_into().unwrap();
 /// assert_eq!(numbers, vec![1, 2, 3]);
@@ -130,5 +130,52 @@ where
             },
             _ => bail!(CBORError::WrongType)
         }
+    }
+}
+
+pub fn sort_array_by_cbor_encoding<T>(array: impl AsRef<[T]>) -> Vec<T>
+where
+    T: Into<CBOR> + Clone,
+{
+    let mut a: Vec<(Vec<u8>, T)> = array
+        .as_ref()
+        .iter()
+        .map(|item| (item.clone().into().to_cbor_data(), item.clone()))
+        .collect();
+    a.sort_by(|a, b| a.0.cmp(&b.0));
+    a.into_iter().map(|(_, item)| item).collect()
+}
+
+pub trait CBORSortable<T> {
+    fn sort_by_cbor_encoding(&self) -> Vec<T>
+    where
+        Self: Sized + Into<CBOR> + Clone;
+}
+
+impl<T> CBORSortable<T> for Vec<T>
+where
+    T: Into<CBOR> + Clone,
+{
+    fn sort_by_cbor_encoding(&self) -> Vec<T> {
+        sort_array_by_cbor_encoding(self)
+    }
+}
+
+impl<T> CBORSortable<T> for &[T]
+where
+    T: Into<CBOR> + Clone,
+{
+    fn sort_by_cbor_encoding(&self) -> Vec<T> {
+        sort_array_by_cbor_encoding(self)
+    }
+}
+
+impl<T> CBORSortable<T> for HashSet<T>
+where
+    T: Into<CBOR> + Clone,
+{
+    fn sort_by_cbor_encoding(&self) -> Vec<T> {
+        let array: Vec<T> = self.iter().cloned().collect();
+        array.sort_by_cbor_encoding()
     }
 }
