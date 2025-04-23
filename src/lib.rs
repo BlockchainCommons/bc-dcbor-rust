@@ -1,4 +1,4 @@
-#![doc(html_root_url = "https://docs.rs/dcbor/0.17.0")]
+#![doc(html_root_url = "https://docs.rs/dcbor/0.17.1")]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -15,7 +15,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! dcbor = "0.17.0"
+//! dcbor = "0.17.1"
 //! ```
 //!
 //! # Features
@@ -28,7 +28,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.17.0"
+//! version = "0.17.1"
 //! features = ["multithreaded"]
 //! ```
 //!
@@ -40,7 +40,7 @@
 //!
 //! ```toml
 //! [dependencies.dcbor]
-//! version = "0.17.0"
+//! version = "0.17.1"
 //! default-features = false
 //! features = ["no_std"]
 //! ```
@@ -105,16 +105,16 @@ mod diag;
 mod dump;
 
 mod tags_store;
-pub use tags_store::{CBORSummarizer, TagsStore, TagsStoreTrait};
+pub use tags_store::{ CBORSummarizer, TagsStore, TagsStoreTrait };
 
 mod tag;
-pub use tag::{Tag, TagValue};
+pub use tag::{ Tag, TagValue };
 
 mod tags;
 pub use tags::*;
 
 mod cbor_codable;
-pub use cbor_codable::{CBORCodable, CBORDecodable, CBOREncodable};
+pub use cbor_codable::{ CBORCodable, CBORDecodable, CBOREncodable };
 
 mod cbor_tagged;
 pub use cbor_tagged::CBORTagged;
@@ -131,10 +131,10 @@ mod decode;
 mod int;
 
 mod map;
-pub use map::{Map, MapIter};
+pub use map::{ Map, MapIter };
 
 mod set;
-pub use set::{Set, SetIter};
+pub use set::{ Set, SetIter };
 
 mod string;
 
