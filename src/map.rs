@@ -115,7 +115,7 @@ use super::varint::{EncodeVarInt, MajorType};
 /// - Uses a `BTreeMap` internally to maintain the sorted order of keys
 /// - Encodes keys with their CBOR representation for lexicographic sorting
 /// - Applies all dCBOR deterministic encoding rules automatically
-#[derive(Clone)]
+#[derive(Clone, Hash)]
 pub struct Map(BTreeMap<MapKey, MapValue>);
 
 impl Map {
@@ -309,7 +309,7 @@ impl<'a> Iterator for MapIter<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, Hash)]
 struct MapValue {
     key: CBOR,
     value: CBOR,
@@ -333,7 +333,7 @@ impl fmt::Debug for MapValue {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Hash)]
 struct MapKey(Vec<u8>);
 
 impl MapKey {
@@ -401,6 +401,23 @@ where
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
                     container.insert(k.clone().try_into()?, v.clone().try_into()?);
+                }
+                Ok(container)
+            },
+            _ => Err(Error::msg(CBORError::WrongType))
+        }
+    }
+}
+
+impl TryFrom<CBOR> for HashMap<CBOR, CBOR> {
+    type Error = Error;
+
+    fn try_from(cbor: CBOR) -> Result<Self> {
+        match cbor.into_case() {
+            CBORCase::Map(map) => {
+                let mut container = <HashMap<CBOR, CBOR>>::new();
+                for (k, v) in map.iter() {
+                    container.insert(k.clone(), v.clone());
                 }
                 Ok(container)
             },

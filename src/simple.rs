@@ -1,17 +1,17 @@
 import_stdlib!();
 
-use anyhow::{bail, Error, Result};
+use anyhow::{ bail, Error, Result };
 
-use crate::{float::f64_cbor_data, CBORCase, CBORError, CBOR};
+use crate::{ float::f64_cbor_data, CBORCase, CBORError, CBOR };
 
-use super::varint::{EncodeVarInt, MajorType};
+use super::varint::{ EncodeVarInt, MajorType };
 
 /// Represents CBOR simple values (major type 7).
 ///
 /// In CBOR, simple values are a special category that includes booleans (`true` and `false`),
-/// `null`, and floating point numbers. 
+/// `null`, and floating point numbers.
 ///
-/// Per Section 2.4 of the dCBOR specification, only these specific simple values 
+/// Per Section 2.4 of the dCBOR specification, only these specific simple values
 /// are valid in dCBOR. All other major type 7 values (such as undefined or other
 /// simple values) are invalid and will be rejected by dCBOR decoders.
 ///
@@ -21,10 +21,10 @@ use super::varint::{EncodeVarInt, MajorType};
 /// - NaN values must be normalized to the canonical form `f97e00`
 ///
 /// # Note
-/// 
+///
 /// This type is primarily an implementation detail. Users should generally use
 /// Rust's native types instead:
-/// 
+///
 /// - Use Rust's `true` and `false` booleans directly
 /// - Use the convenience methods `CBOR::r#true()`, `CBOR::r#false()`, and `CBOR::null()`
 /// - Use Rust's floating point types like `f64` directly
@@ -53,22 +53,37 @@ pub enum Simple {
     /// The boolean value `false`.
     /// Encoded as `0xf4` in CBOR, or `0x14` (20) with major type 7.
     False,
-    
+
     /// The boolean value `true`.
     /// Encoded as `0xf5` in CBOR, or `0x15` (21) with major type 7.
     True,
-    
+
     /// The value representing `null` (`None`).
     /// Encoded as `0xf6` in CBOR, or `0x16` (22) with major type 7.
     Null,
-    
+
     /// A floating point value.
-    /// 
+    ///
     /// In dCBOR, floating point values follow these encoding rules:
     /// - Values are encoded in the shortest form that preserves precision
     /// - Integral floating point values are encoded as integers when in range
     /// - NaN values are normalized to `f97e00`
     Float(f64),
+}
+
+impl Eq for Simple {
+    fn assert_receiver_is_total_eq(&self) {}
+}
+
+impl hash::Hash for Simple {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        match self {
+            Self::False => (0u8).hash(state),
+            Self::True => (1u8).hash(state),
+            Self::Null => (2u8).hash(state),
+            Self::Float(v) => v.to_bits().hash(state),
+        }
+    }
 }
 
 impl Simple {
@@ -87,7 +102,7 @@ impl Simple {
 
     /// Encodes the simple value to its raw CBOR byte representation.
     ///
-    /// Returns the CBOR bytes that represent this simple value according to the 
+    /// Returns the CBOR bytes that represent this simple value according to the
     /// dCBOR deterministic encoding rules:
     /// - `False` encodes as `0xf4`
     /// - `True` encodes as `0xf5`
@@ -102,9 +117,9 @@ impl Simple {
     /// Rust's native types.
     pub fn cbor_data(&self) -> Vec<u8> {
         match self {
-            Self::False => 20u8.encode_varint(MajorType::Simple),
-            Self::True => 21u8.encode_varint(MajorType::Simple),
-            Self::Null => 22u8.encode_varint(MajorType::Simple),
+            Self::False => (20u8).encode_varint(MajorType::Simple),
+            Self::True => (21u8).encode_varint(MajorType::Simple),
+            Self::Null => (22u8).encode_varint(MajorType::Simple),
             Self::Float(v) => f64_cbor_data(*v),
         }
     }

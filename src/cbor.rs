@@ -75,7 +75,7 @@ use alloc::rc::Rc as RefCounted;
 /// // Use diagnostic_flat() for a compact single-line representation
 /// assert_eq!(mixed_decoded.diagnostic_flat(), r#"[1, "Hello", [1, 2, 3]]"#);
 /// ```
-#[derive(Clone)]
+#[derive(Clone, Eq, Hash)]
 pub struct CBOR(RefCounted<CBORCase>);
 
 impl CBOR {
@@ -97,7 +97,7 @@ impl From<CBORCase> for CBOR {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// An enum representing all possible CBOR data types.
 ///
 /// `CBORCase` is the core enum that represents all possible CBOR data types according to
