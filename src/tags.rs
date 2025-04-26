@@ -37,8 +37,8 @@ pub static GLOBAL_TAGS: LazyTagsStore = LazyTagsStore {
 
 /// A macro for accessing the global tags store in a read-only manner.
 ///
-/// This macro provides safe access to a global [`TagsStore`] instance that persists 
-/// for the entire application lifetime. It executes the provided closure with a 
+/// This macro provides safe access to a global [`TagsStore`] instance that persists
+/// for the entire application lifetime. It executes the provided closure with a
 /// reference to the tags store.
 ///
 /// ## Use Cases
@@ -63,7 +63,7 @@ pub static GLOBAL_TAGS: LazyTagsStore = LazyTagsStore {
 ///         // you would use with_tags_mut! to register tags first
 ///         // This is just for demonstration purposes
 ///     }
-///     
+///
 ///     // Look up a tag name by its value (could be "date" if standard tags are registered)
 ///     // or the numeric value as a string if not registered
 ///     tags.name_for_value(42)
@@ -99,8 +99,8 @@ macro_rules! with_tags {
 
 /// A macro for accessing the global tags store in a mutable manner.
 ///
-/// This macro provides safe mutable access to a global [`TagsStore`] instance 
-/// that persists for the entire application lifetime. It executes the provided 
+/// This macro provides safe mutable access to a global [`TagsStore`] instance
+/// that persists for the entire application lifetime. It executes the provided
 /// closure with a mutable reference to the tags store.
 ///
 /// ## Use Cases
@@ -121,7 +121,7 @@ macro_rules! with_tags {
 /// with_tags_mut!(|tags: &mut TagsStore| {
 ///     // Register a tag with value 100 and name "custom-tag"
 ///     tags.insert(Tag::new(100, "custom-tag".to_string()));
-///     
+///
 ///     // Add a summarizer for the tag
 ///     tags.set_summarizer(100, Arc::new(|cbor| -> Result<String> {
 ///         Ok(format!("Custom tag content: {:?}", cbor))
@@ -158,6 +158,11 @@ macro_rules! with_tags_mut {
     };
 }
 
+/// # Epoch-Base Date/Time
+///
+/// | Tag | Data Item | Semantics | Reference |
+/// |:----|:----------|:----------|:----------|
+/// | 1 | integer or float | ur:date, Epoch-based date/time; see Section 3.4.2 | https://www.iana.org/go/rfc8949
 pub const TAG_DATE: TagValue = 1;
 
 pub fn register_tags_in(tags_store: &mut TagsStore) {

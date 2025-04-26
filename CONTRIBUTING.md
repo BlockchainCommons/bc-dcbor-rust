@@ -9,9 +9,10 @@ We love your input! We want to make contributing to this project as easy and tra
 - Becoming a maintainer
 
 ## We Develop with Github
+
 We use GitHub to host code, to track issues and feature requests, and to accept Pull Requests.
 
-## Report Bugs using Github's [issues](https://github.com/briandk/transcriptase-atom/issues)
+## Report Bugs using Github's Issue Tracker
 
 If you find bugs, mistakes, or inconsistencies in this project's code or documents, please let us know by [opening a new issue](./issues), but consider searching through existing issues first to check and see if the problem has already been reported. If it has, it never hurts to add a quick "+1" or "I have this problem too". This helps prioritize the most common problems and requests.
 
@@ -24,12 +25,12 @@ If you find bugs, mistakes, or inconsistencies in this project's code or documen
 - A quick summary and/or background
 - Steps to reproduce
   - Be specific!
-  - Give sample code if you can. [The stackoverflow bug report](http://stackoverflow.com/q/12488905/180626) includes sample code that *anyone* with a base R setup can run to reproduce what I was seeing
+  - Give sample code if you can. [The stackoverflow bug report](http://stackoverflow.com/q/12488905/180626) includes sample code that _anyone_ with a base R setup can run to reproduce what I was seeing
 - What you expected would happen
 - What actually happens
 - Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
 
-People *love* thorough bug reports. I'm not even kidding.
+People _love_ thorough bug reports. I'm not even kidding.
 
 ## Submit Code Changes through Pull Requests
 
@@ -39,9 +40,9 @@ We ask that more significant improvements to the project be first proposed befor
 
 ### Use a Consistent Coding Style
 
-* We indent using two spaces (soft tabs)
-* We ALWAYS put spaces after list items and method parameters ([1, 2, 3], not [1,2,3]), around operators (x += 1, not x+=1), and around hash arrows.
-* This is open-source software. Consider the people who will read your code, and make it look nice for them. It's sort of like driving a car: Perhaps you love doing donuts when you're alone, but with passengers the goal is to make the ride as smooth as possible.
+- We indent using two spaces (soft tabs)
+- We ALWAYS put spaces after list items and method parameters ([1, 2, 3], not [1,2,3]), around operators (x += 1, not x+=1), and around hash arrows.
+- This is open-source software. Consider the people who will read your code, and make it look nice for them. It's sort of like driving a car: Perhaps you love doing donuts when you're alone, but with passengers the goal is to make the ride as smooth as possible.
 
 ### Use [Github Flow](https://guides.github.com/introduction/flow/index.html) for Pull Requests
 
@@ -61,5 +62,6 @@ In short, when you submit code changes, your submissions are understood to be av
 ## References
 
 Portions of this CONTRIBUTING.md document were adopted from best practices of a number of open source projects, including:
-* [Facebook's Draft](https://github.com/facebook/draft-js/blob/a9316a723f9e918afde44dea68b5f9f39b7d9b00/CONTRIBUTING.md)
-* [IPFS Contributing](https://github.com/ipfs/community/blob/master/CONTRIBUTING.md)
+
+- [Facebook's Draft](https://github.com/facebook/draft-js/blob/a9316a723f9e918afde44dea68b5f9f39b7d9b00/CONTRIBUTING.md)
+- [IPFS Contributing](https://github.com/ipfs/community/blob/master/CONTRIBUTING.md)
