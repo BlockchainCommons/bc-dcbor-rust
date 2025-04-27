@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait};
+use crate::{ CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait };
 
 pub struct LazyTagsStore {
     init: Once,
@@ -115,7 +115,6 @@ macro_rules! with_tags {
 /// ```
 /// use dcbor::prelude::*;
 /// use std::sync::Arc;
-/// use anyhow::Result;
 ///
 /// // Register a custom tag in the global tags store
 /// with_tags_mut!(|tags: &mut TagsStore| {
@@ -158,23 +157,34 @@ macro_rules! with_tags_mut {
     };
 }
 
-/// # Epoch-Base Date/Time
-///
-/// | Tag | Data Item | Semantics | Reference |
-/// |:----|:----------|:----------|:----------|
-/// | 1 | integer or float | ur:date, Epoch-based date/time; see Section 3.4.2 | https://www.iana.org/go/rfc8949
-pub const TAG_DATE: TagValue = 1;
+#[macro_export]
+macro_rules! const_cbor_tag {
+    ($value:expr, $const_name:ident, $name:expr) => {
+        paste::paste! {
+            pub const [<TAG_ $const_name>]: u64 = $value;
+            pub const [<TAG_NAME_ $const_name>]: &str = $name;
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! cbor_tag {
+    ($const_name:ident) => {
+        paste::paste! {
+            $crate::Tag::new([<TAG_ $const_name>], [<TAG_NAME_ $const_name>])
+        }
+    };
+}
+
+const_cbor_tag!(1, DATE, "date");
 
 pub fn register_tags_in(tags_store: &mut TagsStore) {
-    let tags = vec![
-        (TAG_DATE, "date"),
-    ];
-    for tag in tags.into_iter() {
-        tags_store.insert(Tag::new(tag.0, tag.1));
-    }
-    tags_store.set_summarizer(TAG_DATE, Arc::new(|untagged_cbor| {
-        Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?))
-    }));
+    let tags = vec![cbor_tag!(DATE)];
+    tags_store.insert_all(tags);
+    tags_store.set_summarizer(
+        TAG_DATE,
+        Arc::new(|untagged_cbor| { Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?)) })
+    );
 }
 
 pub fn register_tags() {
@@ -231,6 +241,9 @@ pub fn register_tags() {
 /// 3. If not found, it falls back to creating a basic tag with just the value
 pub fn tags_for_values(values: &[TagValue]) -> Vec<Tag> {
     with_tags!(|tags: &TagsStore| {
-        values.iter().map(|value| tags.tag_for_value(*value).unwrap_or_else(|| Tag::with_value(*value))).collect()
+        values
+            .iter()
+            .map(|value| tags.tag_for_value(*value).unwrap_or_else(|| Tag::with_value(*value)))
+            .collect()
     })
 }

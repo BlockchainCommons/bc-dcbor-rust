@@ -1,44 +1,43 @@
 import_stdlib!();
 
 use half::f16;
-use anyhow::{bail, Result, Error};
 
-use crate::{int::From64, CBORCase, CBORError, ExactFrom, Simple, CBOR};
+use crate::{ int::From64, CBORCase, Error, Result, ExactFrom, Simple, CBOR };
 
-use super::varint::{EncodeVarInt, MajorType};
+use super::varint::{ EncodeVarInt, MajorType };
 
 /// # Floating Point Number Support in dCBOR
-/// 
+///
 /// dCBOR provides canonical encoding for floating point values through implementation of the
 /// `From<T>` and `TryFrom<CBOR>` traits for `f16`, `f32`, and `f64` types.
-/// 
+///
 /// Per the dCBOR specification, the canonical encoding rules ensure deterministic representation:
-/// 
-/// - Numeric reduction: Floating point values with zero fractional part in range [-2^63, 2^64-1] 
+///
+/// - Numeric reduction: Floating point values with zero fractional part in range [-2^63, 2^64-1]
 ///   are automatically encoded as integers (e.g., 42.0 becomes 42)
 /// - Values are encoded in the smallest possible representation that preserves their value
 /// - All NaN values are canonicalized to a single representation: 0xf97e00
 /// - Positive/negative infinity are canonicalized to half-precision representations
-/// 
+///
 /// ## Example
-/// 
+///
 /// ```
 /// use dcbor::prelude::*;
-/// 
+///
 /// // Create CBOR from floating point values using `into()`
 /// let cbor_integer: CBOR = 42.0.into();  // Numeric reduction: encoded as integer 42
 /// let cbor_float: CBOR = 3.14159.into();  // Encoded as floating point
 /// let cbor_nan: CBOR = f64::NAN.into();  // Canonicalized to 0xf97e00
-/// 
+///
 /// // Convert back to floating point
 /// let value_integer: f64 = cbor_integer.try_into().unwrap();
 /// assert_eq!(value_integer, 42.0);
-/// 
+///
 /// // Maps can use numeric keys with automatic reduction
 /// let mut map = Map::new();
 /// map.insert(1.0, "integer key");    // 1.0 becomes 1
 /// map.insert(2, "another key");      // Integer directly
-/// 
+///
 /// // Verify numeric reduction in maps
 /// let key_value: String = map.extract::<i32, String>(1).unwrap();
 /// assert_eq!(key_value, "integer key");
@@ -65,7 +64,7 @@ impl From<f64> for CBOR {
 pub(crate) fn f64_cbor_data(value: f64) -> Vec<u8> {
     let n = value;
     let f = n as f32;
-    if f as f64 == n {
+    if (f as f64) == n {
         return f32_cbor_data(f);
     }
     if n < 0.0f64 {
@@ -86,12 +85,8 @@ pub(crate) fn f64_cbor_data(value: f64) -> Vec<u8> {
 }
 
 pub(crate) fn validate_canonical_f64(n: f64) -> Result<()> {
-    if
-        n == n as f32 as f64 ||
-        n == n as i64 as f64 ||
-        n.is_nan()
-    {
-        bail!(CBORError::NonCanonicalNumeric);
+    if n == (n as f32 as f64) || n == (n as i64 as f64) || n.is_nan() {
+        return Err(Error::NonCanonicalNumeric);
     }
     Ok(())
 }
@@ -105,18 +100,20 @@ impl TryFrom<CBOR> for f64 {
                 if let Some(f) = f64::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
+            }
             CBORCase::Negative(n) => {
                 if let Some(f) = f64::exact_from_u64(n) {
                     Ok(-1f64 - f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
+            }
             CBORCase::Simple(Simple::Float(n)) => Ok(n),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 }
@@ -158,12 +155,8 @@ pub(crate) fn f32_cbor_data(value: f32) -> Vec<u8> {
 }
 
 pub(crate) fn validate_canonical_f32(n: f32) -> Result<()> {
-    if
-        n == f16::from_f32(n).to_f32() ||
-        n == n as i32 as f32 ||
-        n.is_nan()
-    {
-        bail!(CBORError::NonCanonicalNumeric);
+    if n == f16::from_f32(n).to_f32() || n == (n as i32 as f32) || n.is_nan() {
+        return Err(Error::NonCanonicalNumeric);
     }
     Ok(())
 }
@@ -177,24 +170,26 @@ impl TryFrom<CBOR> for f32 {
                 if let Some(f) = f32::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
+            }
             CBORCase::Negative(n) => {
                 if let Some(f) = f32::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
+            }
             CBORCase::Simple(Simple::Float(n)) => {
                 if let Some(f) = f32::exact_from_f64(n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
-            _ => bail!(CBORError::WrongType)
+            }
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 }
@@ -240,39 +235,38 @@ impl TryFrom<CBOR> for f16 {
                 if let Some(f) = f16::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
+            }
             CBORCase::Negative(n) => {
                 if let Some(f) = f64::exact_from_u64(n) {
                     if let Some(b) = f16::exact_from_f64(-1f64 - f) {
                         Ok(b)
                     } else {
-                        bail!(CBORError::OutOfRange);
+                        return Err(Error::OutOfRange);
                     }
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
+            }
             CBORCase::Simple(Simple::Float(n)) => {
                 if let Some(f) = f16::exact_from_f64(n) {
                     Ok(f)
                 } else {
-                    bail!(CBORError::OutOfRange);
+                    return Err(Error::OutOfRange);
                 }
-            },
-            _ => bail!(CBORError::WrongType)
+            }
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 }
 
 pub(crate) fn validate_canonical_f16(n: f16) -> Result<()> {
     let f = n.to_f64();
-    if
-        f == f as i64 as f64 ||
-        n.is_nan() && n.to_bits() != 0x7e00
-    {
-        bail!(CBORError::NonCanonicalNumeric);
+    if f == (f as i64 as f64) || (n.is_nan() && n.to_bits() != 0x7e00) {
+        return Err(Error::NonCanonicalNumeric);
     }
     Ok(())
 }

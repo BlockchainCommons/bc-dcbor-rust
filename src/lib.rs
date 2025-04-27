@@ -96,7 +96,7 @@ mod array;
 pub use array::CBORSortable;
 
 mod error;
-pub use error::CBORError;
+pub use error::{ Error, Result };
 
 mod date;
 pub use date::Date;

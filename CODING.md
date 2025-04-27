@@ -99,48 +99,6 @@ These documents are in the codebase for reference. Always refer to the latest ve
    ```
    Address any Clippy warnings introduced by documentation changes.
 
-### Public API Items Needing Documentation
-
-This section inventories all public API items that need documentation, ordered from simplest with least dependencies to most complex.
-
-#### Core Data Types and Errors
-
-1. **✅ `CBORError`** (`error.rs`) - Error types for CBOR operations
-2. **✅ `Simple`** (`simple.rs`) - CBOR simple values (true, false, null, float)
-3. **✅ `TagValue`** (`tag.rs`) - Type alias for CBOR tag values
-4. **✅ `Tag`** (`tag.rs`) - CBOR tag representation
-5. **✅ `ByteString`** (`byte_string.rs`) - Byte string representation
-
-#### Traits
-
-1. **✅ `CBOREncodable`** (`cbor_codable.rs`) - Trait for types that can be encoded to CBOR
-2. **✅ `CBORDecodable`** (`cbor_codable.rs`) - Trait for types that can be decoded from CBOR
-3. **✅ `CBORCodable`** (`cbor_codable.rs`) - Combined trait for types that can be both encoded and decoded
-4. **✅ `CBORTagged`** (`cbor_tagged.rs`) - Trait for types with associated CBOR tags
-5. **✅ `CBORTaggedEncodable`** (`cbor_tagged_encodable.rs`) - Trait for encoding tagged types to CBOR
-6. **✅ `CBORTaggedDecodable`** (`cbor_tagged_decodable.rs`) - Trait for decoding tagged types from CBOR
-7. **✅ `CBORTaggedCodable`** (`cbor_tagged_codable.rs`) - Combined trait for tagged types that can be both encoded and decoded
-
-#### Core CBOR Types
-
-1. **✅ `CBOR`** (`cbor.rs`) - Main symbolic representation of CBOR data
-2. **✅ `CBORCase`** (`cbor.rs`) - Enum representing the different types of CBOR data
-3. **✅ `Date`** (`date.rs`) - Date representation in CBOR
-
-#### Collections and Utilities
-
-1. **✅ `MapIter`** (`map.rs`) - Iterator over CBOR map entries
-2. **✅ `Map`** (`map.rs`) - CBOR map implementation
-3. **✅ `CBORSummarizer`** (`tags_store.rs`) - Type for summarizing CBOR values
-4. **✅ `TagsStoreTrait`** (`tags_store.rs`) - Trait for mapping between tags and their names
-5. **✅ `TagsStore`** (`tags_store.rs`) - Dictionary of mappings between tags and their names
-
-#### Functions
-
-1. **✅ `with_tags`** - Macro for working with the global tags registry in a read-only manner
-2. **✅ `with_tags_mut`** - Macro for working with the global tags registry in a mutable manner
-3. **✅ `tags_for_values`** - Function to convert tag values to Tag objects using the global registry
-
 ### API Design Insights
 
 The following insights about the API design of this crate have been learned during documentation:

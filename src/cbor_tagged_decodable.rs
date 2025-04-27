@@ -1,6 +1,4 @@
-use anyhow::{bail, Result, Error};
-
-use crate::{CBOR, CBORError, CBORTagged, CBORCase};
+use crate::{ CBOR, Error, Result, CBORTagged, CBORCase };
 
 /// # Tagged CBOR Decoding Support
 ///
@@ -21,7 +19,6 @@ use crate::{CBOR, CBORError, CBORTagged, CBORCase};
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// use anyhow::{Result, bail};
 ///
 /// // Define a Date type
 /// #[derive(Debug, Clone, PartialEq)]
@@ -45,7 +42,7 @@ use crate::{CBOR, CBORError, CBORTagged, CBORCase};
 ///
 /// // Implement TryFrom<CBOR> (required by CBORTaggedDecodable)
 /// impl TryFrom<CBOR> for Date {
-///     type Error = anyhow::Error;
+///     type Error = Error;
 ///
 ///     fn try_from(cbor: CBOR) -> Result<Self> {
 ///         Self::from_tagged_cbor(cbor)
@@ -90,13 +87,13 @@ use crate::{CBOR, CBORError, CBORTagged, CBORCase};
 ///             let value: String = map.extract("value")?;
 ///             Ok(VersionedData { version, value })
 ///         } else {
-///             bail!("Expected a map")
+///             return Err(Error::WrongType);
 ///         }
 ///     }
 /// }
 ///
 /// impl TryFrom<CBOR> for VersionedData {
-///     type Error = anyhow::Error;
+///     type Error = Error;
 ///
 ///     fn try_from(cbor: CBOR) -> Result<Self> {
 ///         Self::from_tagged_cbor(cbor)
@@ -138,10 +135,12 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
                 if cbor_tags.iter().any(|t| *t == tag) {
                     Self::from_untagged_cbor(item)
                 } else {
-                    bail!(CBORError::WrongTag(cbor_tags[0].clone(), tag))
+                    return Err(Error::WrongTag(cbor_tags[0].clone(), tag));
                 }
-            },
-            _ => bail!(CBORError::WrongType)
+            }
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -150,7 +149,7 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
     /// This is a convenience method that first parses the binary data into a CBOR value,
     /// then uses `from_tagged_cbor()` to decode it.
     fn from_tagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self> where Self: Sized {
-        Self::from_tagged_cbor(CBOR::try_from_data(data).map_err(Error::msg)?)
+        Self::from_tagged_cbor(CBOR::try_from_data(data)?)
     }
 
     /// Creates an instance of this type by decoding it from binary encoded untagged CBOR.
@@ -158,6 +157,6 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
     /// This is a convenience method that first parses the binary data into a CBOR value,
     /// then uses `from_untagged_cbor()` to decode it.
     fn from_untagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self> where Self: Sized {
-        Self::from_untagged_cbor(CBOR::try_from_data(data).map_err(Error::msg)?)
+        Self::from_untagged_cbor(CBOR::try_from_data(data)?)
     }
 }

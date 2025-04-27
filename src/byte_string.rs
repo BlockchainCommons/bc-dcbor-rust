@@ -1,8 +1,6 @@
 import_stdlib!();
 
-use anyhow::Error;
-
-use crate::CBOR;
+use crate::{ CBOR, Error };
 
 /// Represents a CBOR byte string (major type 2).
 ///
@@ -53,7 +51,7 @@ impl ByteString {
     /// Creates a new `ByteString` from any type that can be converted into a byte vector.
     ///
     /// This constructor accepts any type that implements `Into<Vec<u8>>`, which includes
-    /// common types like `Vec<u8>`, arrays `[u8; N]`, slices `&[u8]`, and string slices 
+    /// common types like `Vec<u8>`, arrays `[u8; N]`, slices `&[u8]`, and string slices
     /// `&str` (via the `From<&str>` implementation).
     ///
     /// # Examples
@@ -365,7 +363,6 @@ impl From<ByteString> for CBOR {
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// use anyhow::Result;
 ///
 /// // Converting from a CBOR byte string works
 /// let cbor = CBOR::to_byte_string([1, 2, 3, 4]);
@@ -438,16 +435,14 @@ impl<const N: usize> From<&[u8; N]> for ByteString {
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// use std::convert::TryInto;
 ///
 /// // When the lengths match, conversion succeeds
 /// let bytes = ByteString::new([1, 2, 3, 4]);
 /// let array: [u8; 4] = bytes.try_into().unwrap();
 /// assert_eq!(array, [1, 2, 3, 4]);
-///
 /// // When the lengths don't match, conversion fails
 /// let bytes = ByteString::new([1, 2, 3]);
-/// let result: Result<[u8; 4], _> = bytes.try_into();
+/// let result: core::result::Result<[u8; 4], _> = bytes.try_into();
 /// assert!(result.is_err());
 /// ```
 impl<const N: usize> TryFrom<ByteString> for [u8; N] {
@@ -569,7 +564,7 @@ impl Deref for ByteString {
 pub struct ByteStringIterator<'a> {
     /// The slice being iterated over
     slice: &'a [u8],
-    
+
     /// The current position in the slice
     pos: usize,
 }
@@ -588,5 +583,21 @@ impl<'a> Iterator for ByteStringIterator<'a> {
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_1() {
+        use crate::prelude::*;
+        // When the lengths match, conversion succeeds
+        let bytes = ByteString::new([1, 2, 3, 4]);
+        let array: [u8; 4] = bytes.try_into().unwrap();
+        assert_eq!(array, [1, 2, 3, 4]);
+        // When the lengths don't match, conversion fails
+        let bytes = ByteString::new([1, 2, 3]);
+        let result: core::result::Result<[u8; 4], _> = bytes.try_into();
+        assert!(result.is_err());
     }
 }

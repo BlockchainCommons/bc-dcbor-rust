@@ -1,7 +1,6 @@
 import_stdlib!();
 
-use anyhow::Result;
-use crate::{CBOREncodable, Map, MapIter, CBOR};
+use crate::{ CBOREncodable, Error, Map, MapIter, Result, CBOR };
 
 #[derive(Clone, Default, PartialEq, Eq)]
 pub struct Set(Map);
@@ -30,10 +29,7 @@ impl Set {
     }
 
     /// Inserts a value into the set.
-    pub fn insert<T>(&mut self, value: T)
-    where
-        T: Into<CBOR> + Clone,
-    {
+    pub fn insert<T>(&mut self, value: T) where T: Into<CBOR> + Clone {
         self.0.insert(value.clone(), value)
     }
 
@@ -42,25 +38,20 @@ impl Set {
     }
 
     /// Tests if the set contains a value.
-    pub fn contains<T>(&self, value: T) -> bool
-    where
-        T: Into<CBOR>,
-    {
+    pub fn contains<T>(&self, value: T) -> bool where T: Into<CBOR> {
         self.0.contains_key(value)
     }
 }
 
 impl Set {
     pub fn as_vec(&self) -> Vec<CBOR> {
-        self.0.iter()
+        self.0
+            .iter()
             .map(|(_, v)| v.clone())
             .collect()
     }
 
-    pub fn from_vec<T>(vec: Vec<T>) -> Self
-    where
-        T: Into<CBOR> + Clone,
-    {
+    pub fn from_vec<T>(vec: Vec<T>) -> Self where T: Into<CBOR> + Clone {
         let mut set = Set::new();
         for item in vec {
             set.insert(item);
@@ -68,10 +59,7 @@ impl Set {
         set
     }
 
-    pub fn try_from_vec<T>(vec: Vec<T>) -> Result<Self>
-    where
-        T: Into<CBOR> + Clone,
-    {
+    pub fn try_from_vec<T>(vec: Vec<T>) -> Result<Self> where T: Into<CBOR> + Clone {
         let mut set = Set::new();
         for item in vec {
             set.insert_next(item.into())?;
@@ -90,22 +78,16 @@ impl From<Set> for CBOR {
     }
 }
 
-impl<T> TryFrom<Vec<T>> for Set
-where
-    T: Into<CBOR> + Clone,
-{
-    type Error = anyhow::Error;
+impl<T> TryFrom<Vec<T>> for Set where T: Into<CBOR> + Clone {
+    type Error = Error;
 
     fn try_from(vec: Vec<T>) -> Result<Self> {
         Self::try_from_vec(vec)
     }
 }
 
-impl<T> TryFrom<Set> for Vec<T>
-where
-    T: TryFrom<CBOR, Error = anyhow::Error> + Clone,
-{
-    type Error = anyhow::Error;
+impl<T> TryFrom<Set> for Vec<T> where T: TryFrom<CBOR, Error = Error> + Clone {
+    type Error = Error;
 
     fn try_from(set: Set) -> Result<Self> {
         set.as_vec()
@@ -115,20 +97,14 @@ where
     }
 }
 
-impl<T> From<HashSet<T>> for Set
-where
-    T: Into<CBOR> + Clone,
-{
+impl<T> From<HashSet<T>> for Set where T: Into<CBOR> + Clone {
     fn from(vec: HashSet<T>) -> Self {
         Self::from_vec(vec.into_iter().collect())
     }
 }
 
-impl<T> TryFrom<Set> for HashSet<T>
-where
-    T: TryFrom<CBOR, Error = anyhow::Error> + Clone + Eq + hash::Hash,
-{
-    type Error = anyhow::Error;
+impl<T> TryFrom<Set> for HashSet<T> where T: TryFrom<CBOR, Error = Error> + Clone + Eq + hash::Hash {
+    type Error = Error;
 
     fn try_from(set: Set) -> Result<Self> {
         set.as_vec()
@@ -145,7 +121,7 @@ impl fmt::Debug for Set {
 }
 
 #[derive(Debug)]
-pub struct SetIter<'a> (MapIter<'a>);
+pub struct SetIter<'a>(MapIter<'a>);
 
 impl<'a> SetIter<'a> {
     pub fn new(iter: MapIter<'a>) -> Self {

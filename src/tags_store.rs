@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{Tag, TagValue, CBOR};
+use crate::{ Tag, TagValue, CBOR, Result };
 
 /// A function type for summarizing CBOR values as human-readable strings.
 ///
@@ -25,31 +25,29 @@ use crate::{Tag, TagValue, CBOR};
 /// ```
 /// use dcbor::prelude::*;
 /// use std::sync::Arc;
-/// use anyhow::Result;
-/// 
+///
 /// // Create a custom summarizer for a date tag
 /// let date_summarizer: CBORSummarizer = Arc::new(|cbor| {
-///     // Extract timestamp from tagged CBOR 
-///     let timestamp: f64 = cbor.clone().try_into().map_err(|_| 
-///         anyhow::anyhow!("Expected numeric timestamp"))?;
-///     
+///     // Extract timestamp from tagged CBOR
+///     let timestamp: f64 = cbor.clone().try_into()?;
+///
 ///     // Format timestamp as ISO date (simplified example)
 ///     Ok(format!("Date: {:.1} seconds since epoch", timestamp))
 /// });
-/// 
+///
 /// // Create a tags store
 /// let mut tags = TagsStore::default();
-/// 
+///
 /// // Register a tag for date (tag 1 is the standard CBOR tag for dates)
 /// tags.insert(Tag::new(1, "date".to_string()));
-/// 
+///
 /// // Register our summarizer for tag 1
 /// tags.set_summarizer(1, date_summarizer);
 /// ```
 ///
 /// When this summarizer is used (for example in diagnostic output), it would
 /// convert a tagged CBOR timestamp into a more readable date format.
-pub type CBORSummarizer = Arc<dyn Fn(CBOR) -> anyhow::Result<String> + Send + Sync>;
+pub type CBORSummarizer = Arc<dyn (Fn(CBOR) -> Result<String>) + Send + Sync>;
 
 /// A trait for types that can map between CBOR tags and their human-readable names.
 ///
@@ -74,17 +72,17 @@ pub type CBORSummarizer = Arc<dyn Fn(CBOR) -> anyhow::Result<String> + Send + Sy
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// 
+///
 /// // Create a store that implements TagsStoreTrait
 /// let mut tags = TagsStore::default();
-/// 
+///
 /// // Register a tag with a human-readable name
 /// tags.insert(Tag::new(1, "date".to_string()));
-/// 
+///
 /// // Look up tag by number
 /// let tag_name = tags.name_for_value(1);
 /// assert_eq!(tag_name, "date");
-/// 
+///
 /// // Look up tag by name
 /// let tag = tags.tag_for_name("date").unwrap();
 /// assert_eq!(tag.value(), 1);
@@ -99,15 +97,17 @@ pub trait TagsStoreTrait {
     fn name_for_value(&self, value: u64) -> String;
     fn summarizer(&self, tag: TagValue) -> Option<&CBORSummarizer>;
 
-    fn name_for_tag_opt<T>(tag: &Tag, tags: Option<&T>) -> String where T: TagsStoreTrait, Self: Sized {
+    fn name_for_tag_opt<T>(tag: &Tag, tags: Option<&T>) -> String
+        where T: TagsStoreTrait, Self: Sized
+    {
         match tags {
             None => tag.value().to_string(),
-            Some(tags) => tags.name_for_tag(tag)
+            Some(tags) => tags.name_for_tag(tag),
         }
     }
 }
 
-/// A registry that maintains mappings between CBOR tags, their human-readable names, 
+/// A registry that maintains mappings between CBOR tags, their human-readable names,
 /// and optional summarizers.
 ///
 /// The `TagsStore` is the primary implementation of the [`TagsStoreTrait`], providing
@@ -136,22 +136,22 @@ pub trait TagsStoreTrait {
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// 
+///
 /// // Create a new TagsStore with a set of predefined tags
 /// let mut tags = TagsStore::new([
 ///     Tag::new(1, "date".to_string()),
 ///     Tag::new(2, "positive_bignum".to_string()),
 ///     Tag::new(3, "negative_bignum".to_string())
 /// ]);
-/// 
+///
 /// // Look up a tag by its value
 /// let date_tag = tags.tag_for_value(1).unwrap();
 /// assert_eq!(date_tag.name().unwrap(), "date");
-/// 
+///
 /// // Look up a tag name by value
 /// let name = tags.name_for_value(2);
 /// assert_eq!(name, "positive_bignum");
-/// 
+///
 /// // Look up a tag by its name
 /// let neg_tag = tags.tag_for_name("negative_bignum").unwrap();
 /// assert_eq!(neg_tag.value(), 3);
@@ -162,20 +162,20 @@ pub trait TagsStoreTrait {
 /// ```
 /// use dcbor::prelude::*;
 /// use std::sync::Arc;
-/// 
+///
 /// // Create an empty tags store
 /// let mut tags = TagsStore::default();
-/// 
+///
 /// // Register a tag
 /// tags.insert(Tag::new(1, "date".to_string()));
-/// 
+///
 /// // Add a summarizer for the date tag
 /// tags.set_summarizer(1, Arc::new(|cbor| {
 ///     // Try to convert CBOR to f64 for timestamp formatting
 ///     let timestamp: f64 = cbor.clone().try_into().unwrap_or(0.0);
 ///     Ok(format!("Timestamp: {}", timestamp))
 /// }));
-/// 
+///
 /// // Later, this summarizer can be retrieved and used
 /// let date_summarizer = tags.summarizer(1);
 /// assert!(date_summarizer.is_some());
@@ -194,7 +194,7 @@ pub struct TagsStore {
 }
 
 impl TagsStore {
-    pub fn new<T>(tags: T) -> Self where T: IntoIterator<Item=Tag> {
+    pub fn new<T>(tags: T) -> Self where T: IntoIterator<Item = Tag> {
         let mut tags_by_value = HashMap::new();
         let mut tags_by_name = HashMap::new();
         for tag in tags {
@@ -211,11 +211,21 @@ impl TagsStore {
         Self::_insert(tag, &mut self.tags_by_value, &mut self.tags_by_name);
     }
 
+    pub fn insert_all(&mut self, tags: Vec<Tag>) {
+        for tag in tags {
+            Self::_insert(tag, &mut self.tags_by_value, &mut self.tags_by_name);
+        }
+    }
+
     pub fn set_summarizer(&mut self, tag: TagValue, summarizer: CBORSummarizer) {
         self.summarizers.insert(tag, summarizer);
     }
 
-    fn _insert(tag: Tag, tags_by_value: &mut HashMap<u64, Tag>, tags_by_name: &mut HashMap<String, Tag>) {
+    fn _insert(
+        tag: Tag,
+        tags_by_value: &mut HashMap<u64, Tag>,
+        tags_by_name: &mut HashMap<String, Tag>
+    ) {
         let name = tag.name().unwrap();
         assert!(!name.is_empty());
         let result = tags_by_value.insert(tag.value(), tag.clone());
@@ -223,7 +233,12 @@ impl TagsStore {
             // if the names don't match, we have a problem
             let old_name = old_value.name().unwrap();
             if old_name != name {
-                panic!("Attempt to register tag: {} '{}' with different name: '{}'", tag.value(), old_name, name);
+                panic!(
+                    "Attempt to register tag: {} '{}' with different name: '{}'",
+                    tag.value(),
+                    old_name,
+                    name
+                );
             }
         }
         tags_by_name.insert(name, tag);

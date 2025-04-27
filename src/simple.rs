@@ -1,8 +1,6 @@
 import_stdlib!();
 
-use anyhow::{ bail, Error, Result };
-
-use crate::{ float::f64_cbor_data, CBORCase, CBORError, CBOR };
+use crate::{ float::f64_cbor_data, CBORCase, Error, Result, CBOR };
 
 use super::varint::{ EncodeVarInt, MajorType };
 
@@ -158,7 +156,9 @@ impl TryFrom<CBOR> for Simple {
     fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Simple(simple) => Ok(simple),
-            _ => bail!(CBORError::WrongType),
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 }

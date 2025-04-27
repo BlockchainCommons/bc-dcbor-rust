@@ -18,6 +18,7 @@ pub(crate) mod with_std {
     pub(crate) use std::sync::{Arc, Once, Mutex, MutexGuard};
     pub(crate) use std::time::Duration;
     pub(crate) use std::vec::Vec;
+    pub(crate) use std::result::Result as StdResult;
     pub(crate) use thiserror::Error as ThisError;
 }
 
@@ -38,6 +39,7 @@ pub(crate) mod without_std {
     pub(crate) use alloc::sync::Arc;
     pub(crate) use alloc::vec;
     pub(crate) use alloc::vec::Vec;
+    pub(crate) use core::result::Result as StdResult;
     pub(crate) use core::array::TryFromSliceError;
     pub(crate) use core::cmp;
     pub(crate) use core::hash;
@@ -46,9 +48,6 @@ pub(crate) mod without_std {
     pub(crate) use hashbrown::{HashSet, HashMap};
     pub(crate) use spin::{Once, Mutex, MutexGuard};
     pub(crate) use thiserror_no_std::Error as ThisError;
-
-    // Commented out unused trait
-    // pub(crate) trait StdError: fmt::Debug + fmt::Display { }
 }
 
 // Re-export items that are needed in the public API

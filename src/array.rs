@@ -1,8 +1,6 @@
 import_stdlib!();
 
-use crate::{error::CBORError, CBORCase, CBOR};
-
-use anyhow::{bail, Error, Result};
+use crate::{ Error, CBORCase, CBOR };
 
 /// # Array Support in dCBOR
 ///
@@ -45,135 +43,139 @@ use anyhow::{bail, Error, Result};
 /// ```
 impl<T> From<Vec<T>> for CBOR where T: Into<CBOR> {
     fn from(vec: Vec<T>) -> Self {
-        CBORCase::Array(vec.into_iter().map(|x| x.into()).collect()).into()
+        CBORCase::Array(
+            vec
+                .into_iter()
+                .map(|x| x.into())
+                .collect()
+        ).into()
     }
 }
 
 impl<T> From<&[T]> for CBOR where T: Into<CBOR> + Clone {
     fn from(array: &[T]) -> Self {
-        CBORCase::Array(array.iter().map(|x| x.clone().into()).collect()).into()
+        CBORCase::Array(
+            array
+                .iter()
+                .map(|x| x.clone().into())
+                .collect()
+        ).into()
     }
 }
 
-impl<T> TryFrom<CBOR> for Vec<T>
-where
-    T: TryFrom<CBOR, Error = Error> + Clone,
-{
+impl<T> TryFrom<CBOR> for Vec<T> where T: TryFrom<CBOR, Error = Error> + Clone {
     type Error = Error;
 
-    fn try_from(cbor: CBOR) -> Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = Vec::new();
                 for cbor in cbor_array {
-                    result.push(cbor.try_into()?);
+                    result.push(T::try_from(cbor)?);
                 }
                 Ok(result)
-            },
-            _ => panic!()
+            }
+            _ => Err(Error::WrongType),
         }
     }
 }
 
 impl<T, const N: usize> From<[T; N]> for CBOR where T: Into<CBOR> {
     fn from(array: [T; N]) -> Self {
-        CBORCase::Array(array.into_iter().map(|x| x.into()).collect()).into()
+        CBORCase::Array(
+            array
+                .into_iter()
+                .map(|x| x.into())
+                .collect()
+        ).into()
     }
 }
 
 impl<T> From<VecDeque<T>> for CBOR where T: Into<CBOR> {
     fn from(deque: VecDeque<T>) -> Self {
-        CBORCase::Array(deque.into_iter().map(|x| x.into()).collect()).into()
+        CBORCase::Array(
+            deque
+                .into_iter()
+                .map(|x| x.into())
+                .collect()
+        ).into()
     }
 }
 
-impl<T> TryFrom<CBOR> for VecDeque<T>
-where
-    T: TryFrom<CBOR, Error = Error> + Clone,
-{
+impl<T> TryFrom<CBOR> for VecDeque<T> where T: TryFrom<CBOR, Error = Error> + Clone {
     type Error = Error;
 
-    fn try_from(cbor: CBOR) -> Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = VecDeque::new();
                 for cbor in cbor_array {
-                    result.push_back(cbor.try_into()?);
+                    result.push_back(T::try_from(cbor)?);
                 }
                 Ok(result)
-            },
-            _ => bail!(CBORError::WrongType)
+            }
+            _ => Err(Error::WrongType),
         }
     }
 }
 
 impl<T> From<HashSet<T>> for CBOR where T: Into<CBOR> {
     fn from(set: HashSet<T>) -> Self {
-        CBORCase::Array(set.into_iter().map(|x| x.into()).collect()).into()
+        CBORCase::Array(
+            set
+                .into_iter()
+                .map(|x| x.into())
+                .collect()
+        ).into()
     }
 }
 
-impl<T> TryFrom<CBOR> for HashSet<T>
-where
-    T: TryFrom<CBOR, Error = Error> + Eq + hash::Hash + Clone,
-{
+impl<T> TryFrom<CBOR> for HashSet<T> where T: TryFrom<CBOR, Error = Error> + Eq + hash::Hash + Clone {
     type Error = Error;
 
-    fn try_from(cbor: CBOR) -> Result<Self> {
+    fn try_from(cbor: CBOR) -> Result<Self, Self::Error> {
         match cbor.into_case() {
             CBORCase::Array(cbor_array) => {
                 let mut result = HashSet::new();
                 for cbor in cbor_array {
-                    result.insert(cbor.try_into()?);
+                    result.insert(T::try_from(cbor)?);
                 }
                 Ok(result)
-            },
-            _ => bail!(CBORError::WrongType)
+            }
+            _ => Err(Error::WrongType),
         }
     }
 }
 
-pub fn sort_array_by_cbor_encoding<T>(array: impl AsRef<[T]>) -> Vec<T>
-where
-    T: Into<CBOR> + Clone,
-{
+pub fn sort_array_by_cbor_encoding<T>(array: impl AsRef<[T]>) -> Vec<T> where T: Into<CBOR> + Clone {
     let mut a: Vec<(Vec<u8>, T)> = array
         .as_ref()
         .iter()
         .map(|item| (item.clone().into().to_cbor_data(), item.clone()))
         .collect();
     a.sort_by(|a, b| a.0.cmp(&b.0));
-    a.into_iter().map(|(_, item)| item).collect()
+    a.into_iter()
+        .map(|(_, item)| item)
+        .collect()
 }
 
 pub trait CBORSortable<T> {
-    fn sort_by_cbor_encoding(&self) -> Vec<T>
-    where
-        Self: Sized + Into<CBOR> + Clone;
+    fn sort_by_cbor_encoding(&self) -> Vec<T> where Self: Sized + Into<CBOR> + Clone;
 }
 
-impl<T> CBORSortable<T> for Vec<T>
-where
-    T: Into<CBOR> + Clone,
-{
+impl<T> CBORSortable<T> for Vec<T> where T: Into<CBOR> + Clone {
     fn sort_by_cbor_encoding(&self) -> Vec<T> {
         sort_array_by_cbor_encoding(self)
     }
 }
 
-impl<T> CBORSortable<T> for &[T]
-where
-    T: Into<CBOR> + Clone,
-{
+impl<T> CBORSortable<T> for &[T] where T: Into<CBOR> + Clone {
     fn sort_by_cbor_encoding(&self) -> Vec<T> {
         sort_array_by_cbor_encoding(self)
     }
 }
 
-impl<T> CBORSortable<T> for HashSet<T>
-where
-    T: Into<CBOR> + Clone,
-{
+impl<T> CBORSortable<T> for HashSet<T> where T: Into<CBOR> + Clone {
     fn sort_by_cbor_encoding(&self) -> Vec<T> {
         let array: Vec<T> = self.iter().cloned().collect();
         array.sort_by_cbor_encoding()

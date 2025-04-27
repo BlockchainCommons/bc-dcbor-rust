@@ -1,10 +1,15 @@
 import_stdlib!();
 
-use anyhow::{bail, Result, Error};
 use half::f16;
 use unicode_normalization::is_nfc;
 
-use crate::{CBOR, Map, error::CBORError, float::{validate_canonical_f16, validate_canonical_f32, validate_canonical_f64}, CBORCase};
+use crate::{
+    CBOR,
+    Map,
+    error::{ Error, Result },
+    float::{ validate_canonical_f16, validate_canonical_f32, validate_canonical_f64 },
+    CBORCase,
+};
 
 use super::varint::MajorType;
 
@@ -16,7 +21,7 @@ pub fn decode_cbor(data: impl AsRef<[u8]>) -> Result<CBOR> {
     let (cbor, len) = decode_cbor_internal(data)?;
     let remaining = data.len() - len;
     if remaining > 0 {
-        bail!(CBORError::UnusedData(remaining));
+        return Err(Error::UnusedData(remaining));
     }
     Ok(cbor)
 }
@@ -31,7 +36,7 @@ fn parse_header(header: u8) -> (MajorType, u8) {
         5 => MajorType::Map,
         6 => MajorType::Tagged,
         7 => MajorType::Simple,
-        _ => panic!()
+        _ => panic!(),
     };
     let header_value = header & 31;
     (major_type, header_value)
@@ -39,7 +44,7 @@ fn parse_header(header: u8) -> (MajorType, u8) {
 
 fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize)> {
     if data.is_empty() {
-        bail!(CBORError::Underrun)
+        return Err(Error::Underrun);
     }
     let header = data[0];
     let (major_type, header_value) = parse_header(header);
@@ -47,35 +52,43 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize)> {
     let (value, varint_len) = match header_value {
         0..=23 => (header_value as u64, 1),
         24 => {
-            if data_remaining < 1 { bail!(CBORError::Underrun); }
+            if data_remaining < 1 {
+                return Err(Error::Underrun);
+            }
             let val = data[1] as u64;
-            if val < 24 { bail!(CBORError::NonCanonicalNumeric) }
+            if val < 24 {
+                return Err(Error::NonCanonicalNumeric);
+            }
             (val, 2)
-        },
+        }
         25 => {
-            if data_remaining < 2 { bail!(CBORError::Underrun); }
-            let val =
-                ((data[1] as u64) << 8) |
-                (data[2] as u64);
-            if val <= u8::MAX as u64 && header != 0xf9 {
-                bail!(CBORError::NonCanonicalNumeric)
+            if data_remaining < 2 {
+                return Err(Error::Underrun);
+            }
+            let val = ((data[1] as u64) << 8) | (data[2] as u64);
+            if val <= (u8::MAX as u64) && header != 0xf9 {
+                return Err(Error::NonCanonicalNumeric);
             }
             (val, 3)
-        },
+        }
         26 => {
-            if data_remaining < 4 { bail!(CBORError::Underrun); }
+            if data_remaining < 4 {
+                return Err(Error::Underrun);
+            }
             let val =
                 ((data[1] as u64) << 24) |
                 ((data[2] as u64) << 16) |
                 ((data[3] as u64) << 8) |
                 (data[4] as u64);
-            if val <= u16::MAX as u64 && header != 0xfa {
-                bail!(CBORError::NonCanonicalNumeric)
+            if val <= (u16::MAX as u64) && header != 0xfa {
+                return Err(Error::NonCanonicalNumeric);
             }
             (val, 5)
-        },
+        }
         27 => {
-            if data_remaining < 8 { bail!(CBORError::Underrun); }
+            if data_remaining < 8 {
+                return Err(Error::Underrun);
+            }
             let val =
                 ((data[1] as u64) << 56) |
                 ((data[2] as u64) << 48) |
@@ -85,26 +98,28 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize)> {
                 ((data[6] as u64) << 16) |
                 ((data[7] as u64) << 8) |
                 (data[8] as u64);
-            if val <= u32::MAX as u64 && header != 0xfb {
-                bail!(CBORError::NonCanonicalNumeric)
+            if val <= (u32::MAX as u64) && header != 0xfb {
+                return Err(Error::NonCanonicalNumeric);
             }
             (val, 9)
-        },
-        v => bail!(CBORError::UnsupportedHeaderValue(v))
+        }
+        v => {
+            return Err(Error::UnsupportedHeaderValue(v));
+        }
     };
     Ok((major_type, value, varint_len))
 }
 
 fn parse_bytes(data: &[u8], len: usize) -> Result<&[u8]> {
     if data.len() < len {
-        bail!(CBORError::Underrun);
+        return Err(Error::Underrun);
     }
     Ok(&data[0..len])
 }
 
 fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
     if data.is_empty() {
-        bail!(CBORError::Underrun)
+        return Err(Error::Underrun);
     }
     let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
@@ -112,18 +127,20 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
         MajorType::Negative => Ok((CBORCase::Negative(value).into(), header_varint_len)),
         MajorType::ByteString => {
             let data_len = value as usize;
-            let bytes = parse_bytes(&data[header_varint_len..], data_len)?.to_vec().into();
+            let bytes = parse_bytes(&data[header_varint_len..], data_len)?
+                .to_vec()
+                .into();
             Ok((CBORCase::ByteString(bytes).into(), header_varint_len + data_len))
-        },
+        }
         MajorType::Text => {
             let data_len = value as usize;
             let buf = parse_bytes(&data[header_varint_len..], data_len)?;
-            let string = str::from_utf8(buf).map_err(Error::msg)?;
+            let string = str::from_utf8(buf)?;
             if !is_nfc(string) {
-                bail!(CBORError::NonCanonicalString)
+                return Err(Error::NonCanonicalString);
             }
             Ok((string.into(), header_varint_len + data_len))
-        },
+        }
         MajorType::Array => {
             let mut pos = header_varint_len;
             let mut items = Vec::new();
@@ -133,7 +150,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
                 pos += item_len;
             }
             Ok((items.into(), pos))
-        },
+        }
         MajorType::Map => {
             let mut pos = header_varint_len;
             let mut map = Map::new();
@@ -145,37 +162,37 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
                 map.insert_next(key, value)?;
             }
             Ok((map.into(), pos))
-        },
+        }
         MajorType::Tagged => {
             let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
             let tagged = CBOR::to_tagged_value(value, item);
             Ok((tagged, header_varint_len + item_len))
-        },
+        }
         MajorType::Simple => {
             match header_varint_len {
                 3 => {
                     let f = f16::from_bits(value as u16);
                     validate_canonical_f16(f)?;
                     Ok((f.into(), header_varint_len))
-                },
+                }
                 5 => {
                     let f = f32::from_bits(value as u32);
                     validate_canonical_f32(f)?;
                     Ok((f.into(), header_varint_len))
-                },
+                }
                 9 => {
                     let f = f64::from_bits(value);
                     validate_canonical_f64(f)?;
                     Ok((f.into(), header_varint_len))
-                },
+                }
                 _ => {
                     match value {
                         20 => Ok((CBOR::r#false(), header_varint_len)),
                         21 => Ok((CBOR::r#true(), header_varint_len)),
                         22 => Ok((CBOR::null(), header_varint_len)),
                         _ => {
-                            bail!(CBORError::InvalidSimpleValue)
-                        },
+                            return Err(Error::InvalidSimpleValue);
+                        }
                     }
                 }
             }

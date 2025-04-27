@@ -3,10 +3,17 @@ import_stdlib!();
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
-use anyhow::{bail, Result};
 use unicode_normalization::UnicodeNormalization;
 
-use crate::{decode::decode_cbor, error::CBORError, tag::Tag, varint::{EncodeVarInt, MajorType}, Map, Simple, ByteString};
+use crate::{
+    decode::decode_cbor,
+    error::{ Error, Result },
+    tag::Tag,
+    varint::{ EncodeVarInt, MajorType },
+    Map,
+    Simple,
+    ByteString,
+};
 
 use super::string_util::flanked;
 
@@ -195,7 +202,7 @@ pub enum CBORCase {
     ///
     /// Represents simple values like true, false, null, and floating-point
     /// numbers. In dCBOR, only a limited set of simple values are allowed.
-    Simple(Simple)
+    Simple(Simple),
 }
 
 /// Methods for decoding CBOR from binary representation and encoding to binary.
@@ -307,26 +314,26 @@ impl CBOR {
                 let mut buf = x.len().encode_varint(MajorType::ByteString);
                 buf.extend(x);
                 buf
-            },
+            }
             CBORCase::Text(x) => {
                 let nfc = x.nfc().collect::<String>();
                 let mut buf = nfc.len().encode_varint(MajorType::Text);
                 buf.extend(nfc.as_bytes());
                 buf
-            },
+            }
             CBORCase::Array(x) => {
                 let mut buf = x.len().encode_varint(MajorType::Array);
                 for item in x {
                     buf.extend(item.to_cbor_data());
                 }
                 buf
-            },
+            }
             CBORCase::Map(x) => x.cbor_data(),
             CBORCase::Tagged(tag, item) => {
                 let mut buf = tag.value().encode_varint(MajorType::Tagged);
                 buf.extend(item.to_cbor_data());
                 buf
-            },
+            }
             CBORCase::Simple(x) => x.cbor_data(),
         }
     }
@@ -446,7 +453,9 @@ impl CBOR {
     pub fn try_into_byte_string(self) -> Result<Vec<u8>> {
         match self.into_case() {
             CBORCase::ByteString(b) => Ok(b.into()),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -460,7 +469,9 @@ impl CBOR {
     pub fn try_into_text(self) -> Result<String> {
         match self.into_case() {
             CBORCase::Text(t) => Ok(t),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -470,7 +481,9 @@ impl CBOR {
     pub fn try_into_array(self) -> Result<Vec<CBOR>> {
         match self.into_case() {
             CBORCase::Array(a) => Ok(a),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -480,7 +493,9 @@ impl CBOR {
     pub fn try_into_map(self) -> Result<Map> {
         match self.into_case() {
             CBORCase::Map(m) => Ok(m),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -490,7 +505,9 @@ impl CBOR {
     pub fn try_into_tagged_value(self) -> Result<(Tag, CBOR)> {
         match self.into_case() {
             CBORCase::Tagged(tag, value) => Ok((tag, value)),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -504,7 +521,7 @@ impl CBOR {
         if tag == expected_tag {
             Ok(value)
         } else {
-            bail!(CBORError::WrongTag(expected_tag, tag))
+            return Err(Error::WrongTag(expected_tag, tag));
         }
     }
 
@@ -514,7 +531,9 @@ impl CBOR {
     pub fn try_into_simple_value(self) -> Result<Simple> {
         match self.into_case() {
             CBORCase::Simple(s) => Ok(s),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 }
@@ -543,7 +562,9 @@ impl CBOR {
         match self.into_case() {
             CBORCase::Simple(Simple::True) => Ok(true),
             CBORCase::Simple(Simple::False) => Ok(false),
-            _ => bail!(CBORError::WrongType)
+            _ => {
+                return Err(Error::WrongType);
+            }
         }
     }
 
@@ -592,12 +613,18 @@ fn format_string(s: &str) -> String {
 }
 
 fn format_array(a: &[CBOR]) -> String {
-    let s: Vec<String> = a.iter().map(|x| format!("{}", x)).collect();
+    let s: Vec<String> = a
+        .iter()
+        .map(|x| format!("{}", x))
+        .collect();
     flanked(&s.join(", "), "[", "]")
 }
 
 fn format_map(m: &Map) -> String {
-    let s: Vec<String> = m.iter().map(|x| format!("{}: {}", x.0, x.1)).collect();
+    let s: Vec<String> = m
+        .iter()
+        .map(|x| format!("{}: {}", x.0, x.1))
+        .collect();
     flanked(&s.join(", "), "{", "}")
 }
 
@@ -605,7 +632,11 @@ impl fmt::Debug for CBOR {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.as_case() {
             CBORCase::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
-            CBORCase::Negative(x) => f.debug_tuple("negative").field(&(-1 - (*x as i128))).finish(),
+            CBORCase::Negative(x) =>
+                f
+                    .debug_tuple("negative")
+                    .field(&(-1 - (*x as i128)))
+                    .finish(),
             CBORCase::ByteString(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
             CBORCase::Text(x) => f.debug_tuple("text").field(x).finish(),
             CBORCase::Array(x) => f.debug_tuple("array").field(x).finish(),

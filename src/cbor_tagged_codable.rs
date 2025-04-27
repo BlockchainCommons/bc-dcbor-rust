@@ -1,8 +1,8 @@
 use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 
 /// # Tagged CBOR Encoding and Decoding Support
-/// 
-/// This module provides the `CBORTaggedCodable` trait, which serves as a convenience 
+///
+/// This module provides the `CBORTaggedCodable` trait, which serves as a convenience
 /// marker for types that can be both encoded to and decoded from tagged CBOR values.
 ///
 /// The trait is automatically implemented for any type that implements both
@@ -17,7 +17,6 @@ use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// use anyhow::{Result, bail};
 ///
 /// // Define a Date type
 /// #[derive(Debug, Clone, PartialEq)]
@@ -47,7 +46,7 @@ use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 ///
 /// // Implement TryFrom<CBOR> (required by CBORTaggedDecodable)
 /// impl TryFrom<CBOR> for Date {
-///     type Error = anyhow::Error;
+///     type Error = Error;
 ///
 ///     fn try_from(cbor: CBOR) -> Result<Self> {
 ///         Self::from_tagged_cbor(cbor)

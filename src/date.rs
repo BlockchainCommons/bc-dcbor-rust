@@ -1,21 +1,19 @@
 import_stdlib!();
 
 #[cfg(feature = "std")]
-use std::ops::{Add, Sub};
+use std::ops::{ Add, Sub };
 
 #[cfg(not(feature = "std"))]
-use core::ops::{Add, Sub};
+use core::ops::{ Add, Sub };
 
-use chrono::{DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike};
+use chrono::{ DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike };
 
-use anyhow::{bail, Error, Result};
-
-use crate::{CBORTaggedEncodable, Tag, CBOR, CBORTaggedDecodable, CBORTagged};
+use crate::{ CBORTaggedEncodable, Tag, CBOR, CBORTaggedDecodable, CBORTagged, Error, Result };
 
 /// A CBOR-friendly representation of a date and time.
 ///
-/// The `Date` type provides a wrapper around `chrono::DateTime<Utc>` that supports 
-/// encoding and decoding to/from CBOR with tag 1, following the CBOR date/time 
+/// The `Date` type provides a wrapper around `chrono::DateTime<Utc>` that supports
+/// encoding and decoding to/from CBOR with tag 1, following the CBOR date/time
 /// standard specified in [RFC 8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-date-and-time-tag-1-and-co).
 ///
 /// When encoded to CBOR, dates are represented as tag 1 followed by a numeric value
@@ -35,10 +33,10 @@ use crate::{CBORTaggedEncodable, Tag, CBOR, CBORTaggedDecodable, CBORTagged};
 /// ```
 /// use dcbor::prelude::*;
 /// use dcbor::Date;
-/// 
+///
 /// // Create a date from a timestamp (seconds since Unix epoch)
 /// let date = Date::from_timestamp(1675854714.0);
-/// 
+///
 /// // Create a date from year, month, day
 /// let date = Date::from_ymd(2023, 2, 8);
 ///
@@ -138,7 +136,14 @@ impl Date {
     /// # Panics
     ///
     /// This method panics if the provided components do not form a valid date and time.
-    pub fn from_ymd_hms(year: i32, month: u32, day: u32, hour: u32, minute: u32, second: u32) -> Self {
+    pub fn from_ymd_hms(
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: u32,
+        minute: u32,
+        second: u32
+    ) -> Self {
         let dt = Utc.with_ymd_and_hms(year, month, day, hour, minute, second).unwrap();
         Self::from_datetime(dt)
     }
@@ -182,7 +187,7 @@ impl Date {
     /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
     ///
     /// This method parses a string representation of a date or date-time in ISO-8601/RFC-3339 format
-    /// and creates a new `Date` instance. It supports both full date-time strings (e.g., 
+    /// and creates a new `Date` instance. It supports both full date-time strings (e.g.,
     /// "2023-02-08T15:30:45Z") and date-only strings (e.g., "2023-02-08").
     ///
     /// # Arguments
@@ -219,7 +224,7 @@ impl Date {
             return Ok(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
         }
 
-        bail!("Invalid date string")
+        return Err(Error::InvalidDate("Invalid date string".into()));
     }
 
     /// Creates a new `Date` containing the current date and time.
@@ -310,7 +315,7 @@ impl Date {
         let d = self.datetime();
         let whole_seconds_since_unix_epoch = d.timestamp();
         let nsecs = d.nanosecond();
-        (whole_seconds_since_unix_epoch as f64) + ((nsecs as f64) / 1_000_000_000.0)
+        (whole_seconds_since_unix_epoch as f64) + (nsecs as f64) / 1_000_000_000.0
     }
 }
 
