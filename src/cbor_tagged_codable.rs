@@ -38,7 +38,7 @@ use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 ///
 /// // Implement decoding from tagged CBOR
 /// impl CBORTaggedDecodable for Date {
-///     fn from_untagged_cbor(cbor: CBOR) -> Result<Self> {
+///     fn from_untagged_cbor(cbor: CBOR) -> dcbor::Result<Self> {
 ///         let timestamp: f64 = cbor.try_into()?;
 ///         Ok(Date(timestamp))
 ///     }
@@ -46,9 +46,9 @@ use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 ///
 /// // Implement TryFrom<CBOR> (required by CBORTaggedDecodable)
 /// impl TryFrom<CBOR> for Date {
-///     type Error = Error;
+///     type Error = dcbor::Error;
 ///
-///     fn try_from(cbor: CBOR) -> Result<Self> {
+///     fn try_from(cbor: CBOR) -> dcbor::Result<Self> {
 ///         Self::from_tagged_cbor(cbor)
 ///     }
 /// }

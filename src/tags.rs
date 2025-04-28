@@ -122,7 +122,7 @@ macro_rules! with_tags {
 ///     tags.insert(Tag::new(100, "custom-tag".to_string()));
 ///
 ///     // Add a summarizer for the tag
-///     tags.set_summarizer(100, Arc::new(|cbor| -> Result<String> {
+///     tags.set_summarizer(100, Arc::new(|cbor| -> dcbor::Result<String> {
 ///         Ok(format!("Custom tag content: {:?}", cbor))
 ///     }));
 /// });

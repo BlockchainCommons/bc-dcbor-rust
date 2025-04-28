@@ -371,7 +371,7 @@ impl From<ByteString> for CBOR {
 ///
 /// // Converting from a different CBOR type fails
 /// let cbor = CBOR::from(42);
-/// let result: Result<ByteString> = cbor.try_into();
+/// let result: dcbor::Result<ByteString> = cbor.try_into();
 /// assert!(result.is_err());
 /// ```
 impl TryFrom<CBOR> for ByteString {

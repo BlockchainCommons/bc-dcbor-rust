@@ -44,10 +44,10 @@ use crate::CBOR;
 ///
 /// // The CBOREncodable trait is automatically implemented
 /// let person = Person { name: "Alice".to_string(), age: 30 };
-/// 
+///
 /// // Convert to CBOR with to_cbor()
 /// let cbor = person.to_cbor();
-/// 
+///
 /// // Convert directly to binary CBOR data
 /// let data = person.to_cbor_data();
 /// ```
@@ -78,7 +78,6 @@ impl<T> CBOREncodable for T where T: Into<CBOR> + Clone { }
 ///
 /// ```no_run
 /// use dcbor::prelude::*;
-/// use anyhow::{Result, bail};
 ///
 /// // Custom type that implements TryFrom<CBOR>
 /// struct Person {
@@ -88,28 +87,28 @@ impl<T> CBOREncodable for T where T: Into<CBOR> + Clone { }
 ///
 /// // Implement conversion from CBOR
 /// impl TryFrom<CBOR> for Person {
-///     type Error = anyhow::Error;
+///     type Error = dcbor::Error;
 ///
-///     fn try_from(cbor: CBOR) -> Result<Self> {
+///     fn try_from(cbor: CBOR) -> dcbor::Result<Self> {
 ///         if let CBORCase::Map(map) = cbor.into_case() {
 ///             let name: String = map.extract("name")?;
 ///             let age: u8 = map.extract("age")?;
 ///             Ok(Person { name, age })
 ///         } else {
-///             bail!("Expected a CBOR map")
+///             Err("Expected a CBOR map".into())
 ///         }
 ///     }
 /// }
 ///
 /// // The CBORDecodable trait is automatically implemented
 /// // Convert a CBOR object to our type
-/// 
+///
 /// // Create a sample CBOR map
 /// let mut map = Map::new();
 /// map.insert("name", "Alice");
 /// map.insert("age", 42);
 /// let cbor = map.to_cbor();
-/// 
+///
 /// // Parse from CBOR to our type
 /// let person: Person = cbor.try_into().unwrap();
 /// ```
@@ -127,7 +126,6 @@ impl<T> CBORDecodable for T where T: TryFrom<CBOR> { }
 ///
 /// ```
 /// use dcbor::prelude::*;
-/// use anyhow::{Result, bail};
 ///
 /// // Custom type that implements both conversion directions
 /// #[derive(Clone)]
@@ -148,15 +146,15 @@ impl<T> CBORDecodable for T where T: TryFrom<CBOR> { }
 ///
 /// // Implement conversion from CBOR
 /// impl TryFrom<CBOR> for Person {
-///     type Error = anyhow::Error;
+///     type Error = dcbor::Error;
 ///
-///     fn try_from(cbor: CBOR) -> Result<Self> {
+///     fn try_from(cbor: CBOR) -> dcbor::Result<Self> {
 ///         if let CBORCase::Map(map) = cbor.into_case() {
 ///             let name: String = map.extract("name")?;
 ///             let age: u8 = map.extract("age")?;
 ///             Ok(Person { name, age })
 ///         } else {
-///             bail!("Expected a CBOR map")
+///             Err("Expected a CBOR map".into())
 ///         }
 ///     }
 /// }

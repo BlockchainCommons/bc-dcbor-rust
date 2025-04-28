@@ -33,7 +33,7 @@ use crate::{ CBOR, Error, Result, CBORTagged, CBORCase };
 ///
 /// // Implement decoding from tagged CBOR
 /// impl CBORTaggedDecodable for Date {
-///     fn from_untagged_cbor(cbor: CBOR) -> Result<Self> {
+///     fn from_untagged_cbor(cbor: CBOR) -> dcbor::Result<Self> {
 ///         // Convert the untagged CBOR to a float
 ///         let timestamp: f64 = cbor.try_into()?;
 ///         Ok(Date(timestamp))
@@ -42,9 +42,9 @@ use crate::{ CBOR, Error, Result, CBORTagged, CBORCase };
 ///
 /// // Implement TryFrom<CBOR> (required by CBORTaggedDecodable)
 /// impl TryFrom<CBOR> for Date {
-///     type Error = Error;
+///     type Error = dcbor::Error;
 ///
-///     fn try_from(cbor: CBOR) -> Result<Self> {
+///     fn try_from(cbor: CBOR) -> dcbor::Result<Self> {
 ///         Self::from_tagged_cbor(cbor)
 ///     }
 /// }
@@ -81,21 +81,21 @@ use crate::{ CBOR, Error, Result, CBORTagged, CBORCase };
 /// }
 ///
 /// impl CBORTaggedDecodable for VersionedData {
-///     fn from_untagged_cbor(cbor: CBOR) -> Result<Self> {
+///     fn from_untagged_cbor(cbor: CBOR) -> dcbor::Result<Self> {
 ///         if let CBORCase::Map(map) = cbor.into_case() {
 ///             let version: u8 = map.extract("version")?;
 ///             let value: String = map.extract("value")?;
 ///             Ok(VersionedData { version, value })
 ///         } else {
-///             return Err(Error::WrongType);
+///             return Err(dcbor::Error::WrongType);
 ///         }
 ///     }
 /// }
 ///
 /// impl TryFrom<CBOR> for VersionedData {
-///     type Error = Error;
+///     type Error = dcbor::Error;
 ///
-///     fn try_from(cbor: CBOR) -> Result<Self> {
+///     fn try_from(cbor: CBOR) -> dcbor::Result<Self> {
 ///         Self::from_tagged_cbor(cbor)
 ///     }
 /// }

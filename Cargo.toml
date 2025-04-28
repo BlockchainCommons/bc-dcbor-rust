@@ -1,6 +1,6 @@
 [package]
 name = "dcbor"
-version = "0.17.1"
+version = "0.18.0"
 edition = "2024"
 description = "Deterministic CBOR (\"dCBOR\") for Rust."
 authors = ["Blockchain Commons"]
@@ -42,4 +42,5 @@ version-sync = "^0.9.0"
 default = ["std"]
 multithreaded = []
 no_std = ["hashbrown", "thiserror-no-std", "spin"]
-std = ["half/std", "chrono/std", "hex/std", "thiserror", "anyhow"]
+std = ["half/std", "chrono/std", "hex/std", "thiserror"]
+anyhow = ["dep:anyhow", "std"]

@@ -21,7 +21,7 @@ use with_std::*;
 #[cfg(feature = "no_std")]
 use without_std::*;
 
-use dcbor::{prelude::*, CBORCase};
+use dcbor::prelude::*;
 use half::f16;
 use hex_literal::hex;
 
