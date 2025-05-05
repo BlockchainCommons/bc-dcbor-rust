@@ -330,14 +330,14 @@ fn encode_value() {
 
 #[test]
 fn encode_envelope() {
-    let alice = CBOR::to_tagged_value(200, CBOR::to_tagged_value(24, "Alice"));
-    let knows = CBOR::to_tagged_value(200, CBOR::to_tagged_value(24, "knows"));
-    let bob = CBOR::to_tagged_value(200, CBOR::to_tagged_value(24, "Bob"));
+    let alice = CBOR::to_tagged_value(200, CBOR::to_tagged_value(201, "Alice"));
+    let knows = CBOR::to_tagged_value(200, CBOR::to_tagged_value(201, "knows"));
+    let bob = CBOR::to_tagged_value(200, CBOR::to_tagged_value(201, "Bob"));
     let knows_bob = CBOR::to_tagged_value(200, CBOR::to_tagged_value(221, [knows, bob]));
     let envelope = CBOR::to_tagged_value(200, [alice, knows_bob]);
-    assert_eq!(format!("{}", envelope), r#"200([200(24("Alice")), 200(221([200(24("knows")), 200(24("Bob"))]))])"#);
+    assert_eq!(format!("{}", envelope), r#"200([200(201("Alice")), 200(221([200(201("knows")), 200(201("Bob"))]))])"#);
     let bytes = envelope.clone().to_cbor_data();
-    assert_eq!(format!("{}", hex::encode(&bytes)), "d8c882d8c8d81865416c696365d8c8d8dd82d8c8d818656b6e6f7773d8c8d81863426f62");
+    assert_eq!(format!("{}", hex::encode(&bytes)), "d8c882d8c8d8c965416c696365d8c8d8dd82d8c8d8c9656b6e6f7773d8c8d8c963426f62");
     let decoded_cbor = CBOR::try_from_data(&bytes).unwrap();
     assert_eq!(envelope, decoded_cbor);
 }
