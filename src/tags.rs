@@ -2,6 +2,9 @@ import_stdlib!();
 
 use crate::{ CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait };
 
+#[doc(hidden)]
+pub use paste::paste;
+
 pub struct LazyTagsStore {
     init: Once,
     data: Mutex<Option<TagsStore>>,
@@ -160,7 +163,7 @@ macro_rules! with_tags_mut {
 #[macro_export]
 macro_rules! const_cbor_tag {
     ($value:expr, $const_name:ident, $name:expr) => {
-        paste::paste! {
+        $crate::paste! {
             pub const [<TAG_ $const_name>]: u64 = $value;
             pub const [<TAG_NAME_ $const_name>]: &str = $name;
         }
@@ -170,7 +173,7 @@ macro_rules! const_cbor_tag {
 #[macro_export]
 macro_rules! cbor_tag {
     ($const_name:ident) => {
-        paste::paste! {
+        $crate::paste! {
             $crate::Tag::new([<TAG_ $const_name>], [<TAG_NAME_ $const_name>])
         }
     };

@@ -239,7 +239,7 @@ fn encode_heterogenous_array() {
         vec![1, 2, 3].into(),
     ];
 
-    let cbor: CBOR = array.clone().into();
+    let cbor: CBOR = array.to_cbor();
     let data = cbor.to_cbor_data();
     let decoded_cbor = CBOR::try_from_data(data).unwrap();
     match decoded_cbor.into_case() {
@@ -268,7 +268,7 @@ fn encode_map() {
     m.insert(100, 2);
     m.insert("aa", 5);
     m.insert(vec![100], 6);
-    test_cbor(m.clone(),
+    test_cbor(&m,
         r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#,
         r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#,
         "a80a011864022003617a046261610581186406812007f408");
@@ -292,7 +292,7 @@ fn encode_map_with_map_keys() {
     let mut m = Map::new();
     m.insert(k1, 5);
     m.insert(k2, 6);
-    test_cbor(m.clone(),
+    test_cbor(m,
         r#"map({0xa10102: (map({0x01: (unsigned(1), unsigned(2))}), unsigned(5)), 0xa10304: (map({0x03: (unsigned(3), unsigned(4))}), unsigned(6))})"#,
         r#"{{1: 2}: 5, {3: 4}: 6}"#,
         "a2a1010205a1030406");
@@ -303,7 +303,7 @@ fn encode_anders_map() {
     let mut m = Map::new();
     m.insert(1, 45.7);
     m.insert(2, "Hi there!");
-    assert_eq!(m.clone().cbor_data(), hex!("a201fb4046d9999999999a0269486920746865726521"));
+    assert_eq!(Map::cbor_data(&m), hex!("a201fb4046d9999999999a0269486920746865726521"));
     assert_eq!(m.extract::<i32, f64>(1).unwrap(), 45.7);
 }
 
@@ -336,7 +336,7 @@ fn encode_envelope() {
     let knows_bob = CBOR::to_tagged_value(200, CBOR::to_tagged_value(221, [knows, bob]));
     let envelope = CBOR::to_tagged_value(200, [alice, knows_bob]);
     assert_eq!(format!("{}", envelope), r#"200([200(201("Alice")), 200(221([200(201("knows")), 200(201("Bob"))]))])"#);
-    let bytes = envelope.clone().to_cbor_data();
+    let bytes = CBOR::to_cbor_data(&envelope);
     assert_eq!(format!("{}", hex::encode(&bytes)), "d8c882d8c8d8c965416c696365d8c8d8dd82d8c8d8c9656b6e6f7773d8c8d8c963426f62");
     let decoded_cbor = CBOR::try_from_data(&bytes).unwrap();
     assert_eq!(envelope, decoded_cbor);
@@ -428,7 +428,7 @@ fn encode_float() {
 fn int_coerced_to_float() {
     let n = 42;
     let c: CBOR = n.into();
-    let f: f64 = c.clone().try_into().unwrap();
+    let f: f64 = f64::try_from_cbor(&c).unwrap();
     assert_eq!(f, n as f64);
     let c2: CBOR = f.into();
     assert_eq!(c2, c);
@@ -441,7 +441,7 @@ fn fail_float_coerced_to_int() {
     // Floating point values cannot be coerced to integer types.
     let n = 42.5;
     let c: CBOR = n.into();
-    let f: f64 = c.clone().try_into().unwrap();
+    let f: f64 = f64::try_from_cbor(&c).unwrap();
     assert_eq!(f, n);
     let a = i32::try_from(c);
     assert!(a.is_err());
@@ -501,10 +501,10 @@ where
     T: PartialEq + Clone + Into<CBOR> + TryFrom<CBOR> + fmt::Debug,
     T::Error: fmt::Debug,
 {
-    let cbor = value.clone().into();
+    let cbor = value.to_cbor();
     let value2 = cbor.try_into().unwrap();
     assert_eq!(value, value2);
-    let cbor_2: CBOR = value.clone().into();
+    let cbor_2 = value.to_cbor();
     let value3 = cbor_2.try_into().unwrap();
     assert_eq!(value, value3);
 }
@@ -525,7 +525,7 @@ fn convert_hash_map() {
     h.insert(1, "A".to_string());
     h.insert(50, "B".to_string());
     h.insert(25, "C".to_string());
-    let m: CBOR = h.clone().into();
+    let m: CBOR = h.to_cbor();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
     let h2: HashMap<i32, String> = m.try_into().unwrap();
     assert_eq!(h, h2);
@@ -537,7 +537,7 @@ fn convert_btree_map() {
     h.insert(1, "A".to_string());
     h.insert(50, "B".to_string());
     h.insert(25, "C".to_string());
-    let m: CBOR = h.clone().into();
+    let m: CBOR = h.to_cbor();
     assert_eq!(m.diagnostic(), r#"{1: "A", 25: "C", 50: "B"}"#);
     let h2: BTreeMap<i32, String> = m.try_into().unwrap();
     assert_eq!(h, h2);
@@ -546,7 +546,7 @@ fn convert_btree_map() {
 #[test]
 fn convert_vector() {
     let v: Vec<i32> = vec![1, 50, 25];
-    let c: CBOR = v.clone().into();
+    let c: CBOR = v.to_cbor();
     assert_eq!(c.diagnostic(), "[1, 50, 25]");
     let v2: Vec<i32> = c.try_into().unwrap();
     assert_eq!(v, v2);
@@ -558,7 +558,7 @@ fn convert_vecdeque() {
     v.push_back(1);
     v.push_back(50);
     v.push_back(25);
-    let c: CBOR = v.clone().into();
+    let c: CBOR = v.to_cbor();
     assert_eq!(c.diagnostic(), "[1, 50, 25]");
     let v2: VecDeque<i32> = c.try_into().unwrap();
     assert_eq!(v, v2);
@@ -570,7 +570,7 @@ fn convert_hashset() {
     v.insert(1);
     v.insert(50);
     v.insert(25);
-    let c: CBOR = v.clone().into();
+    let c = v.to_cbor();
     let v2: HashSet<i32> = c.try_into().unwrap();
     assert_eq!(v, v2);
 }
@@ -578,7 +578,7 @@ fn convert_hashset() {
 #[test]
 fn usage_test_1() {
     let array = [1000, 2000, 3000];
-    let cbor: CBOR = array.into();
+    let cbor = array.to_cbor();
     assert_eq!(cbor.hex(), "831903e81907d0190bb8");
 }
 

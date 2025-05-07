@@ -237,6 +237,12 @@ impl From<Map> for CBOR {
     }
 }
 
+impl From<&Map> for CBOR {
+    fn from(value: &Map) -> Self {
+        value.clone().into()
+    }
+}
+
 impl fmt::Debug for Map {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.0)

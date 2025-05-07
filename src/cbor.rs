@@ -463,6 +463,10 @@ impl CBOR {
         self.try_into_byte_string().ok()
     }
 
+    pub fn try_byte_string(cbor: &Self) -> Result<Vec<u8>> {
+        cbor.clone().try_into_byte_string()
+    }
+
     /// Extract the CBOR value as a text string.
     ///
     /// Returns `Ok` if the value is a text string, `Err` otherwise.
@@ -473,6 +477,10 @@ impl CBOR {
                 return Err(Error::WrongType);
             }
         }
+    }
+
+    pub fn try_text(cbor: &Self) -> Result<String> {
+        cbor.clone().try_into_text()
     }
 
     /// Extract the CBOR value as an array.
@@ -487,6 +495,10 @@ impl CBOR {
         }
     }
 
+    pub fn try_array(cbor: &Self) -> Result<Vec<CBOR>> {
+        cbor.clone().try_into_array()
+    }
+
     /// Extract the CBOR value as a map.
     ///
     /// Returns `Ok` if the value is a map, `Err` otherwise.
@@ -497,6 +509,10 @@ impl CBOR {
                 return Err(Error::WrongType);
             }
         }
+    }
+
+    pub fn try_map(cbor: &Self) -> Result<Map> {
+        cbor.clone().try_into_map()
     }
 
     /// Extract the CBOR value as a tagged value.
@@ -511,6 +527,10 @@ impl CBOR {
         }
     }
 
+    pub fn try_tagged_value(cbor: &Self) -> Result<(Tag, CBOR)> {
+        cbor.clone().try_into_tagged_value()
+    }
+
     /// Extract the CBOR value as an expected tagged value.
     ///
     /// Returns `Ok` if the value is a tagged value with the expected tag, `Err`
@@ -523,6 +543,10 @@ impl CBOR {
         } else {
             return Err(Error::WrongTag(expected_tag, tag));
         }
+    }
+
+    pub fn try_expected_tagged_value(cbor: &Self, expected_tag: impl Into<Tag>) -> Result<CBOR> {
+        cbor.clone().try_into_expected_tagged_value(expected_tag)
     }
 
     /// Extract the CBOR value as a simple value.
@@ -566,6 +590,10 @@ impl CBOR {
                 return Err(Error::WrongType);
             }
         }
+    }
+
+    pub fn try_bool(cbor: &Self) -> Result<bool> {
+        cbor.clone().try_into_bool()
     }
 
     /// Check if the CBOR value is true.

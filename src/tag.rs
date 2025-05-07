@@ -330,3 +330,10 @@ impl From<usize> for Tag {
         Tag::with_value(value as TagValue)
     }
 }
+
+/// Converts a reference to a `Tag` into an owned `Tag` instance.
+impl From<&Tag> for Tag {
+    fn from(tag: &Tag) -> Self {
+        tag.clone()
+    }
+}

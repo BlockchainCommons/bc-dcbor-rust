@@ -29,7 +29,7 @@ This deterministic approach ensures that semantically equivalent data items are 
 
 ```toml
 [dependencies]
-dcbor = "0.18.0"
+dcbor = "0.18.1"
 ```
 
 ## Related Projects

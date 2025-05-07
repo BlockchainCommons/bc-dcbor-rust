@@ -112,9 +112,13 @@ impl<T> CBOREncodable for T where T: Into<CBOR> + Clone { }
 /// // Parse from CBOR to our type
 /// let person: Person = cbor.try_into().unwrap();
 /// ```
-pub trait CBORDecodable: TryFrom<CBOR> { }
+pub trait CBORDecodable: TryFrom<CBOR, Error = crate::Error> {
+    fn try_from_cbor(cbor: &CBOR) -> crate::Result<Self> {
+        Self::try_from(cbor.clone())
+    }
+}
 
-impl<T> CBORDecodable for T where T: TryFrom<CBOR> { }
+impl<T> CBORDecodable for T where T: TryFrom<CBOR, Error = crate::Error> { }
 
 /// A trait for types that can be both encoded to and decoded from CBOR.
 ///
