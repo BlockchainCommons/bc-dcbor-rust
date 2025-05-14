@@ -127,17 +127,23 @@ pub enum Error {
     Custom(String),
 }
 
+impl Error {
+    pub fn msg(s: impl Into<String>) -> Self {
+        Error::Custom(s.into())
+    }
+}
+
 impl From<&str> for Error {
     /// Converts a string slice into a `CBORError::Custom` variant.
     fn from(error: &str) -> Self {
-        Error::Custom(error.to_string())
+        Error::msg(error)
     }
 }
 
 impl From<String> for Error {
     /// Converts a `String` into a `CBORError::Custom` variant.
     fn from(error: String) -> Self {
-        Error::Custom(error)
+        Error::msg(error)
     }
 }
 
@@ -147,6 +153,6 @@ pub type Result<T> = StdResult<T, Error>;
 impl From<anyhow::Error> for Error {
     /// Converts an `anyhow::Error` into a `CBORError::Custom` variant.
     fn from(error: anyhow::Error) -> Self {
-        Error::Custom(error.to_string())
+        Error::msg(error.to_string())
     }
 }

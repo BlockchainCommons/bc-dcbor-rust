@@ -72,8 +72,8 @@ impl ByteString {
     /// let hex = "deadbeef";
     /// let bytes4 = ByteString::new(hex::decode(hex).unwrap());
     /// ```
-    pub fn new(data: impl Into<Vec<u8>>) -> Self {
-        Self(data.into())
+    pub fn new(data: impl AsRef<[u8]>) -> Self {
+        Self(data.as_ref().to_vec())
     }
 
     /// Returns a reference to the underlying byte data.
@@ -147,8 +147,8 @@ impl ByteString {
     /// bytes.extend(vec![5, 6]);
     /// assert_eq!(bytes.data(), &[1, 2, 3, 4, 5, 6]);
     /// ```
-    pub fn extend(&mut self, other: impl Into<Vec<u8>>) {
-        self.0.extend(other.into())
+    pub fn extend(&mut self, other: impl AsRef<[u8]>) {
+        self.0.extend(other.as_ref());
     }
 
     /// Creates a new vector containing a copy of the byte string's data.
