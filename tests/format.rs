@@ -13,8 +13,6 @@ fn run(
     expected_hex: &str,
     expected_hex_annotated: &str
 ) {
-    dcbor::register_tags();
-
     let description = format!("{}", cbor);
     if expected_description.is_empty() {
         println!("description:");
@@ -291,10 +289,11 @@ fn format_tagged() {
 
 #[test]
 fn format_date() {
+    dcbor::register_tags();
     #[rustfmt::skip]
     run(dcbor::Date::from_timestamp(-100.0).into(),
-        "1(-100)",
-        "tagged(1, negative(-100))",
+        "date(-100)",
+        "tagged(date, negative(-100))",
         "1(-100)",
         "1(-100)   / date /",
         "1(-100)",
@@ -308,8 +307,8 @@ fn format_date() {
 
     #[rustfmt::skip]
     run(dcbor::Date::from_timestamp(1647887071.0).into(),
-        "1(1647887071)",
-        "tagged(1, unsigned(1647887071))",
+        "date(1647887071)",
+        "tagged(date, unsigned(1647887071))",
         "1(1647887071)",
         "1(1647887071)   / date /",
         "1(1647887071)",
@@ -324,10 +323,11 @@ fn format_date() {
 
 #[test]
 fn format_fractional_date() {
+    dcbor::register_tags();
     #[rustfmt::skip]
     run(dcbor::Date::from_timestamp(0.5).into(),
-        "1(0.5)",
-        "tagged(1, simple(0.5))",
+        "date(0.5)",
+        "tagged(date, simple(0.5))",
         "1(0.5)",
         "1(0.5)   / date /",
         "1(0.5)",

@@ -216,7 +216,19 @@ impl fmt::Display for Simple {
             Self::False => "false".to_owned(),
             Self::True => "true".to_owned(),
             Self::Null => "null".to_owned(),
-            Self::Float(v) => format!("{:?}", v),
+            Self::Float(v) => {
+                if v.is_nan() {
+                    "NaN".to_owned()
+                } else if v.is_infinite() {
+                    if v.is_sign_positive() {
+                        "Infinity".to_owned()
+                    } else {
+                        "-Infinity".to_owned()
+                    }
+                } else {
+                    format!("{:?}", v)
+                }
+            },
         };
         f.write_str(&s)
     }

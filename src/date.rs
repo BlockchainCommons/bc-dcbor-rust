@@ -8,7 +8,7 @@ use core::ops::{ Add, Sub };
 
 use chrono::{ DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike };
 
-use crate::{ CBORTaggedEncodable, Tag, CBOR, CBORTaggedDecodable, CBORTagged, Error, Result };
+use crate::{ tags_for_values, CBORTagged, CBORTaggedDecodable, CBORTaggedEncodable, Error, Result, Tag, CBOR, TAG_DATE };
 
 /// A CBOR-friendly representation of a date and time.
 ///
@@ -407,17 +407,19 @@ impl TryFrom<CBOR> for Date {
 /// Implementation of the `CBORTagged` trait for `Date`.
 ///
 /// This implementation specifies that `Date` values are tagged with CBOR tag 1,
-/// which is the standard CBOR tag for date/time values per RFC 8949.
+/// which is the standard CBOR tag for date/time values represented as seconds
+/// since the Unix epoch per RFC 8949.
 impl CBORTagged for Date {
     /// Returns the CBOR tags associated with the `Date` type.
     ///
-    /// For dates, this is always tag 1, which is the standard CBOR tag for date/time values.
+    /// For dates, this is always tag 1, which is the standard CBOR tag for
+    /// date/time values represented as seconds since the Unix epoch.
     ///
     /// # Returns
     ///
     /// A vector containing tag 1
     fn cbor_tags() -> Vec<Tag> {
-        vec![Tag::with_value(1)]
+        tags_for_values(&[TAG_DATE])
     }
 }
 

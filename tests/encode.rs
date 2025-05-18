@@ -348,7 +348,7 @@ fn encode_float() {
     test_cbor(1.5,              "simple(1.5)",          "1.5",          "f93e00");
     test_cbor(2345678.25,       "simple(2345678.25)",   "2345678.25",   "fa4a0f2b39");
     test_cbor(1.2,              "simple(1.2)",          "1.2",          "fb3ff3333333333333");
-    test_cbor(f64::INFINITY,    "simple(inf)",          "inf",          "f97c00");
+    test_cbor(f64::INFINITY,    "simple(inf)",          "Infinity",     "f97c00");
 
     // Floating point values that can be represented as integers get serialized as integers.
     test_cbor(42.0f32,          "unsigned(42)",         "42",           "182a");

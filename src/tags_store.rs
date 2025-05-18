@@ -92,9 +92,9 @@ pub type CBORSummarizer = Arc<dyn (Fn(CBOR) -> Result<String>) + Send + Sync>;
 pub trait TagsStoreTrait {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String>;
     fn name_for_tag(&self, tag: &Tag) -> String;
-    fn tag_for_value(&self, value: u64) -> Option<Tag>;
+    fn tag_for_value(&self, value: TagValue) -> Option<Tag>;
     fn tag_for_name(&self, name: &str) -> Option<Tag>;
-    fn name_for_value(&self, value: u64) -> String;
+    fn name_for_value(&self, value: TagValue) -> String;
     fn summarizer(&self, tag: TagValue) -> Option<&CBORSummarizer>;
 
     fn name_for_tag_opt<T>(tag: &Tag, tags: Option<&T>) -> String
@@ -188,9 +188,9 @@ pub trait TagsStoreTrait {
 /// tag value that already exists with a different name will panic.
 #[derive(Clone)]
 pub struct TagsStore {
-    tags_by_value: HashMap<u64, Tag>,
+    tags_by_value: HashMap<TagValue, Tag>,
     tags_by_name: HashMap<String, Tag>,
-    summarizers: HashMap<u64, CBORSummarizer>,
+    summarizers: HashMap<TagValue, CBORSummarizer>,
 }
 
 impl TagsStore {
@@ -223,7 +223,7 @@ impl TagsStore {
 
     fn _insert(
         tag: Tag,
-        tags_by_value: &mut HashMap<u64, Tag>,
+        tags_by_value: &mut HashMap<TagValue, Tag>,
         tags_by_name: &mut HashMap<String, Tag>
     ) {
         let name = tag.name().unwrap();
@@ -258,11 +258,11 @@ impl TagsStoreTrait for TagsStore {
         self.tags_by_name.get(name).cloned()
     }
 
-    fn tag_for_value(&self, value: u64) -> Option<Tag> {
+    fn tag_for_value(&self, value: TagValue) -> Option<Tag> {
         self.tags_by_value.get(&value).cloned()
     }
 
-    fn name_for_value(&self, value: u64) -> String {
+    fn name_for_value(&self, value: TagValue) -> String {
         self.tag_for_value(value)
             .and_then(|tag| tag.name())
             .unwrap_or_else(|| value.to_string())
