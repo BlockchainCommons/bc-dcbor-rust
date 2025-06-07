@@ -69,7 +69,7 @@
 //! let data = hex_literal::hex!("831903e81907d0190bb8");
 //! let cbor = CBOR::try_from_data(&data).unwrap();
 //! assert_eq!(cbor.diagnostic(), "[1000, 2000, 3000]");
-//! let array: Vec::<u32> = cbor.try_into().unwrap();
+//! let array: Vec<u32> = cbor.try_into().unwrap();
 //! assert_eq!(format!("{:?}", array), "[1000, 2000, 3000]");
 //! # }
 //! # }
@@ -96,25 +96,26 @@ mod array;
 pub use array::CBORSortable;
 
 mod error;
-pub use error::{ Error, Result };
+pub use error::{Error, Result};
 
 mod date;
 pub use date::Date;
 
 mod diag;
 mod dump;
+pub use dump::HexFormatOpts;
 
 mod tags_store;
-pub use tags_store::{ CBORSummarizer, TagsStore, TagsStoreTrait };
+pub use tags_store::{CBORSummarizer, TagsStore, TagsStoreOpt, TagsStoreTrait};
 
 mod tag;
-pub use tag::{ Tag, TagValue };
+pub use tag::{Tag, TagValue};
 
 mod tags;
 pub use tags::*;
 
 mod cbor_codable;
-pub use cbor_codable::{ CBORCodable, CBORDecodable, CBOREncodable };
+pub use cbor_codable::{CBORCodable, CBORDecodable, CBOREncodable};
 
 mod cbor_tagged;
 pub use cbor_tagged::CBORTagged;
@@ -131,10 +132,10 @@ mod decode;
 mod int;
 
 mod map;
-pub use map::{ Map, MapIter };
+pub use map::{Map, MapIter};
 
 mod set;
-pub use set::{ Set, SetIter };
+pub use set::{Set, SetIter};
 
 mod string;
 
