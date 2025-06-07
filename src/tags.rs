@@ -74,14 +74,6 @@ pub static GLOBAL_TAGS: LazyTagsStore = LazyTagsStore {
 ///
 /// // Verify we got some kind of tag name or value
 /// assert!(!tag_name.is_empty());
-///
-/// // Use with diagnostic output
-/// let cbor = CBOR::from(42);
-/// // We can format the CBOR value using tag information from the store
-/// with_tags!(|tags| {
-///     let _formatted = cbor.diagnostic_opt(true, false, false, Some(tags));
-///     // In a real app, we would use the formatted output
-/// });
 /// ```
 ///
 /// ## Thread Safety

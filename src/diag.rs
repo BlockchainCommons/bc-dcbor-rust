@@ -2,7 +2,7 @@ import_stdlib!();
 
 use super::string_util::flanked;
 use crate::{
-    CBOR, CBORCase, TagsStoreOpt, tags_store::TagsStoreTrait,
+    CBOR, CBORCase, Error, TagsStoreOpt, tags_store::TagsStoreTrait, with_tags,
 };
 
 #[derive(Clone, Default)]
@@ -65,13 +65,19 @@ impl CBOR {
     }
 
     pub fn summary(&self) -> String {
-        self.diagnostic_opt(DiagFormatOpts::default().summarize(true))
+        self.diagnostic_opt(
+            DiagFormatOpts::default()
+                .summarize(true)
+                .flat(true) // Ensure summary is flat
+                .context(TagsStoreOpt::Global), // Use Global tags for summary
+        )
     }
 
     pub fn summary_opt(&self, tags: &dyn TagsStoreTrait) -> String {
         self.diagnostic_opt(
             DiagFormatOpts::default()
                 .summarize(true)
+                .flat(true) // Ensure summary is flat
                 .context(TagsStoreOpt::Custom(tags)),
         )
     }
@@ -111,29 +117,68 @@ impl CBOR {
             }
             CBORCase::Tagged(tag, item) => {
                 if opts.summarize {
-                    if let TagsStoreOpt::Custom(tags_store_trait) = &opts.tags {
-                        if let Some(summarizer) = tags_store_trait.summarizer(tag.value()) {
-                            match summarizer(item.clone()) {
-                                Ok(summary) => {
-                                    return DiagItem::Item(summary);
+                    let mut item_to_return: Option<DiagItem> = None;
+
+                    // Attempt to get a summarizer function based on opts.tags
+                    let summarizer_fn_opt: Option<
+                        Arc<
+                            dyn Fn(CBOR) -> Result<String, Error> + Send + Sync,
+                        >,
+                    > = match &opts.tags {
+                        TagsStoreOpt::Custom(tags_store_trait) => {
+                            tags_store_trait
+                                .summarizer(tag.value())
+                                .map(|f| f.clone()) // Clone the Arc
+                        }
+                        TagsStoreOpt::Global => {
+                            with_tags!(
+                                |global_tags_store: &dyn TagsStoreTrait| {
+                                    global_tags_store
+                                        .summarizer(tag.value())
+                                        .map(|f| f.clone()) // Clone the Arc
                                 }
-                                Err(error) => {
-                                    return DiagItem::Item(format!(
-                                        "<error: {}>",
-                                        error
-                                    ));
-                                }
+                            )
+                        }
+                        TagsStoreOpt::None => None,
+                    };
+
+                    // If a summarizer function was found, execute it.
+                    if let Some(summarizer_fn) = summarizer_fn_opt {
+                        match summarizer_fn(item.clone()) {
+                            Ok(summary_text) => {
+                                item_to_return =
+                                    Some(DiagItem::Item(summary_text));
+                            }
+                            Err(error) => {
+                                item_to_return = Some(DiagItem::Item(format!(
+                                    "<error: {}>",
+                                    error
+                                )));
                             }
                         }
                     }
+
+                    // If summarization produced a DiagItem (either success or
+                    // error string), return it.
+                    if let Some(diag_item) = item_to_return {
+                        return diag_item;
+                    }
+                    // Otherwise (no summarizer found), fall through to default
+                    // tagged item formatting.
                 }
 
                 // Get a possible comment before we move opts
                 let comment = if opts.annotate {
-                    if let TagsStoreOpt::Custom(tags_store_trait) = &opts.tags {
-                        tags_store_trait.assigned_name_for_tag(tag)
-                    } else {
-                        None
+                    match &opts.tags {
+                        TagsStoreOpt::None => None,
+                        TagsStoreOpt::Custom(tags_store_trait) => {
+                            tags_store_trait.assigned_name_for_tag(tag)
+                        }
+                        TagsStoreOpt::Global => {
+                            with_tags!(|tags_store: &dyn TagsStoreTrait| {
+                                tags_store.assigned_name_for_tag(tag)
+                            })
+                        }
                     }
                 } else {
                     None
