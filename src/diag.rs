@@ -23,6 +23,7 @@ impl<'a> DiagFormatOpts<'a> {
     /// Sets whether to summarize the diagnostic notation.
     pub fn summarize(mut self, summarize: bool) -> Self {
         self.summarize = summarize;
+        self.flat = true; // Summarization implies flat output
         self
     }
 
@@ -32,8 +33,8 @@ impl<'a> DiagFormatOpts<'a> {
         self
     }
 
-    /// Sets the formatting context for the diagnostic notation.
-    pub fn context(mut self, tags: TagsStoreOpt<'a>) -> Self {
+    /// Sets the tags for the diagnostic notation.
+    pub fn tags(mut self, tags: TagsStoreOpt<'a>) -> Self {
         self.tags = tags;
         self
     }
@@ -45,44 +46,34 @@ impl CBOR {
     ///
     /// Optionally annotates the output, e.g. formatting dates and adding names
     /// of known tags.
-    pub fn diagnostic_opt(&self, opts: DiagFormatOpts<'_>) -> String {
-        self.diag_item(opts.clone()).format(opts)
+    pub fn diagnostic_opt(&self, opts: &DiagFormatOpts<'_>) -> String {
+        self.diag_item(opts).format(opts)
     }
 
     /// Returns a representation of this CBOR in diagnostic notation.
     pub fn diagnostic(&self) -> String {
-        self.diagnostic_opt(DiagFormatOpts::default())
+        self.diagnostic_opt(&DiagFormatOpts::default())
     }
 
     /// Returns a representation of this CBOR in diagnostic notation, with
     /// annotations.
     pub fn diagnostic_annotated(&self) -> String {
-        self.diagnostic_opt(DiagFormatOpts::default().annotate(true))
+        self.diagnostic_opt(&DiagFormatOpts::default().annotate(true))
     }
 
     pub fn diagnostic_flat(&self) -> String {
-        self.diagnostic_opt(DiagFormatOpts::default().flat(true))
+        self.diagnostic_opt(&DiagFormatOpts::default().flat(true))
     }
 
     pub fn summary(&self) -> String {
         self.diagnostic_opt(
-            DiagFormatOpts::default()
-                .summarize(true)
-                .flat(true) // Ensure summary is flat
-                .context(TagsStoreOpt::Global), // Use Global tags for summary
+            &DiagFormatOpts::default().summarize(true)
         )
     }
+}
 
-    pub fn summary_opt(&self, tags: &dyn TagsStoreTrait) -> String {
-        self.diagnostic_opt(
-            DiagFormatOpts::default()
-                .summarize(true)
-                .flat(true) // Ensure summary is flat
-                .context(TagsStoreOpt::Custom(tags)),
-        )
-    }
-
-    fn diag_item(&self, opts: DiagFormatOpts<'_>) -> DiagItem {
+impl CBOR {
+    fn diag_item(&self, opts: &DiagFormatOpts<'_>) -> DiagItem {
         match self.as_case() {
             CBORCase::Unsigned(_)
             | CBORCase::Negative(_)
@@ -94,7 +85,7 @@ impl CBOR {
                 let begin = "[".to_string();
                 let end = "]".to_string();
                 let items =
-                    a.iter().map(|x| x.diag_item(opts.clone())).collect();
+                    a.iter().map(|x| x.diag_item(opts)).collect();
                 let is_pairs = false;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
@@ -106,8 +97,8 @@ impl CBOR {
                     .iter()
                     .flat_map(|(key, value)| {
                         vec![
-                            key.diag_item(opts.clone()),
-                            value.diag_item(opts.clone()),
+                            key.diag_item(opts),
+                            value.diag_item(opts),
                         ]
                     })
                     .collect();
@@ -202,7 +193,7 @@ enum DiagItem {
 }
 
 impl DiagItem {
-    fn format(&self, opts: DiagFormatOpts<'_>) -> String {
+    fn format(&self, opts: &DiagFormatOpts<'_>) -> String {
         self.format_opt(0, "", opts)
     }
 
@@ -210,7 +201,7 @@ impl DiagItem {
         &self,
         level: usize,
         separator: &str,
-        opts: DiagFormatOpts<'_>,
+        opts: &DiagFormatOpts<'_>,
     ) -> String {
         match self {
             DiagItem::Item(string) => {
@@ -233,7 +224,7 @@ impl DiagItem {
     fn format_line(
         &self,
         level: usize,
-        opts: DiagFormatOpts<'_>,
+        opts: &DiagFormatOpts<'_>,
         string: &str,
         separator: &str,
         comment: Option<&str>,
@@ -255,7 +246,7 @@ impl DiagItem {
         &self,
         level: usize,
         separator: &str,
-        opts: DiagFormatOpts<'_>,
+        opts: &DiagFormatOpts<'_>,
     ) -> String {
         let string: String;
         let comment: Option<&str>;
@@ -273,7 +264,7 @@ impl DiagItem {
                             .single_line_composition(
                                 level + 1,
                                 separator,
-                                opts.clone(),
+                                opts,
                             ),
                     })
                     .collect();
@@ -293,7 +284,7 @@ impl DiagItem {
         &self,
         level: usize,
         separator: &str,
-        opts: DiagFormatOpts<'_>,
+        opts: &DiagFormatOpts<'_>,
     ) -> String {
         match self {
             DiagItem::Item(string) => string.to_owned(),
@@ -301,7 +292,7 @@ impl DiagItem {
                 let mut lines: Vec<String> = vec![];
                 lines.push(self.format_line(
                     level,
-                    opts.clone().flat(false),
+                    &opts.clone().flat(false),
                     begin,
                     "",
                     comment.as_ref().map(|x| x.as_str()),
@@ -317,7 +308,7 @@ impl DiagItem {
                     lines.push(item.format_opt(
                         level + 1,
                         separator,
-                        opts.clone(),
+                        opts,
                     ));
                 }
                 lines.push(self.format_line(level, opts, end, separator, None));

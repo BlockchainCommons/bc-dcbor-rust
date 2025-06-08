@@ -102,6 +102,7 @@ mod date;
 pub use date::Date;
 
 mod diag;
+pub use diag::DiagFormatOpts;
 mod dump;
 pub use dump::HexFormatOpts;
 

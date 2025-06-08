@@ -4,7 +4,7 @@ use crate::{tags_store::TagsStoreTrait, with_tags, CBORCase, TagsStoreOpt, CBOR}
 
 use super::{string_util::{sanitized, flanked}, varint::{EncodeVarInt, MajorType}};
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct HexFormatOpts<'a> {
     annotate: bool,
     tags: TagsStoreOpt<'a>,
@@ -36,7 +36,7 @@ impl CBOR {
     /// Optionally annotates the output, e.g. breaking the output up into
     /// semantically meaningful lines, formatting dates, and adding names of
     /// known tags.
-    pub fn hex_opt<'a>(&self, opts: HexFormatOpts<'a>) -> String {
+    pub fn hex_opt<'a>(&self, opts: &HexFormatOpts<'a>) -> String {
         if !opts.annotate {
             return self.hex()
         }
@@ -52,10 +52,10 @@ impl CBOR {
 
     /// Returns the encoded hexadecimal representation of this CBOR, with annotations.
     pub fn hex_annotated(&self) -> String {
-        self.hex_opt(HexFormatOpts::default().annotate(true))
+        self.hex_opt(&HexFormatOpts::default().annotate(true))
     }
 
-    fn dump_items<'a>(&self, level: usize, opts: HexFormatOpts<'a>) -> Vec<DumpItem> {
+    fn dump_items<'a>(&self, level: usize, opts: &HexFormatOpts<'a>) -> Vec<DumpItem> {
         match self.as_case() {
             CBORCase::Unsigned(n) => vec!(DumpItem::new(level, vec!(self.to_cbor_data()), Some(format!("unsigned({})", n)))),
             CBORCase::Negative(n) => vec!(DumpItem::new(level, vec!(self.to_cbor_data()), Some(format!("negative({})", -1 - (*n as i128))))),
@@ -122,7 +122,7 @@ impl CBOR {
                     vec![
                         DumpItem::new(level, header_data, Some(format!("array({})", array.len())))
                     ],
-                    array.iter().flat_map(|x| x.dump_items(level + 1, opts.clone())).collect()
+                    array.iter().flat_map(|x| x.dump_items(level + 1, opts)).collect()
                 ].into_iter().flatten().collect()
             },
             CBORCase::Map(m) => {
@@ -134,8 +134,8 @@ impl CBOR {
                     ],
                     m.iter().flat_map(|x| {
                         vec![
-                            x.0.dump_items(level + 1, opts.clone()),
-                            x.1.dump_items(level + 1, opts.clone())
+                            x.0.dump_items(level + 1, opts),
+                            x.1.dump_items(level + 1, opts)
                         ].into_iter().flatten().collect::<Vec<DumpItem>>()
                     }).collect()
                 ].into_iter().flatten().collect()
