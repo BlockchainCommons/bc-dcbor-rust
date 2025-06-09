@@ -117,7 +117,7 @@ macro_rules! with_tags {
 ///     tags.insert(Tag::new(100, "custom-tag".to_string()));
 ///
 ///     // Add a summarizer for the tag
-///     tags.set_summarizer(100, Arc::new(|cbor| -> dcbor::Result<String> {
+///     tags.set_summarizer(100, Arc::new(|cbor, _flat| -> dcbor::Result<String> {
 ///         Ok(format!("Custom tag content: {:?}", cbor))
 ///     }));
 /// });
@@ -178,7 +178,7 @@ pub fn register_tags_in(tags_store: &mut TagsStore) {
     tags_store.insert_all(tags);
     tags_store.set_summarizer(
         TAG_DATE,
-        Arc::new(|untagged_cbor| { Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?)) })
+        Arc::new(|untagged_cbor, _| { Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?)) })
     );
 }
 

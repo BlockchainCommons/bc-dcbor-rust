@@ -66,9 +66,7 @@ impl CBOR {
     }
 
     pub fn summary(&self) -> String {
-        self.diagnostic_opt(
-            &DiagFormatOpts::default().summarize(true)
-        )
+        self.diagnostic_opt(&DiagFormatOpts::default().summarize(true))
     }
 }
 
@@ -84,8 +82,7 @@ impl CBOR {
             CBORCase::Array(a) => {
                 let begin = "[".to_string();
                 let end = "]".to_string();
-                let items =
-                    a.iter().map(|x| x.diag_item(opts)).collect();
+                let items = a.iter().map(|x| x.diag_item(opts)).collect();
                 let is_pairs = false;
                 let comment = None;
                 DiagItem::Group(begin, end, items, is_pairs, comment)
@@ -96,10 +93,7 @@ impl CBOR {
                 let items = m
                     .iter()
                     .flat_map(|(key, value)| {
-                        vec![
-                            key.diag_item(opts),
-                            value.diag_item(opts),
-                        ]
+                        vec![key.diag_item(opts), value.diag_item(opts)]
                     })
                     .collect();
                 let is_pairs = true;
@@ -113,7 +107,9 @@ impl CBOR {
                     // Attempt to get a summarizer function based on opts.tags
                     let summarizer_fn_opt: Option<
                         Arc<
-                            dyn Fn(CBOR) -> Result<String, Error> + Send + Sync,
+                            dyn Fn(CBOR, bool) -> Result<String, Error>
+                                + Send
+                                + Sync,
                         >,
                     > = match &opts.tags {
                         TagsStoreOpt::Custom(tags_store_trait) => {
@@ -135,7 +131,7 @@ impl CBOR {
 
                     // If a summarizer function was found, execute it.
                     if let Some(summarizer_fn) = summarizer_fn_opt {
-                        match summarizer_fn(item.clone()) {
+                        match summarizer_fn(item.clone(), opts.flat) {
                             Ok(summary_text) => {
                                 item_to_return =
                                     Some(DiagItem::Item(summary_text));
@@ -305,11 +301,7 @@ impl DiagItem {
                     } else {
                         ","
                     };
-                    lines.push(item.format_opt(
-                        level + 1,
-                        separator,
-                        opts,
-                    ));
+                    lines.push(item.format_opt(level + 1, separator, opts));
                 }
                 lines.push(self.format_line(level, opts, end, separator, None));
                 lines.join("\n")

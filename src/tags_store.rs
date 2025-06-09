@@ -27,7 +27,7 @@ use crate::{ Tag, TagValue, CBOR, Result };
 /// use std::sync::Arc;
 ///
 /// // Create a custom summarizer for a date tag
-/// let date_summarizer: CBORSummarizer = Arc::new(|cbor| {
+/// let date_summarizer: CBORSummarizer = Arc::new(|cbor, _flat| {
 ///     // Extract timestamp from tagged CBOR
 ///     let timestamp: f64 = cbor.clone().try_into()?;
 ///
@@ -47,7 +47,7 @@ use crate::{ Tag, TagValue, CBOR, Result };
 ///
 /// When this summarizer is used (for example in diagnostic output), it would
 /// convert a tagged CBOR timestamp into a more readable date format.
-pub type CBORSummarizer = Arc<dyn (Fn(CBOR) -> Result<String>) + Send + Sync>;
+pub type CBORSummarizer = Arc<dyn (Fn(CBOR, bool) -> Result<String>) + Send + Sync>;
 
 /// A trait for types that can map between CBOR tags and their human-readable names.
 ///
@@ -183,7 +183,7 @@ impl Default for TagsStoreOpt<'_> {
 /// tags.insert(Tag::new(1, "date".to_string()));
 ///
 /// // Add a summarizer for the date tag
-/// tags.set_summarizer(1, Arc::new(|cbor| {
+/// tags.set_summarizer(1, Arc::new(|cbor, _flat| {
 ///     // Try to convert CBOR to f64 for timestamp formatting
 ///     let timestamp: f64 = cbor.clone().try_into().unwrap_or(0.0);
 ///     Ok(format!("Timestamp: {}", timestamp))

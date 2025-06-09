@@ -25,20 +25,43 @@ use dcbor::prelude::*;
 use half::f16;
 use hex_literal::hex;
 
+macro_rules! assert_actual_expected {
+    ($actual:expr, $expected:expr $(,)?) => {
+        match (&$actual, &$expected) {
+            (actual_val, expected_val) => {
+                if !(*actual_val == *expected_val) {
+                    println!("Actual:\n{actual_val}");
+                    assert_eq!(*actual_val, *expected_val);
+                }
+            }
+        }
+    };
+    ($actual:expr, $expected:expr, $($arg:tt)+) => {
+        match (&$actual, &$expected) {
+            (actual_val, expected_val) => {
+                if !(*actual_val == *expected_val) {
+                    println!("Actual:\n{actual_val}");
+                    assert_eq!(*actual_val, *expected_val, $crate::option::Option::Some($crate::format_args!($($arg)+)));
+                }
+            }
+        }
+    };
+}
+
 fn test_cbor(t: impl Into<CBOR>, expected_debug: &str, expected_display: &str, expected_data: &str) {
     let cbor = t.into();
-    assert_eq!(format!("{:?}", cbor), expected_debug);
-    assert_eq!(format!("{}", cbor), expected_display);
+    assert_actual_expected!(format!("{:?}", cbor), expected_debug);
+    assert_actual_expected!(format!("{}", cbor), expected_display);
     let data = cbor.to_cbor_data();
-    assert_eq!(hex::encode(&data), expected_data);
+    assert_actual_expected!(hex::encode(&data), expected_data);
     let decoded_cbor = CBOR::try_from_data(&data).unwrap();
-    assert_eq!(cbor, decoded_cbor);
+    assert_actual_expected!(cbor, decoded_cbor);
 }
 
 fn test_cbor_decode(data: &str, expected_debug: &str, expected_display: &str) {
     let cbor = CBOR::try_from_hex(data).unwrap();
-    assert_eq!(format!("{:?}", cbor), expected_debug);
-    assert_eq!(format!("{}", cbor), expected_display);
+    assert_actual_expected!(format!("{:?}", cbor), expected_debug);
+    assert_actual_expected!(format!("{}", cbor), expected_display);
 }
 
 fn test_cbor_codable<T>(t: T, expected_debug: &str, expected_display: &str, expected_data: &str)
@@ -47,20 +70,20 @@ T: TryFrom<CBOR> + Into<CBOR>,
 <T as TryFrom<dcbor::CBOR>>::Error: std::fmt::Debug
 {
     let cbor = t.into();
-    assert_eq!(format!("{:?}", cbor), expected_debug);
-    assert_eq!(format!("{}", cbor), expected_display);
+    assert_actual_expected!(format!("{:?}", cbor), expected_debug);
+    assert_actual_expected!(format!("{}", cbor), expected_display);
     let data = cbor.to_cbor_data();
-    assert_eq!(hex::encode(&data), expected_data);
+    assert_actual_expected!(hex::encode(&data), expected_data);
 
     let decoded_cbor = CBOR::try_from_data(&data).unwrap();
     assert_eq!(cbor, decoded_cbor);
     let t2 = T::try_from(decoded_cbor).unwrap();
 
     let cbor = t2.into();
-    assert_eq!(format!("{:?}", cbor), expected_debug);
-    assert_eq!(format!("{}", cbor), expected_display);
+    assert_actual_expected!(format!("{:?}", cbor), expected_debug);
+    assert_actual_expected!(format!("{}", cbor), expected_display);
     let data = cbor.to_cbor_data();
-    assert_eq!(hex::encode(data), expected_data);
+    assert_actual_expected!(hex::encode(data), expected_data);
 }
 
 #[test]
@@ -218,7 +241,7 @@ fn test_normalized_string() {
     let cbor_data = hex!("6365cc81");
     let cbor = CBOR::try_from_data(cbor_data);
     if let Err(e) = cbor {
-        assert_eq!(format!("{}", e), "a CBOR string was not encoded in Unicode Canonical Normalization Form C");
+        assert_actual_expected!(format!("{}", e), "a CBOR string was not encoded in Unicode Canonical Normalization Form C");
     } else {
         panic!("Expected NonCanonicalString error");
     }
