@@ -578,6 +578,11 @@ impl CBOR {
     pub fn null() -> Self {
         CBORCase::Simple(Simple::Null).into()
     }
+
+    /// The CBOR simple value representing `NaN` (Not a Number).
+    pub fn nan() -> Self {
+        CBORCase::Simple(Simple::Float(f64::NAN)).into()
+    }
 }
 
 impl CBOR {
@@ -609,6 +614,23 @@ impl CBOR {
     /// Check if the CBOR value is null.
     pub fn is_null(&self) -> bool {
         matches!(self.as_case(), CBORCase::Simple(Simple::Null))
+    }
+
+    /// Check if the CBOR value is a number.
+    pub fn is_number(&self) -> bool {
+        match self.as_case() {
+            CBORCase::Unsigned(_) | CBORCase::Negative(_) => true,
+            CBORCase::Simple(s) => s.is_float(),
+            _ => false,
+        }
+    }
+
+    /// Check if the CBOR value is the NaN (Not a Number) representation.
+    pub fn is_nan(&self) -> bool {
+        match self.as_case() {
+            CBORCase::Simple(s) => s.is_nan(),
+            _ => false,
+        }
     }
 }
 

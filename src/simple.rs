@@ -1,20 +1,20 @@
 import_stdlib!();
 
-use crate::{ float::f64_cbor_data, CBORCase, Error, Result, CBOR };
-
-use super::varint::{ EncodeVarInt, MajorType };
+use super::varint::{EncodeVarInt, MajorType};
+use crate::{CBOR, CBORCase, Error, Result, float::f64_cbor_data};
 
 /// Represents CBOR simple values (major type 7).
 ///
-/// In CBOR, simple values are a special category that includes booleans (`true` and `false`),
-/// `null`, and floating point numbers.
+/// In CBOR, simple values are a special category that includes booleans (`true`
+/// and `false`), `null`, and floating point numbers.
 ///
-/// Per Section 2.4 of the dCBOR specification, only these specific simple values
-/// are valid in dCBOR. All other major type 7 values (such as undefined or other
-/// simple values) are invalid and will be rejected by dCBOR decoders.
+/// Per Section 2.4 of the dCBOR specification, only these specific simple
+/// values are valid in dCBOR. All other major type 7 values (such as undefined
+/// or other simple values) are invalid and will be rejected by dCBOR decoders.
 ///
-/// When encoding floating point values, dCBOR follows specific numeric reduction
-/// rules detailed in Section 2.3 of the dCBOR specification, including:
+/// When encoding floating point values, dCBOR follows specific numeric
+/// reduction rules detailed in Section 2.3 of the dCBOR specification,
+/// including:
 /// - Integral floating point values must be reduced to integers when possible
 /// - NaN values must be normalized to the canonical form `f97e00`
 ///
@@ -24,7 +24,8 @@ use super::varint::{ EncodeVarInt, MajorType };
 /// Rust's native types instead:
 ///
 /// - Use Rust's `true` and `false` booleans directly
-/// - Use the convenience methods `CBOR::r#true()`, `CBOR::r#false()`, and `CBOR::null()`
+/// - Use the convenience methods `CBOR::r#true()`, `CBOR::r#false()`, and
+///   `CBOR::null()`
 /// - Use Rust's floating point types like `f64` directly
 ///
 /// # Examples
@@ -88,14 +89,22 @@ impl Simple {
     /// Returns the standard name of the simple value as a string.
     ///
     /// For `False`, `True`, and `Null`, this returns their lowercase string
-    /// representation. For `Float` values, it returns their numeric representation.
+    /// representation. For `Float` values, it returns their numeric
+    /// representation.
     ///
     /// # Note
     ///
-    /// This method is primarily used internally. Users should generally interact
-    /// with Rust's native types rather than with `Simple` values directly.
-    pub fn name(&self) -> String {
-        format!("{:?}", self)
+    /// This method is primarily used internally. Users should generally
+    /// interact with Rust's native types rather than with `Simple` values
+    /// directly.
+    pub fn name(&self) -> String { format!("{:?}", self) }
+
+    /// Checks if the simple value is a floating point number.
+    pub fn is_float(&self) -> bool { matches!(self, Self::Float(_)) }
+
+    /// Checks if the simple value is the NaN (Not a Number) representation.
+    pub fn is_nan(&self) -> bool {
+        matches!(self, Self::Float(v) if v.is_nan())
     }
 
     /// Encodes the simple value to its raw CBOR byte representation.
@@ -125,9 +134,9 @@ impl Simple {
 
 /// Converts a `Simple` value into a CBOR representation.
 ///
-/// This conversion allows `Simple` values to be seamlessly used where CBOR values
-/// are expected, creating a CBOR value of type `CBORCase::Simple` that wraps the
-/// simple value.
+/// This conversion allows `Simple` values to be seamlessly used where CBOR
+/// values are expected, creating a CBOR value of type `CBORCase::Simple` that
+/// wraps the simple value.
 ///
 /// # Note
 ///
@@ -135,9 +144,7 @@ impl Simple {
 /// converting from Rust's native types (bool, f64) directly to CBOR instead of
 /// using the `Simple` type.
 impl From<Simple> for CBOR {
-    fn from(value: Simple) -> Self {
-        CBORCase::Simple(value.clone()).into()
-    }
+    fn from(value: Simple) -> Self { CBORCase::Simple(value.clone()).into() }
 }
 
 /// Attempts to convert a CBOR value to a `Simple` value.
@@ -165,16 +172,18 @@ impl TryFrom<CBOR> for Simple {
 
 /// Implements equality comparison for `Simple` values.
 ///
-/// Two `Simple` values are equal if they're the same variant. For `Float` variants,
-/// the contained floating point values are compared for equality according to
-/// Rust's floating point equality rules.
+/// Two `Simple` values are equal if they're the same variant. For `Float`
+/// variants, the contained floating point values are compared for equality
+/// according to Rust's floating point equality rules.
 impl PartialEq for Simple {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::False, Self::False) => true,
             (Self::True, Self::True) => true,
             (Self::Null, Self::Null) => true,
-            (Self::Float(v1), Self::Float(v2)) => v1 == v2,
+            (Self::Float(v1), Self::Float(v2)) => {
+                v1 == v2 || (v1.is_nan() && v2.is_nan())
+            }
             _ => false,
         }
     }
@@ -228,7 +237,7 @@ impl fmt::Display for Simple {
                 } else {
                     format!("{:?}", v)
                 }
-            },
+            }
         };
         f.write_str(&s)
     }
