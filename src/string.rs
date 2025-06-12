@@ -62,7 +62,7 @@ impl TryFrom<CBOR> for String {
         match cbor.into_case() {
             CBORCase::Text(s) => Ok(s),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }

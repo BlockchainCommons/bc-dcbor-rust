@@ -189,7 +189,7 @@ impl Map {
         match self.get(key) {
             Some(value) => Ok(value),
             None => {
-                return Err(Error::MissingMapKey);
+                Err(Error::MissingMapKey)
             }
         }
     }

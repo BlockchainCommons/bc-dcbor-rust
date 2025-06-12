@@ -51,7 +51,7 @@ impl TryFrom<CBOR> for bool {
             CBORCase::Simple(Simple::False) => Ok(false),
             CBORCase::Simple(Simple::True) => Ok(true),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }

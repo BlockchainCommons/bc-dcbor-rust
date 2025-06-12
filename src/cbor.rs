@@ -3,50 +3,48 @@ import_stdlib!();
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
-use unicode_normalization::UnicodeNormalization;
-
-use crate::{
-    decode::decode_cbor,
-    error::{ Error, Result },
-    tag::Tag,
-    varint::{ EncodeVarInt, MajorType },
-    Map,
-    Simple,
-    ByteString,
-};
-
-use super::string_util::flanked;
-
+#[cfg(all(not(feature = "multithreaded"), not(feature = "std")))]
+use alloc::rc::Rc as RefCounted;
+#[cfg(all(feature = "multithreaded", not(feature = "std")))]
+use alloc::sync::Arc as RefCounted;
+#[cfg(all(not(feature = "multithreaded"), feature = "std"))]
+use std::rc::Rc as RefCounted;
 #[cfg(all(feature = "multithreaded", feature = "std"))]
 use std::sync::Arc as RefCounted;
 
-#[cfg(all(feature = "multithreaded", not(feature = "std")))]
-use alloc::sync::Arc as RefCounted;
+use unicode_normalization::UnicodeNormalization;
 
-#[cfg(all(not(feature = "multithreaded"), feature = "std"))]
-use std::rc::Rc as RefCounted;
-
-#[cfg(all(not(feature = "multithreaded"), not(feature = "std")))]
-use alloc::rc::Rc as RefCounted;
+use super::string_util::flanked;
+use crate::{
+    ByteString, Map, Simple,
+    decode::decode_cbor,
+    error::{Error, Result},
+    tag::Tag,
+    varint::{EncodeVarInt, MajorType},
+};
 
 /// A symbolic representation of CBOR data.
 ///
-/// The `CBOR` type is the central type in the dCBOR library, representing any CBOR data item using
-/// a reference-counted wrapper around a [`CBORCase`] enum. This design allows efficient sharing
-/// of CBOR data structures in memory without excessive copying.
+/// The `CBOR` type is the central type in the dCBOR library, representing any
+/// CBOR data item using a reference-counted wrapper around a [`CBORCase`] enum.
+/// This design allows efficient sharing of CBOR data structures in memory
+/// without excessive copying.
 ///
 /// # Features
 ///
-/// - **Deterministic encoding**: Guarantees that semantically equivalent data structures
-///   will always be encoded to identical byte sequences
+/// - **Deterministic encoding**: Guarantees that semantically equivalent data
+///   structures will always be encoded to identical byte sequences
 /// - **Reference counting**: Enables efficient sharing of CBOR structures
-/// - **Type safety**: Uses Rust's type system to safely handle different CBOR data types
-/// - **Conversion traits**: Implements Rust's standard conversion traits for ergonomic use
+/// - **Type safety**: Uses Rust's type system to safely handle different CBOR
+///   data types
+/// - **Conversion traits**: Implements Rust's standard conversion traits for
+///   ergonomic use
 ///
 /// # Thread Safety
 ///
-/// With the `multithreaded` feature enabled, `CBOR` uses `Arc` for reference counting, making
-/// it thread-safe. Without this feature, it uses `Rc`, which is more efficient but not thread-safe.
+/// With the `multithreaded` feature enabled, `CBOR` uses `Arc` for reference
+/// counting, making it thread-safe. Without this feature, it uses `Rc`, which
+/// is more efficient but not thread-safe.
 ///
 /// # Example
 ///
@@ -65,11 +63,8 @@ use alloc::rc::Rc as RefCounted;
 /// assert_eq!(decoded, array);
 ///
 /// // 2. Create and round-trip a heterogeneous array
-/// let mixed_array: Vec<CBOR> = vec![
-///     1.into(),
-///     "Hello".into(),
-///     vec![1, 2, 3].into(),
-/// ];
+/// let mixed_array: Vec<CBOR> =
+///     vec![1.into(), "Hello".into(), vec![1, 2, 3].into()];
 /// let mixed = CBOR::from(mixed_array);
 ///
 /// // Encode the heterogeneous array to bytes
@@ -80,15 +75,16 @@ use alloc::rc::Rc as RefCounted;
 /// let mixed_decoded = CBOR::try_from_data(&mixed_encoded).unwrap();
 /// assert_eq!(mixed_decoded, mixed);
 /// // Use diagnostic_flat() for a compact single-line representation
-/// assert_eq!(mixed_decoded.diagnostic_flat(), r#"[1, "Hello", [1, 2, 3]]"#);
+/// assert_eq!(
+///     mixed_decoded.diagnostic_flat(),
+///     r#"[1, "Hello", [1, 2, 3]]"#
+/// );
 /// ```
-#[derive(Clone, Eq, Hash)]
+#[derive(Clone, Eq)]
 pub struct CBOR(RefCounted<CBORCase>);
 
 impl CBOR {
-    pub fn as_case(&self) -> &CBORCase {
-        &self.0
-    }
+    pub fn as_case(&self) -> &CBORCase { &self.0 }
 
     pub fn into_case(self) -> CBORCase {
         match RefCounted::try_unwrap(self.0) {
@@ -99,20 +95,19 @@ impl CBOR {
 }
 
 impl From<CBORCase> for CBOR {
-    fn from(case: CBORCase) -> Self {
-        Self(RefCounted::new(case))
-    }
+    fn from(case: CBORCase) -> Self { Self(RefCounted::new(case)) }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// An enum representing all possible CBOR data types.
 ///
-/// `CBORCase` is the core enum that represents all possible CBOR data types according to
-/// [RFC 8949](https://www.rfc-editor.org/rfc/rfc8949.html) and the dCBOR specification.
+/// `CBORCase` is the core enum that represents all possible CBOR data types
+/// according to [RFC 8949](https://www.rfc-editor.org/rfc/rfc8949.html) and the dCBOR specification.
 /// Each variant corresponds to one of the eight major types in CBOR.
 ///
-/// This enum is not typically used directly by users of the library. Instead, it's wrapped
-/// by the reference-counted [`CBOR`] type, which provides a more ergonomic API.
+/// This enum is not typically used directly by users of the library. Instead,
+/// it's wrapped by the reference-counted [`CBOR`] type, which provides a more
+/// ergonomic API.
 ///
 /// # Major Types
 ///
@@ -131,7 +126,8 @@ impl From<CBORCase> for CBOR {
 ///
 /// # dCBOR Constraints
 ///
-/// According to the dCBOR specification, deterministic encoding adds several constraints:
+/// According to the dCBOR specification, deterministic encoding adds several
+/// constraints:
 ///
 /// - Maps must have lexicographically ordered keys
 /// - Numeric values must use the smallest possible encoding
@@ -142,14 +138,13 @@ impl From<CBORCase> for CBOR {
 /// # Example
 ///
 /// ```
-/// use dcbor::prelude::*;
-/// use dcbor::{CBORCase, Simple};
+/// use dcbor::{CBORCase, Simple, prelude::*};
 ///
 /// // Create a CBOR value using the CBORCase enum
 /// let case = CBORCase::Array(vec![
 ///     CBORCase::Unsigned(1).into(),
 ///     CBORCase::Text("hello".to_string()).into(),
-///     CBORCase::Simple(Simple::True).into()
+///     CBORCase::Simple(Simple::True).into(),
 /// ]);
 ///
 /// // Wrap in the CBOR type for easier handling
@@ -209,13 +204,14 @@ pub enum CBORCase {
 impl CBOR {
     /// Decodes binary data into CBOR symbolic representation.
     ///
-    /// This method parses the provided binary data according to the CBOR and dCBOR
-    /// specifications, validating that it follows all deterministic encoding rules.
+    /// This method parses the provided binary data according to the CBOR and
+    /// dCBOR specifications, validating that it follows all deterministic
+    /// encoding rules.
     ///
     /// # Arguments
     ///
-    /// * `data` - The binary data to decode, which can be any type that can be referenced
-    ///   as a byte slice (e.g., `Vec<u8>`, `&[u8]`, etc.)
+    /// * `data` - The binary data to decode, which can be any type that can be
+    ///   referenced as a byte slice (e.g., `Vec<u8>`, `&[u8]`, etc.)
     ///
     /// # Returns
     ///
@@ -240,7 +236,8 @@ impl CBOR {
     ///
     /// This method will return an error if:
     /// - The data is not valid CBOR
-    /// - The data violates dCBOR encoding rules (e.g., non-canonical integer encoding)
+    /// - The data violates dCBOR encoding rules (e.g., non-canonical integer
+    ///   encoding)
     /// - The data has content after the end of the CBOR item
     pub fn try_from_data(data: impl AsRef<[u8]>) -> Result<CBOR> {
         decode_cbor(data)
@@ -248,17 +245,19 @@ impl CBOR {
 
     /// Decodes a hexadecimal string into CBOR symbolic representation.
     ///
-    /// This is a convenience method that converts a hexadecimal string to binary data
-    /// and then calls [`try_from_data`](Self::try_from_data).
+    /// This is a convenience method that converts a hexadecimal string to
+    /// binary data and then calls [`try_from_data`](Self::try_from_data).
     ///
     /// # Arguments
     ///
-    /// * `hex` - A string containing hexadecimal characters (no spaces or other characters)
+    /// * `hex` - A string containing hexadecimal characters (no spaces or other
+    ///   characters)
     ///
     /// # Returns
     ///
     /// * `Ok(CBOR)` - A CBOR value if decoding was successful
-    /// * `Err` - If the hex string is invalid or the resulting data is not valid dCBOR
+    /// * `Err` - If the hex string is invalid or the resulting data is not
+    ///   valid dCBOR
     ///
     /// # Examples
     ///
@@ -281,8 +280,8 @@ impl CBOR {
 
     /// Encodes this CBOR value to binary data following dCBOR encoding rules.
     ///
-    /// This method converts the CBOR value to a byte vector according to the dCBOR
-    /// specification, ensuring deterministic encoding.
+    /// This method converts the CBOR value to a byte vector according to the
+    /// dCBOR specification, ensuring deterministic encoding.
     ///
     /// # Returns
     ///
@@ -348,8 +347,9 @@ impl CBOR {
     ///
     /// # Arguments
     ///
-    /// * `data` - The bytes to include in the byte string, which can be any type that can be
-    ///   referenced as a byte slice (e.g., `Vec<u8>`, `&[u8]`, etc.)
+    /// * `data` - The bytes to include in the byte string, which can be any
+    ///   type that can be referenced as a byte slice (e.g., `Vec<u8>`, `&[u8]`,
+    ///   etc.)
     ///
     /// # Returns
     ///
@@ -376,14 +376,16 @@ impl CBOR {
         CBORCase::ByteString(data.as_ref().into()).into()
     }
 
-    /// Creates a new CBOR value representing a byte string from a hexadecimal string.
+    /// Creates a new CBOR value representing a byte string from a hexadecimal
+    /// string.
     ///
-    /// This is a convenience method that converts a hexadecimal string to a byte array
-    /// and then creates a CBOR byte string value.
+    /// This is a convenience method that converts a hexadecimal string to a
+    /// byte array and then creates a CBOR byte string value.
     ///
     /// # Arguments
     ///
-    /// * `hex` - A string containing hexadecimal characters (no spaces or other characters)
+    /// * `hex` - A string containing hexadecimal characters (no spaces or other
+    ///   characters)
     ///
     /// # Returns
     ///
@@ -411,14 +413,16 @@ impl CBOR {
 
     /// Creates a new CBOR value representing a tagged value.
     ///
-    /// This method creates a CBOR tagged value (major type 6) by applying a tag to
-    /// another CBOR value. Tags provide semantic information about how the tagged
-    /// data should be interpreted.
+    /// This method creates a CBOR tagged value (major type 6) by applying a tag
+    /// to another CBOR value. Tags provide semantic information about how
+    /// the tagged data should be interpreted.
     ///
     /// # Arguments
     ///
-    /// * `tag` - The tag to apply, which can be any type that can be converted to a `Tag`
-    /// * `item` - The CBOR value to tag, which can be any type that can be converted to `CBOR`
+    /// * `tag` - The tag to apply, which can be any type that can be converted
+    ///   to a `Tag`
+    /// * `item` - The CBOR value to tag, which can be any type that can be
+    ///   converted to `CBOR`
     ///
     /// # Returns
     ///
@@ -453,9 +457,7 @@ impl CBOR {
     pub fn try_into_byte_string(self) -> Result<Vec<u8>> {
         match self.into_case() {
             CBORCase::ByteString(b) => Ok(b.into()),
-            _ => {
-                return Err(Error::WrongType);
-            }
+            _ => Err(Error::WrongType),
         }
     }
 
@@ -473,9 +475,7 @@ impl CBOR {
     pub fn try_into_text(self) -> Result<String> {
         match self.into_case() {
             CBORCase::Text(t) => Ok(t),
-            _ => {
-                return Err(Error::WrongType);
-            }
+            _ => Err(Error::WrongType),
         }
     }
 
@@ -483,15 +483,15 @@ impl CBOR {
         cbor.clone().try_into_text()
     }
 
+    pub fn into_text(self) -> Option<String> { self.try_into_text().ok() }
+
     /// Extract the CBOR value as an array.
     ///
     /// Returns `Ok` if the value is an array, `Err` otherwise.
     pub fn try_into_array(self) -> Result<Vec<CBOR>> {
         match self.into_case() {
             CBORCase::Array(a) => Ok(a),
-            _ => {
-                return Err(Error::WrongType);
-            }
+            _ => Err(Error::WrongType),
         }
     }
 
@@ -499,21 +499,21 @@ impl CBOR {
         cbor.clone().try_into_array()
     }
 
+    pub fn into_array(self) -> Option<Vec<CBOR>> { self.try_into_array().ok() }
+
     /// Extract the CBOR value as a map.
     ///
     /// Returns `Ok` if the value is a map, `Err` otherwise.
     pub fn try_into_map(self) -> Result<Map> {
         match self.into_case() {
             CBORCase::Map(m) => Ok(m),
-            _ => {
-                return Err(Error::WrongType);
-            }
+            _ => Err(Error::WrongType),
         }
     }
 
-    pub fn try_map(cbor: &Self) -> Result<Map> {
-        cbor.clone().try_into_map()
-    }
+    pub fn try_map(cbor: &Self) -> Result<Map> { cbor.clone().try_into_map() }
+
+    pub fn into_map(self) -> Option<Map> { self.try_into_map().ok() }
 
     /// Extract the CBOR value as a tagged value.
     ///
@@ -522,7 +522,7 @@ impl CBOR {
         match self.into_case() {
             CBORCase::Tagged(tag, value) => Ok((tag, value)),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }
@@ -535,17 +535,23 @@ impl CBOR {
     ///
     /// Returns `Ok` if the value is a tagged value with the expected tag, `Err`
     /// otherwise.
-    pub fn try_into_expected_tagged_value(self, expected_tag: impl Into<Tag>) -> Result<CBOR> {
+    pub fn try_into_expected_tagged_value(
+        self,
+        expected_tag: impl Into<Tag>,
+    ) -> Result<CBOR> {
         let (tag, value) = self.try_into_tagged_value()?;
         let expected_tag = expected_tag.into();
         if tag == expected_tag {
             Ok(value)
         } else {
-            return Err(Error::WrongTag(expected_tag, tag));
+            Err(Error::WrongTag(expected_tag, tag))
         }
     }
 
-    pub fn try_expected_tagged_value(cbor: &Self, expected_tag: impl Into<Tag>) -> Result<CBOR> {
+    pub fn try_expected_tagged_value(
+        cbor: &Self,
+        expected_tag: impl Into<Tag>,
+    ) -> Result<CBOR> {
         cbor.clone().try_into_expected_tagged_value(expected_tag)
     }
 
@@ -556,7 +562,7 @@ impl CBOR {
         match self.into_case() {
             CBORCase::Simple(s) => Ok(s),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }
@@ -565,24 +571,16 @@ impl CBOR {
 /// Associated constants for common CBOR simple values.
 impl CBOR {
     /// The CBOR simple value representing `false`.
-    pub fn r#false() -> Self {
-        CBORCase::Simple(Simple::False).into()
-    }
+    pub fn r#false() -> Self { CBORCase::Simple(Simple::False).into() }
 
     /// The CBOR simple value representing `true`.
-    pub fn r#true() -> Self {
-        CBORCase::Simple(Simple::True).into()
-    }
+    pub fn r#true() -> Self { CBORCase::Simple(Simple::True).into() }
 
     /// The CBOR simple value representing `null` (`None`).
-    pub fn null() -> Self {
-        CBORCase::Simple(Simple::Null).into()
-    }
+    pub fn null() -> Self { CBORCase::Simple(Simple::Null).into() }
 
     /// The CBOR simple value representing `NaN` (Not a Number).
-    pub fn nan() -> Self {
-        CBORCase::Simple(Simple::Float(f64::NAN)).into()
-    }
+    pub fn nan() -> Self { CBORCase::Simple(Simple::Float(f64::NAN)).into() }
 }
 
 impl CBOR {
@@ -592,7 +590,7 @@ impl CBOR {
             CBORCase::Simple(Simple::True) => Ok(true),
             CBORCase::Simple(Simple::False) => Ok(false),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }
@@ -643,9 +641,52 @@ impl PartialEq for CBOR {
             (CBORCase::Text(l0), CBORCase::Text(r0)) => l0 == r0,
             (CBORCase::Array(l0), CBORCase::Array(r0)) => l0 == r0,
             (CBORCase::Map(l0), CBORCase::Map(r0)) => l0 == r0,
-            (CBORCase::Tagged(l0, l1), CBORCase::Tagged(r0, r1)) => l0 == r0 && l1 == r1,
+            (CBORCase::Tagged(l0, l1), CBORCase::Tagged(r0, r1)) => {
+                l0 == r0 && l1 == r1
+            }
             (CBORCase::Simple(l0), CBORCase::Simple(r0)) => l0 == r0,
             _ => false,
+        }
+    }
+}
+
+impl std::hash::Hash for CBOR {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        use CBORCase::*;
+        match self.as_case() {
+            Unsigned(x) => {
+                0u8.hash(state);
+                x.hash(state);
+            }
+            Negative(x) => {
+                1u8.hash(state);
+                x.hash(state);
+            }
+            ByteString(x) => {
+                2u8.hash(state);
+                x.hash(state);
+            }
+            Text(x) => {
+                3u8.hash(state);
+                x.hash(state);
+            }
+            Array(x) => {
+                4u8.hash(state);
+                x.hash(state);
+            }
+            Map(x) => {
+                5u8.hash(state);
+                x.hash(state);
+            }
+            Tagged(tag, item) => {
+                6u8.hash(state);
+                tag.hash(state);
+                item.hash(state);
+            }
+            Simple(x) => {
+                7u8.hash(state);
+                x.hash(state);
+            }
         }
     }
 }
@@ -663,36 +704,38 @@ fn format_string(s: &str) -> String {
 }
 
 fn format_array(a: &[CBOR]) -> String {
-    let s: Vec<String> = a
-        .iter()
-        .map(|x| format!("{}", x))
-        .collect();
+    let s: Vec<String> = a.iter().map(|x| format!("{}", x)).collect();
     flanked(&s.join(", "), "[", "]")
 }
 
 fn format_map(m: &Map) -> String {
-    let s: Vec<String> = m
-        .iter()
-        .map(|x| format!("{}: {}", x.0, x.1))
-        .collect();
+    let s: Vec<String> =
+        m.iter().map(|x| format!("{}: {}", x.0, x.1)).collect();
     flanked(&s.join(", "), "{", "}")
 }
 
 impl fmt::Debug for CBOR {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.as_case() {
-            CBORCase::Unsigned(x) => f.debug_tuple("unsigned").field(x).finish(),
-            CBORCase::Negative(x) =>
-                f
-                    .debug_tuple("negative")
-                    .field(&(-1 - (*x as i128)))
-                    .finish(),
-            CBORCase::ByteString(x) => f.write_fmt(format_args!("bytes({})", hex::encode(x))),
+            CBORCase::Unsigned(x) => {
+                f.debug_tuple("unsigned").field(x).finish()
+            }
+            CBORCase::Negative(x) => f
+                .debug_tuple("negative")
+                .field(&(-1 - (*x as i128)))
+                .finish(),
+            CBORCase::ByteString(x) => {
+                f.write_fmt(format_args!("bytes({})", hex::encode(x)))
+            }
             CBORCase::Text(x) => f.debug_tuple("text").field(x).finish(),
             CBORCase::Array(x) => f.debug_tuple("array").field(x).finish(),
             CBORCase::Map(x) => f.debug_tuple("map").field(x).finish(),
-            CBORCase::Tagged(tag, item) => f.write_fmt(format_args!("tagged({}, {:?})", tag, item)),
-            CBORCase::Simple(x) => f.write_fmt(format_args!("simple({})", x.name())),
+            CBORCase::Tagged(tag, item) => {
+                f.write_fmt(format_args!("tagged({}, {:?})", tag, item))
+            }
+            CBORCase::Simple(x) => {
+                f.write_fmt(format_args!("simple({})", x.name()))
+            }
         }
     }
 }

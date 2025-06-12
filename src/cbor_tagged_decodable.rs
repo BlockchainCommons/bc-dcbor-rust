@@ -135,12 +135,10 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
                 if cbor_tags.iter().any(|t| *t == tag) {
                     Self::from_untagged_cbor(item)
                 } else {
-                    return Err(Error::WrongTag(cbor_tags[0].clone(), tag));
+                    Err(Error::WrongTag(cbor_tags[0].clone(), tag))
                 }
             }
-            _ => {
-                return Err(Error::WrongType);
-            }
+            _ => Err(Error::WrongType)
         }
     }
 

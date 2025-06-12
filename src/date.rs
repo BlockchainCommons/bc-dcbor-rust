@@ -224,7 +224,7 @@ impl Date {
             return Ok(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
         }
 
-        return Err(Error::InvalidDate("Invalid date string".into()));
+        Err(Error::InvalidDate("Invalid date string".into()))
     }
 
     /// Creates a new `Date` containing the current date and time.

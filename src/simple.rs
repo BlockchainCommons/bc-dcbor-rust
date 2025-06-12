@@ -164,7 +164,7 @@ impl TryFrom<CBOR> for Simple {
         match cbor.into_case() {
             CBORCase::Simple(simple) => Ok(simple),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }

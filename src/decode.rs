@@ -191,7 +191,7 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
                         21 => Ok((CBOR::r#true(), header_varint_len)),
                         22 => Ok((CBOR::null(), header_varint_len)),
                         _ => {
-                            return Err(Error::InvalidSimpleValue);
+                            Err(Error::InvalidSimpleValue)
                         }
                     }
                 }

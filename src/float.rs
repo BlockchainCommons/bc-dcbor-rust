@@ -100,19 +100,19 @@ impl TryFrom<CBOR> for f64 {
                 if let Some(f) = f64::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             CBORCase::Negative(n) => {
                 if let Some(f) = f64::exact_from_u64(n) {
                     Ok(-1f64 - f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             CBORCase::Simple(Simple::Float(n)) => Ok(n),
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }
@@ -170,25 +170,25 @@ impl TryFrom<CBOR> for f32 {
                 if let Some(f) = f32::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             CBORCase::Negative(n) => {
                 if let Some(f) = f32::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             CBORCase::Simple(Simple::Float(n)) => {
                 if let Some(f) = f32::exact_from_f64(n) {
                     Ok(f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }
@@ -235,7 +235,7 @@ impl TryFrom<CBOR> for f16 {
                 if let Some(f) = f16::exact_from_u64(n) {
                     Ok(f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             CBORCase::Negative(n) => {
@@ -243,21 +243,21 @@ impl TryFrom<CBOR> for f16 {
                     if let Some(b) = f16::exact_from_f64(-1f64 - f) {
                         Ok(b)
                     } else {
-                        return Err(Error::OutOfRange);
+                        Err(Error::OutOfRange)
                     }
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             CBORCase::Simple(Simple::Float(n)) => {
                 if let Some(f) = f16::exact_from_f64(n) {
                     Ok(f)
                 } else {
-                    return Err(Error::OutOfRange);
+                    Err(Error::OutOfRange)
                 }
             }
             _ => {
-                return Err(Error::WrongType);
+                Err(Error::WrongType)
             }
         }
     }

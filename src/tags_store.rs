@@ -107,18 +107,14 @@ pub trait TagsStoreTrait {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub enum TagsStoreOpt<'a> {
     None,
+    #[default]
     Global,
     Custom(&'a dyn TagsStoreTrait),
 }
 
-impl Default for TagsStoreOpt<'_> {
-    fn default() -> Self {
-        TagsStoreOpt::Global
-    }
-}
 
 /// A registry that maintains mappings between CBOR tags, their human-readable names,
 /// and optional summarizers.

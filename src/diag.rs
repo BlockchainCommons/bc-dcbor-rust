@@ -121,8 +121,7 @@ impl CBOR {
                             with_tags!(
                                 |global_tags_store: &dyn TagsStoreTrait| {
                                     global_tags_store
-                                        .summarizer(tag.value())
-                                        .map(|f| f.clone()) // Clone the Arc
+                                        .summarizer(tag.value()).cloned()
                                 }
                             )
                         }
