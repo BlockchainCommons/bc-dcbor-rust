@@ -1,32 +1,37 @@
 import_stdlib!();
 
-use crate::{ CBOR, Error, Result, CBORCase };
-
-use super::varint::{ EncodeVarInt, MajorType };
+use super::varint::{EncodeVarInt, MajorType};
+use crate::{CBOR, CBORCase, Error, Result};
 
 /// # Map Support in dCBOR
 ///
-/// A deterministic CBOR map implementation that ensures maps with the same content always
-/// produce identical binary encodings, regardless of insertion order.
+/// A deterministic CBOR map implementation that ensures maps with the same
+/// content always produce identical binary encodings, regardless of insertion
+/// order.
 ///
 /// ## Deterministic Map Representation
 ///
-/// The `Map` type follows strict deterministic encoding rules as specified by dCBOR:
+/// The `Map` type follows strict deterministic encoding rules as specified by
+/// dCBOR:
 ///
-/// - Map keys are always sorted in lexicographic order of their encoded CBOR bytes
+/// - Map keys are always sorted in lexicographic order of their encoded CBOR
+///   bytes
 /// - Duplicate keys are not allowed (enforced by the implementation)
 /// - Keys and values can be any type that implements `Into<CBOR>`
 /// - Numeric reduction is applied (e.g., 3.0 is stored as integer 3)
 ///
-/// This deterministic encoding ensures that equivalent maps always produce identical byte
-/// representations, which is crucial for applications that rely on consistent hashing,
-/// digital signatures, or other cryptographic operations.
+/// This deterministic encoding ensures that equivalent maps always produce
+/// identical byte representations, which is crucial for applications that rely
+/// on consistent hashing, digital signatures, or other cryptographic
+/// operations.
 ///
 /// ## Features
 ///
 /// The `Map` type provides:
-/// - Built-in conversions from standard Rust collections like `HashMap` and `BTreeMap`
-/// - Type-safe conversions when extracting values with `get<K, V>()` and `extract<K, V>()`
+/// - Built-in conversions from standard Rust collections like `HashMap` and
+///   `BTreeMap`
+/// - Type-safe conversions when extracting values with `get<K, V>()` and
+///   `extract<K, V>()`
 /// - Automatic deterministic ordering of keys
 /// - Prevention of duplicate keys
 /// - Support for heterogeneous key and value types
@@ -36,14 +41,15 @@ use super::varint::{ EncodeVarInt, MajorType };
 /// ### Creating and using maps
 ///
 /// ```
-/// use dcbor::prelude::*;
 /// use std::collections::HashMap;
+///
+/// use dcbor::prelude::*;
 ///
 /// // Create a new Map directly
 /// let mut map = Map::new();
-/// map.insert(1, "one");                // Integer key
-/// map.insert("two", 2);                // String key
-/// map.insert([1, 2, 3], "array key");  // Array key
+/// map.insert(1, "one"); // Integer key
+/// map.insert("two", 2); // String key
+/// map.insert([1, 2, 3], "array key"); // Array key
 /// map.insert(3.0, "numeric reduction"); // Float key (stored as integer 3)
 ///
 /// // Check the map size
@@ -63,8 +69,9 @@ use super::varint::{ EncodeVarInt, MajorType };
 /// ### Converting from standard Rust collections
 ///
 /// ```
+/// use std::collections::{BTreeMap, HashMap};
+///
 /// use dcbor::prelude::*;
-/// use std::collections::{HashMap, BTreeMap};
 ///
 /// // Convert HashMap to CBOR Map
 /// let mut hash_map = HashMap::new();
@@ -113,37 +120,30 @@ use super::varint::{ EncodeVarInt, MajorType };
 /// - Uses a `BTreeMap` internally to maintain the sorted order of keys
 /// - Encodes keys with their CBOR representation for lexicographic sorting
 /// - Applies all dCBOR deterministic encoding rules automatically
-#[derive(Clone, Hash)]
+#[derive(Clone)]
 pub struct Map(BTreeMap<MapKey, MapValue>);
 
 impl Map {
     /// Makes a new, empty CBOR `Map`.
-    pub fn new() -> Self {
-        Map(BTreeMap::new())
-    }
+    pub fn new() -> Self { Map(BTreeMap::new()) }
 
     /// Returns the number of entries in the map.
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
+    pub fn len(&self) -> usize { self.0.len() }
 
     /// Checks if the map is empty.
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
+    pub fn is_empty(&self) -> bool { self.0.is_empty() }
 
     /// Gets an iterator over the entries of the CBOR map, sorted by key.
     ///
     /// Key sorting order is lexicographic by the key's binary-encoded CBOR.
-    pub fn iter(&self) -> MapIter<'_> {
-        MapIter::new(self.0.values())
-    }
+    pub fn iter(&self) -> MapIter<'_> { MapIter::new(self.0.values()) }
 
     /// Inserts a key-value pair into the map.
     pub fn insert(&mut self, key: impl Into<CBOR>, value: impl Into<CBOR>) {
         let key = key.into();
         let value = value.into();
-        self.0.insert(MapKey::new(key.to_cbor_data()), MapValue::new(key, value));
+        self.0
+            .insert(MapKey::new(key.to_cbor_data()), MapValue::new(key, value));
     }
 
     pub(crate) fn insert_next(&mut self, key: CBOR, value: CBOR) -> Result<()> {
@@ -169,7 +169,11 @@ impl Map {
     /// Get a value from the map, given a key.
     ///
     /// Returns `Some` if the key is present in the map, `None` otherwise.
-    pub fn get<K, V>(&self, key: K) -> Option<V> where K: Into<CBOR>, V: TryFrom<CBOR> {
+    pub fn get<K, V>(&self, key: K) -> Option<V>
+    where
+        K: Into<CBOR>,
+        V: TryFrom<CBOR>,
+    {
         match self.0.get(&MapKey::new(key.into().to_cbor_data())) {
             Some(value) => V::try_from(value.value.clone()).ok(),
             None => None,
@@ -177,43 +181,48 @@ impl Map {
     }
 
     /// Tests if the map contains a key.
-    ///
-    pub fn contains_key<K>(&self, key: K) -> bool where K: Into<CBOR> {
+    pub fn contains_key<K>(&self, key: K) -> bool
+    where
+        K: Into<CBOR>,
+    {
         self.0.contains_key(&MapKey::new(key.into().to_cbor_data()))
     }
 
     /// Get a value from the map, given a key.
     ///
     /// Returns `Ok` if the key is present in the map, `Err` otherwise.
-    pub fn extract<K, V>(&self, key: K) -> Result<V> where K: Into<CBOR>, V: TryFrom<CBOR> {
+    pub fn extract<K, V>(&self, key: K) -> Result<V>
+    where
+        K: Into<CBOR>,
+        V: TryFrom<CBOR>,
+    {
         match self.get(key) {
             Some(value) => Ok(value),
-            None => {
-                Err(Error::MissingMapKey)
-            }
+            None => Err(Error::MissingMapKey),
         }
     }
 }
 
 impl Default for Map {
-    fn default() -> Self {
-        Self::new()
-    }
+    fn default() -> Self { Self::new() }
 }
 
 impl PartialEq for Map {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
+    fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
 }
 
 impl Eq for Map {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
+impl hash::Hash for Map {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) { self.0.hash(state); }
+}
+
 impl Map {
     pub fn cbor_data(&self) -> Vec<u8> {
-        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self.0
+        let pairs: Vec<(Vec<u8>, Vec<u8>)> = self
+            .0
             .iter()
             .map(|x| {
                 let a: Vec<u8> = x.0.0.to_owned();
@@ -232,15 +241,11 @@ impl Map {
 }
 
 impl From<Map> for CBOR {
-    fn from(value: Map) -> Self {
-        CBORCase::Map(value.clone()).into()
-    }
+    fn from(value: Map) -> Self { CBORCase::Map(value.clone()).into() }
 }
 
 impl From<&Map> for CBOR {
-    fn from(value: &Map) -> Self {
-        value.clone().into()
-    }
+    fn from(value: &Map) -> Self { value.clone().into() }
 }
 
 impl fmt::Debug for Map {
@@ -288,9 +293,9 @@ impl fmt::Debug for Map {
 /// assert_eq!(key_as_i64, 1);
 /// ```
 ///
-/// Note that unlike standard Rust collections which may have implementation-specific
-/// ordering, CBOR maps in dCBOR guarantee deterministic iteration order based on
-/// the binary encoding of keys.
+/// Note that unlike standard Rust collections which may have
+/// implementation-specific ordering, CBOR maps in dCBOR guarantee deterministic
+/// iteration order based on the binary encoding of keys.
 #[derive(Debug)]
 pub struct MapIter<'a>(BTreeMapValues<'a, MapKey, MapValue>);
 
@@ -309,21 +314,26 @@ impl<'a> Iterator for MapIter<'a> {
     }
 }
 
-#[derive(Clone, Eq, Hash)]
+#[derive(Clone, Eq)]
 struct MapValue {
     key: CBOR,
     value: CBOR,
 }
 
 impl MapValue {
-    fn new(key: CBOR, value: CBOR) -> MapValue {
-        MapValue { key, value }
-    }
+    fn new(key: CBOR, value: CBOR) -> MapValue { MapValue { key, value } }
 }
 
 impl PartialEq for MapValue {
     fn eq(&self, other: &Self) -> bool {
         self.key == other.key && self.value == other.value
+    }
+}
+
+impl hash::Hash for MapValue {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
+        self.key.hash(state);
+        self.value.hash(state);
     }
 }
 
@@ -333,23 +343,23 @@ impl fmt::Debug for MapValue {
     }
 }
 
-#[derive(Clone, Hash)]
+#[derive(Clone)]
 struct MapKey(Vec<u8>);
 
 impl MapKey {
-    fn new(key_data: Vec<u8>) -> MapKey {
-        MapKey(key_data)
-    }
+    fn new(key_data: Vec<u8>) -> MapKey { MapKey(key_data) }
 }
 
 impl PartialEq for MapKey {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
+    fn eq(&self, other: &Self) -> bool { self.0 == other.0 }
 }
 
 impl Eq for MapKey {
     fn assert_receiver_is_total_eq(&self) {}
+}
+
+impl hash::Hash for MapKey {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) { self.0.hash(state); }
 }
 
 impl PartialOrd for MapKey {
@@ -359,9 +369,7 @@ impl PartialOrd for MapKey {
 }
 
 impl Ord for MapKey {
-    fn cmp(&self, other: &Self) -> cmp::Ordering {
-        self.0.cmp(&other.0)
-    }
+    fn cmp(&self, other: &Self) -> cmp::Ordering { self.0.cmp(&other.0) }
 }
 
 impl fmt::Debug for MapKey {
@@ -372,7 +380,12 @@ impl fmt::Debug for MapKey {
 
 /// Convert a container to a CBOR Map where the container's items are
 /// pairs of CBOREncodable values.
-impl<T, K, V> From<T> for Map where T: IntoIterator<Item = (K, V)>, K: Into<CBOR>, V: Into<CBOR> {
+impl<T, K, V> From<T> for Map
+where
+    T: IntoIterator<Item = (K, V)>,
+    K: Into<CBOR>,
+    V: Into<CBOR>,
+{
     fn from(container: T) -> Self {
         let mut map = Map::new();
         for (k, v) in container {
@@ -382,17 +395,20 @@ impl<T, K, V> From<T> for Map where T: IntoIterator<Item = (K, V)>, K: Into<CBOR
     }
 }
 
-impl<K, V> From<HashMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
+impl<K, V> From<HashMap<K, V>> for CBOR
+where
+    K: Into<CBOR>,
+    V: Into<CBOR>,
+{
     fn from(container: HashMap<K, V>) -> Self {
         CBORCase::Map(Map::from(container.into_iter())).into()
     }
 }
 
-impl<K, V> TryFrom<CBOR>
-    for HashMap<K, V>
-    where
-        K: TryFrom<CBOR, Error = Error> + cmp::Eq + hash::Hash + Clone,
-        V: TryFrom<CBOR, Error = Error> + Clone
+impl<K, V> TryFrom<CBOR> for HashMap<K, V>
+where
+    K: TryFrom<CBOR, Error = Error> + cmp::Eq + hash::Hash + Clone,
+    V: TryFrom<CBOR, Error = Error> + Clone,
 {
     type Error = Error;
 
@@ -401,7 +417,8 @@ impl<K, V> TryFrom<CBOR>
             CBORCase::Map(map) => {
                 let mut container = <HashMap<K, V>>::new();
                 for (k, v) in map.iter() {
-                    container.insert(k.clone().try_into()?, v.clone().try_into()?);
+                    container
+                        .insert(k.clone().try_into()?, v.clone().try_into()?);
                 }
                 Ok(container)
             }
@@ -427,17 +444,20 @@ impl TryFrom<CBOR> for HashMap<CBOR, CBOR> {
     }
 }
 
-impl<K, V> From<BTreeMap<K, V>> for CBOR where K: Into<CBOR>, V: Into<CBOR> {
+impl<K, V> From<BTreeMap<K, V>> for CBOR
+where
+    K: Into<CBOR>,
+    V: Into<CBOR>,
+{
     fn from(container: BTreeMap<K, V>) -> Self {
         CBORCase::Map(Map::from(container.into_iter())).into()
     }
 }
 
-impl<K, V> TryFrom<CBOR>
-    for BTreeMap<K, V>
-    where
-        K: TryFrom<CBOR, Error = Error> + cmp::Eq + cmp::Ord + Clone,
-        V: TryFrom<CBOR, Error = Error> + Clone
+impl<K, V> TryFrom<CBOR> for BTreeMap<K, V>
+where
+    K: TryFrom<CBOR, Error = Error> + cmp::Eq + cmp::Ord + Clone,
+    V: TryFrom<CBOR, Error = Error> + Clone,
 {
     type Error = Error;
 

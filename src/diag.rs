@@ -5,6 +5,9 @@ use crate::{
     CBOR, CBORCase, Error, TagsStoreOpt, tags_store::TagsStoreTrait, with_tags,
 };
 
+type SummarizerFn =
+    Arc<dyn Fn(CBOR, bool) -> Result<String, Error> + Send + Sync>;
+
 #[derive(Clone, Default)]
 pub struct DiagFormatOpts<'a> {
     annotate: bool,
@@ -105,23 +108,18 @@ impl CBOR {
                     let mut item_to_return: Option<DiagItem> = None;
 
                     // Attempt to get a summarizer function based on opts.tags
-                    let summarizer_fn_opt: Option<
-                        Arc<
-                            dyn Fn(CBOR, bool) -> Result<String, Error>
-                                + Send
-                                + Sync,
-                        >,
-                    > = match &opts.tags {
+                    let summarizer_fn_opt: Option<SummarizerFn> = match &opts
+                        .tags
+                    {
                         TagsStoreOpt::Custom(tags_store_trait) => {
-                            tags_store_trait
-                                .summarizer(tag.value())
-                                .map(|f| f.clone()) // Clone the Arc
+                            tags_store_trait.summarizer(tag.value()).cloned() // Clone the Arc
                         }
                         TagsStoreOpt::Global => {
                             with_tags!(
                                 |global_tags_store: &dyn TagsStoreTrait| {
                                     global_tags_store
-                                        .summarizer(tag.value()).cloned()
+                                        .summarizer(tag.value())
+                                        .cloned()
                                 }
                             )
                         }
