@@ -2,22 +2,26 @@ import_stdlib!();
 
 use half::f16;
 
-use crate::{ int::From64, CBORCase, Error, Result, ExactFrom, Simple, CBOR };
-
-use super::varint::{ EncodeVarInt, MajorType };
+use super::varint::{EncodeVarInt, MajorType};
+use crate::{CBOR, CBORCase, Error, ExactFrom, Result, Simple, int::From64};
 
 /// # Floating Point Number Support in dCBOR
 ///
-/// dCBOR provides canonical encoding for floating point values through implementation of the
-/// `From<T>` and `TryFrom<CBOR>` traits for `f16`, `f32`, and `f64` types.
+/// dCBOR provides canonical encoding for floating point values through
+/// implementation of the `From<T>` and `TryFrom<CBOR>` traits for `f16`, `f32`,
+/// and `f64` types.
 ///
-/// Per the dCBOR specification, the canonical encoding rules ensure deterministic representation:
+/// Per the dCBOR specification, the canonical encoding rules ensure
+/// deterministic representation:
 ///
-/// - Numeric reduction: Floating point values with zero fractional part in range [-2^63, 2^64-1]
-///   are automatically encoded as integers (e.g., 42.0 becomes 42)
-/// - Values are encoded in the smallest possible representation that preserves their value
+/// - Numeric reduction: Floating point values with zero fractional part in
+///   range [-2^63, 2^64-1] are automatically encoded as integers (e.g., 42.0
+///   becomes 42)
+/// - Values are encoded in the smallest possible representation that preserves
+///   their value
 /// - All NaN values are canonicalized to a single representation: 0xf97e00
-/// - Positive/negative infinity are canonicalized to half-precision representations
+/// - Positive/negative infinity are canonicalized to half-precision
+///   representations
 ///
 /// ## Example
 ///
@@ -111,9 +115,7 @@ impl TryFrom<CBOR> for f64 {
                 }
             }
             CBORCase::Simple(Simple::Float(n)) => Ok(n),
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 }
@@ -187,9 +189,7 @@ impl TryFrom<CBOR> for f32 {
                     Err(Error::OutOfRange)
                 }
             }
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 }
@@ -256,9 +256,7 @@ impl TryFrom<CBOR> for f16 {
                     Err(Error::OutOfRange)
                 }
             }
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 }

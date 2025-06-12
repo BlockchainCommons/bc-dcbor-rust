@@ -1,17 +1,19 @@
-use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
+use crate::{CBORTaggedDecodable, CBORTaggedEncodable};
 
 /// # Tagged CBOR Encoding and Decoding Support
 ///
-/// This module provides the `CBORTaggedCodable` trait, which serves as a convenience
-/// marker for types that can be both encoded to and decoded from tagged CBOR values.
+/// This module provides the `CBORTaggedCodable` trait, which serves as a
+/// convenience marker for types that can be both encoded to and decoded from
+/// tagged CBOR values.
 ///
 /// The trait is automatically implemented for any type that implements both
 /// `CBORTaggedEncodable` and `CBORTaggedDecodable`.
-/// A trait for types that can be both encoded to and decoded from CBOR with a specific tag.
+/// A trait for types that can be both encoded to and decoded from CBOR with a
+/// specific tag.
 ///
 /// This trait is automatically implemented for any type that implements both
-/// `CBORTaggedEncodable` and `CBORTaggedDecodable`. It serves as a convenience marker
-/// to indicate full tagged CBOR serialization support.
+/// `CBORTaggedEncodable` and `CBORTaggedDecodable`. It serves as a convenience
+/// marker to indicate full tagged CBOR serialization support.
 ///
 /// ## Example
 ///
@@ -31,9 +33,7 @@ use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 ///
 /// // Implement encoding to tagged CBOR
 /// impl CBORTaggedEncodable for Date {
-///     fn untagged_cbor(&self) -> CBOR {
-///         self.0.into()
-///     }
+///     fn untagged_cbor(&self) -> CBOR { self.0.into() }
 /// }
 ///
 /// // Implement decoding from tagged CBOR
@@ -60,6 +60,9 @@ use crate::{CBORTaggedEncodable, CBORTaggedDecodable};
 /// let roundtrip: Date = cbor.try_into().unwrap();
 /// assert_eq!(original, roundtrip);
 /// ```
-pub trait CBORTaggedCodable { }
+pub trait CBORTaggedCodable {}
 
-impl<T> CBORTaggedCodable for T where T: CBORTaggedEncodable + CBORTaggedDecodable { }
+impl<T> CBORTaggedCodable for T where
+    T: CBORTaggedEncodable + CBORTaggedDecodable
+{
+}

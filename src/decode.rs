@@ -3,15 +3,14 @@ import_stdlib!();
 use half::f16;
 use unicode_normalization::is_nfc;
 
-use crate::{
-    CBOR,
-    Map,
-    error::{ Error, Result },
-    float::{ validate_canonical_f16, validate_canonical_f32, validate_canonical_f64 },
-    CBORCase,
-};
-
 use super::varint::MajorType;
+use crate::{
+    CBOR, CBORCase, Map,
+    error::{Error, Result},
+    float::{
+        validate_canonical_f16, validate_canonical_f32, validate_canonical_f64,
+    },
+};
 
 /// Decode CBOR binary representation to symbolic representation.
 ///
@@ -75,11 +74,10 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize)> {
             if data_remaining < 4 {
                 return Err(Error::Underrun);
             }
-            let val =
-                ((data[1] as u64) << 24) |
-                ((data[2] as u64) << 16) |
-                ((data[3] as u64) << 8) |
-                (data[4] as u64);
+            let val = ((data[1] as u64) << 24)
+                | ((data[2] as u64) << 16)
+                | ((data[3] as u64) << 8)
+                | (data[4] as u64);
             if val <= (u16::MAX as u64) && header != 0xfa {
                 return Err(Error::NonCanonicalNumeric);
             }
@@ -89,15 +87,14 @@ fn parse_header_varint(data: &[u8]) -> Result<(MajorType, u64, usize)> {
             if data_remaining < 8 {
                 return Err(Error::Underrun);
             }
-            let val =
-                ((data[1] as u64) << 56) |
-                ((data[2] as u64) << 48) |
-                ((data[3] as u64) << 40) |
-                ((data[4] as u64) << 32) |
-                ((data[5] as u64) << 24) |
-                ((data[6] as u64) << 16) |
-                ((data[7] as u64) << 8) |
-                (data[8] as u64);
+            let val = ((data[1] as u64) << 56)
+                | ((data[2] as u64) << 48)
+                | ((data[3] as u64) << 40)
+                | ((data[4] as u64) << 32)
+                | ((data[5] as u64) << 24)
+                | ((data[6] as u64) << 16)
+                | ((data[7] as u64) << 8)
+                | (data[8] as u64);
             if val <= (u32::MAX as u64) && header != 0xfb {
                 return Err(Error::NonCanonicalNumeric);
             }
@@ -123,14 +120,21 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
     }
     let (major_type, value, header_varint_len) = parse_header_varint(data)?;
     match major_type {
-        MajorType::Unsigned => Ok((CBORCase::Unsigned(value).into(), header_varint_len)),
-        MajorType::Negative => Ok((CBORCase::Negative(value).into(), header_varint_len)),
+        MajorType::Unsigned => {
+            Ok((CBORCase::Unsigned(value).into(), header_varint_len))
+        }
+        MajorType::Negative => {
+            Ok((CBORCase::Negative(value).into(), header_varint_len))
+        }
         MajorType::ByteString => {
             let data_len = value as usize;
             let bytes = parse_bytes(&data[header_varint_len..], data_len)?
                 .to_vec()
                 .into();
-            Ok((CBORCase::ByteString(bytes).into(), header_varint_len + data_len))
+            Ok((
+                CBORCase::ByteString(bytes).into(),
+                header_varint_len + data_len,
+            ))
         }
         MajorType::Text => {
             let data_len = value as usize;
@@ -164,38 +168,33 @@ fn decode_cbor_internal(data: &[u8]) -> Result<(CBOR, usize)> {
             Ok((map.into(), pos))
         }
         MajorType::Tagged => {
-            let (item, item_len) = decode_cbor_internal(&data[header_varint_len..])?;
+            let (item, item_len) =
+                decode_cbor_internal(&data[header_varint_len..])?;
             let tagged = CBOR::to_tagged_value(value, item);
             Ok((tagged, header_varint_len + item_len))
         }
-        MajorType::Simple => {
-            match header_varint_len {
-                3 => {
-                    let f = f16::from_bits(value as u16);
-                    validate_canonical_f16(f)?;
-                    Ok((f.into(), header_varint_len))
-                }
-                5 => {
-                    let f = f32::from_bits(value as u32);
-                    validate_canonical_f32(f)?;
-                    Ok((f.into(), header_varint_len))
-                }
-                9 => {
-                    let f = f64::from_bits(value);
-                    validate_canonical_f64(f)?;
-                    Ok((f.into(), header_varint_len))
-                }
-                _ => {
-                    match value {
-                        20 => Ok((CBOR::r#false(), header_varint_len)),
-                        21 => Ok((CBOR::r#true(), header_varint_len)),
-                        22 => Ok((CBOR::null(), header_varint_len)),
-                        _ => {
-                            Err(Error::InvalidSimpleValue)
-                        }
-                    }
-                }
+        MajorType::Simple => match header_varint_len {
+            3 => {
+                let f = f16::from_bits(value as u16);
+                validate_canonical_f16(f)?;
+                Ok((f.into(), header_varint_len))
             }
-        }
+            5 => {
+                let f = f32::from_bits(value as u32);
+                validate_canonical_f32(f)?;
+                Ok((f.into(), header_varint_len))
+            }
+            9 => {
+                let f = f64::from_bits(value);
+                validate_canonical_f64(f)?;
+                Ok((f.into(), header_varint_len))
+            }
+            _ => match value {
+                20 => Ok((CBOR::r#false(), header_varint_len)),
+                21 => Ok((CBOR::r#true(), header_varint_len)),
+                22 => Ok((CBOR::null(), header_varint_len)),
+                _ => Err(Error::InvalidSimpleValue),
+            },
+        },
     }
 }

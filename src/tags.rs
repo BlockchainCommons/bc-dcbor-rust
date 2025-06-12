@@ -1,9 +1,11 @@
 import_stdlib!();
 
-use crate::{ CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait };
-
 #[doc(hidden)]
 pub use paste::paste;
+
+use crate::{
+    CBORTaggedDecodable, Date, Tag, TagValue, TagsStore, TagsStoreTrait,
+};
 
 pub struct LazyTagsStore {
     init: Once,
@@ -33,16 +35,14 @@ impl LazyTagsStore {
     }
 }
 
-pub static GLOBAL_TAGS: LazyTagsStore = LazyTagsStore {
-    init: Once::new(),
-    data: Mutex::new(None),
-};
+pub static GLOBAL_TAGS: LazyTagsStore =
+    LazyTagsStore { init: Once::new(), data: Mutex::new(None) };
 
 /// A macro for accessing the global tags store in a read-only manner.
 ///
-/// This macro provides safe access to a global [`TagsStore`] instance that persists
-/// for the entire application lifetime. It executes the provided closure with a
-/// reference to the tags store.
+/// This macro provides safe access to a global [`TagsStore`] instance that
+/// persists for the entire application lifetime. It executes the provided
+/// closure with a reference to the tags store.
 ///
 /// ## Use Cases
 ///
@@ -82,14 +82,12 @@ pub static GLOBAL_TAGS: LazyTagsStore = LazyTagsStore {
 /// and this macro acquires a read lock on that mutex.
 #[macro_export]
 macro_rules! with_tags {
-    ($action:expr) => {
-        {
+    ($action:expr) => {{
         let binding = $crate::GLOBAL_TAGS.get();
         let tags = binding.as_ref().unwrap();
         #[allow(clippy::redundant_closure_call)]
         $action(tags)
-        }
-    };
+    }};
 }
 
 /// A macro for accessing the global tags store in a mutable manner.
@@ -108,8 +106,9 @@ macro_rules! with_tags {
 /// ## Examples
 ///
 /// ```
-/// use dcbor::prelude::*;
 /// use std::sync::Arc;
+///
+/// use dcbor::prelude::*;
 ///
 /// // Register a custom tag in the global tags store
 /// with_tags_mut!(|tags: &mut TagsStore| {
@@ -117,15 +116,16 @@ macro_rules! with_tags {
 ///     tags.insert(Tag::new(100, "custom-tag".to_string()));
 ///
 ///     // Add a summarizer for the tag
-///     tags.set_summarizer(100, Arc::new(|cbor, _flat| -> dcbor::Result<String> {
-///         Ok(format!("Custom tag content: {:?}", cbor))
-///     }));
+///     tags.set_summarizer(
+///         100,
+///         Arc::new(|cbor, _flat| -> dcbor::Result<String> {
+///             Ok(format!("Custom tag content: {:?}", cbor))
+///         }),
+///     );
 /// });
 ///
 /// // Later, you can read the registered tag
-/// let tag_name = with_tags!(|tags: &TagsStore| {
-///     tags.name_for_value(100)
-/// });
+/// let tag_name = with_tags!(|tags: &TagsStore| { tags.name_for_value(100) });
 ///
 /// assert_eq!(tag_name, "custom-tag");
 /// ```
@@ -142,14 +142,12 @@ macro_rules! with_tags {
 /// holding the mutex lock for extended periods of time.
 #[macro_export]
 macro_rules! with_tags_mut {
-    ($action:expr) => {
-        {
+    ($action:expr) => {{
         let mut binding = $crate::GLOBAL_TAGS.get();
         let tags = binding.as_mut().unwrap();
         #[allow(clippy::redundant_closure_call)]
         $action(tags)
-        }
-    };
+    }};
 }
 
 #[macro_export]
@@ -178,7 +176,9 @@ pub fn register_tags_in(tags_store: &mut TagsStore) {
     tags_store.insert_all(tags);
     tags_store.set_summarizer(
         TAG_DATE,
-        Arc::new(|untagged_cbor, _| { Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?)) })
+        Arc::new(|untagged_cbor, _| {
+            Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?))
+        }),
     );
 }
 
@@ -191,8 +191,9 @@ pub fn register_tags() {
 /// Converts a slice of tag values to their corresponding [`Tag`] objects.
 ///
 /// This function looks up each tag value in the global tag registry and returns
-/// a vector of complete `Tag` objects. For any tag values that aren't registered
-/// in the global registry, it creates a basic `Tag` with just the value (no name).
+/// a vector of complete `Tag` objects. For any tag values that aren't
+/// registered in the global registry, it creates a basic `Tag` with just the
+/// value (no name).
 ///
 /// ## Purpose
 ///
@@ -238,7 +239,10 @@ pub fn tags_for_values(values: &[TagValue]) -> Vec<Tag> {
     with_tags!(|tags: &TagsStore| {
         values
             .iter()
-            .map(|value| tags.tag_for_value(*value).unwrap_or_else(|| Tag::with_value(*value)))
+            .map(|value| {
+                tags.tag_for_value(*value)
+                    .unwrap_or_else(|| Tag::with_value(*value))
+            })
             .collect()
     })
 }

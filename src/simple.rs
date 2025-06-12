@@ -163,9 +163,7 @@ impl TryFrom<CBOR> for Simple {
     fn try_from(cbor: CBOR) -> Result<Self> {
         match cbor.into_case() {
             CBORCase::Simple(simple) => Ok(simple),
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 }

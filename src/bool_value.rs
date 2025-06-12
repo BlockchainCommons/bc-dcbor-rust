@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{ CBOR, Simple, Error, Result, CBORCase };
+use crate::{CBOR, CBORCase, Error, Result, Simple};
 
 /// # Boolean Values in dCBOR
 ///
@@ -50,9 +50,7 @@ impl TryFrom<CBOR> for bool {
         match cbor.into_case() {
             CBORCase::Simple(Simple::False) => Ok(false),
             CBORCase::Simple(Simple::True) => Ok(true),
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 }

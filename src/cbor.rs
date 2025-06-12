@@ -521,9 +521,7 @@ impl CBOR {
     pub fn try_into_tagged_value(self) -> Result<(Tag, CBOR)> {
         match self.into_case() {
             CBORCase::Tagged(tag, value) => Ok((tag, value)),
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 
@@ -561,9 +559,7 @@ impl CBOR {
     pub fn try_into_simple_value(self) -> Result<Simple> {
         match self.into_case() {
             CBORCase::Simple(s) => Ok(s),
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 }
@@ -589,9 +585,7 @@ impl CBOR {
         match self.into_case() {
             CBORCase::Simple(Simple::True) => Ok(true),
             CBORCase::Simple(Simple::False) => Ok(false),
-            _ => {
-                Err(Error::WrongType)
-            }
+            _ => Err(Error::WrongType),
         }
     }
 

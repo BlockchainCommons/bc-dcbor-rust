@@ -1,6 +1,6 @@
 import_stdlib!();
 
-use crate::{ Tag, TagValue, CBOR, Result };
+use crate::{CBOR, Result, Tag, TagValue};
 
 /// A function type for summarizing CBOR values as human-readable strings.
 ///
@@ -10,21 +10,22 @@ use crate::{ Tag, TagValue, CBOR, Result };
 ///
 /// ## Purpose
 ///
-/// In CBOR, tags provide semantic meaning to data structures. A `CBORSummarizer`
-/// helps interpret and display these tagged values in a human-readable format.
-/// This is particularly useful for debugging, logging, or displaying CBOR data
-/// to users.
+/// In CBOR, tags provide semantic meaning to data structures. A
+/// `CBORSummarizer` helps interpret and display these tagged values in a
+/// human-readable format. This is particularly useful for debugging, logging,
+/// or displaying CBOR data to users.
 ///
 /// ## Thread Safety
 ///
-/// The `CBORSummarizer` type is wrapped in an `Arc` (Atomic Reference Count) and
-/// requires `Send + Sync` traits, making it safe to share between threads.
+/// The `CBORSummarizer` type is wrapped in an `Arc` (Atomic Reference Count)
+/// and requires `Send + Sync` traits, making it safe to share between threads.
 ///
 /// ## Examples
 ///
 /// ```
-/// use dcbor::prelude::*;
 /// use std::sync::Arc;
+///
+/// use dcbor::prelude::*;
 ///
 /// // Create a custom summarizer for a date tag
 /// let date_summarizer: CBORSummarizer = Arc::new(|cbor, _flat| {
@@ -47,13 +48,15 @@ use crate::{ Tag, TagValue, CBOR, Result };
 ///
 /// When this summarizer is used (for example in diagnostic output), it would
 /// convert a tagged CBOR timestamp into a more readable date format.
-pub type CBORSummarizer = Arc<dyn (Fn(CBOR, bool) -> Result<String>) + Send + Sync>;
+pub type CBORSummarizer =
+    Arc<dyn (Fn(CBOR, bool) -> Result<String>) + Send + Sync>;
 
-/// A trait for types that can map between CBOR tags and their human-readable names.
+/// A trait for types that can map between CBOR tags and their human-readable
+/// names.
 ///
-/// The `TagsStoreTrait` provides a standardized interface for resolving CBOR tags
-/// to human-readable names and vice versa. This is useful for debugging and
-/// displaying CBOR data in a more understandable format.
+/// The `TagsStoreTrait` provides a standardized interface for resolving CBOR
+/// tags to human-readable names and vice versa. This is useful for debugging
+/// and displaying CBOR data in a more understandable format.
 ///
 /// ## Functionality
 ///
@@ -65,8 +68,9 @@ pub type CBORSummarizer = Arc<dyn (Fn(CBOR, bool) -> Result<String>) + Send + Sy
 /// ## Implementation
 ///
 /// Implementers of this trait should maintain a bidirectional mapping between
-/// tag values (numbers) and their corresponding names. The primary implementation
-/// is [`TagsStore`], but other implementations can be created for specific needs.
+/// tag values (numbers) and their corresponding names. The primary
+/// implementation is [`TagsStore`], but other implementations can be created
+/// for specific needs.
 ///
 /// ## Examples
 ///
@@ -88,7 +92,8 @@ pub type CBORSummarizer = Arc<dyn (Fn(CBOR, bool) -> Result<String>) + Send + Sy
 /// assert_eq!(tag.value(), 1);
 /// ```
 ///
-/// The trait also includes a helper method to handle the common case of optional tag stores.
+/// The trait also includes a helper method to handle the common case of
+/// optional tag stores.
 pub trait TagsStoreTrait {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String>;
     fn name_for_tag(&self, tag: &Tag) -> String;
@@ -98,7 +103,9 @@ pub trait TagsStoreTrait {
     fn summarizer(&self, tag: TagValue) -> Option<&CBORSummarizer>;
 
     fn name_for_tag_opt<T>(tag: &Tag, tags: Option<&T>) -> String
-        where T: TagsStoreTrait, Self: Sized
+    where
+        T: TagsStoreTrait,
+        Self: Sized,
     {
         match tags {
             None => tag.value().to_string(),
@@ -115,21 +122,23 @@ pub enum TagsStoreOpt<'a> {
     Custom(&'a dyn TagsStoreTrait),
 }
 
-
-/// A registry that maintains mappings between CBOR tags, their human-readable names,
-/// and optional summarizers.
+/// A registry that maintains mappings between CBOR tags, their human-readable
+/// names, and optional summarizers.
 ///
-/// The `TagsStore` is the primary implementation of the [`TagsStoreTrait`], providing
-/// a bidirectional mapping between CBOR tag values (numbers) and their human-readable
-/// names. It also supports registering custom summarizers for specific tags.
+/// The `TagsStore` is the primary implementation of the [`TagsStoreTrait`],
+/// providing a bidirectional mapping between CBOR tag values (numbers) and
+/// their human-readable names. It also supports registering custom summarizers
+/// for specific tags.
 ///
 /// ## Use Cases
 ///
 /// The `TagsStore` serves several important purposes:
 ///
-/// 1. **Readability**: Converting numeric tags to meaningful names in diagnostic output
+/// 1. **Readability**: Converting numeric tags to meaningful names in
+///    diagnostic output
 /// 2. **Consistency**: Ensuring consistent tag usage throughout an application
-/// 3. **Documentation**: Providing a central registry of all tags used in a system
+/// 3. **Documentation**: Providing a central registry of all tags used in a
+///    system
 /// 4. **Customization**: Supporting custom summarization of tagged values
 ///
 /// ## Features
@@ -150,7 +159,7 @@ pub enum TagsStoreOpt<'a> {
 /// let mut tags = TagsStore::new([
 ///     Tag::new(1, "date".to_string()),
 ///     Tag::new(2, "positive_bignum".to_string()),
-///     Tag::new(3, "negative_bignum".to_string())
+///     Tag::new(3, "negative_bignum".to_string()),
 /// ]);
 ///
 /// // Look up a tag by its value
@@ -169,8 +178,9 @@ pub enum TagsStoreOpt<'a> {
 /// ### Adding summarizers
 ///
 /// ```
-/// use dcbor::prelude::*;
 /// use std::sync::Arc;
+///
+/// use dcbor::prelude::*;
 ///
 /// // Create an empty tags store
 /// let mut tags = TagsStore::default();
@@ -179,11 +189,14 @@ pub enum TagsStoreOpt<'a> {
 /// tags.insert(Tag::new(1, "date".to_string()));
 ///
 /// // Add a summarizer for the date tag
-/// tags.set_summarizer(1, Arc::new(|cbor, _flat| {
-///     // Try to convert CBOR to f64 for timestamp formatting
-///     let timestamp: f64 = cbor.clone().try_into().unwrap_or(0.0);
-///     Ok(format!("Timestamp: {}", timestamp))
-/// }));
+/// tags.set_summarizer(
+///     1,
+///     Arc::new(|cbor, _flat| {
+///         // Try to convert CBOR to f64 for timestamp formatting
+///         let timestamp: f64 = cbor.clone().try_into().unwrap_or(0.0);
+///         Ok(format!("Timestamp: {}", timestamp))
+///     }),
+/// );
 ///
 /// // Later, this summarizer can be retrieved and used
 /// let date_summarizer = tags.summarizer(1);
@@ -192,9 +205,9 @@ pub enum TagsStoreOpt<'a> {
 ///
 /// ## Implementation Notes
 ///
-/// The `TagsStore` prevents registering the same tag value with different names,
-/// which helps maintain consistency in CBOR tag usage. Attempting to register a
-/// tag value that already exists with a different name will panic.
+/// The `TagsStore` prevents registering the same tag value with different
+/// names, which helps maintain consistency in CBOR tag usage. Attempting to
+/// register a tag value that already exists with a different name will panic.
 #[derive(Clone)]
 pub struct TagsStore {
     tags_by_value: HashMap<TagValue, Tag>,
@@ -203,7 +216,10 @@ pub struct TagsStore {
 }
 
 impl TagsStore {
-    pub fn new<T>(tags: T) -> Self where T: IntoIterator<Item = Tag> {
+    pub fn new<T>(tags: T) -> Self
+    where
+        T: IntoIterator<Item = Tag>,
+    {
         let mut tags_by_value = HashMap::new();
         let mut tags_by_name = HashMap::new();
         for tag in tags {
@@ -226,14 +242,18 @@ impl TagsStore {
         }
     }
 
-    pub fn set_summarizer(&mut self, tag: TagValue, summarizer: CBORSummarizer) {
+    pub fn set_summarizer(
+        &mut self,
+        tag: TagValue,
+        summarizer: CBORSummarizer,
+    ) {
         self.summarizers.insert(tag, summarizer);
     }
 
     fn _insert(
         tag: Tag,
         tags_by_value: &mut HashMap<TagValue, Tag>,
-        tags_by_name: &mut HashMap<String, Tag>
+        tags_by_name: &mut HashMap<String, Tag>,
     ) {
         let name = tag.name().unwrap();
         assert!(!name.is_empty());
@@ -256,11 +276,13 @@ impl TagsStore {
 
 impl TagsStoreTrait for TagsStore {
     fn assigned_name_for_tag(&self, tag: &Tag) -> Option<String> {
-        self.tag_for_value(tag.value()).map(|tag| tag.name().unwrap())
+        self.tag_for_value(tag.value())
+            .map(|tag| tag.name().unwrap())
     }
 
     fn name_for_tag(&self, tag: &Tag) -> String {
-        self.assigned_name_for_tag(tag).unwrap_or_else(|| tag.value().to_string())
+        self.assigned_name_for_tag(tag)
+            .unwrap_or_else(|| tag.value().to_string())
     }
 
     fn tag_for_name(&self, name: &str) -> Option<Tag> {
@@ -283,7 +305,5 @@ impl TagsStoreTrait for TagsStore {
 }
 
 impl Default for TagsStore {
-    fn default() -> Self {
-        Self::new([])
-    }
+    fn default() -> Self { Self::new([]) }
 }

@@ -1,38 +1,42 @@
 import_stdlib!();
 
-#[cfg(feature = "std")]
-use std::ops::{ Add, Sub };
-
 #[cfg(not(feature = "std"))]
-use core::ops::{ Add, Sub };
+use core::ops::{Add, Sub};
+#[cfg(feature = "std")]
+use std::ops::{Add, Sub};
 
-use chrono::{ DateTime, Utc, TimeZone, SecondsFormat, NaiveDate, NaiveDateTime, Timelike };
+use chrono::{
+    DateTime, NaiveDate, NaiveDateTime, SecondsFormat, TimeZone, Timelike, Utc,
+};
 
-use crate::{ tags_for_values, CBORTagged, CBORTaggedDecodable, CBORTaggedEncodable, Error, Result, Tag, CBOR, TAG_DATE };
+use crate::{
+    CBOR, CBORTagged, CBORTaggedDecodable, CBORTaggedEncodable, Error, Result,
+    TAG_DATE, Tag, tags_for_values,
+};
 
 /// A CBOR-friendly representation of a date and time.
 ///
-/// The `Date` type provides a wrapper around `chrono::DateTime<Utc>` that supports
-/// encoding and decoding to/from CBOR with tag 1, following the CBOR date/time
-/// standard specified in [RFC 8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-date-and-time-tag-1-and-co).
+/// The `Date` type provides a wrapper around `chrono::DateTime<Utc>` that
+/// supports encoding and decoding to/from CBOR with tag 1, following the CBOR
+/// date/time standard specified in [RFC 8949](https://www.rfc-editor.org/rfc/rfc8949.html#name-date-and-time-tag-1-and-co).
 ///
-/// When encoded to CBOR, dates are represented as tag 1 followed by a numeric value
-/// representing the number of seconds since (or before) the Unix epoch (1970-01-01T00:00:00Z).
-/// The numeric value can be a positive or negative integer, or a floating-point value
-/// for dates with fractional seconds.
+/// When encoded to CBOR, dates are represented as tag 1 followed by a numeric
+/// value representing the number of seconds since (or before) the Unix epoch
+/// (1970-01-01T00:00:00Z). The numeric value can be a positive or negative
+/// integer, or a floating-point value for dates with fractional seconds.
 ///
 /// # Features
 ///
 /// - Supports UTC dates with optional fractional seconds
 /// - Provides convenient constructors for common date creation patterns
-/// - Implements the [`CBORTagged`], [`CBORTaggedEncodable`], and [`CBORTaggedDecodable`] traits
+/// - Implements the [`CBORTagged`], [`CBORTaggedEncodable`], and
+///   [`CBORTaggedDecodable`] traits
 /// - Supports arithmetic operations with durations and between dates
 ///
 /// # Examples
 ///
 /// ```
-/// use dcbor::prelude::*;
-/// use dcbor::Date;
+/// use dcbor::{Date, prelude::*};
 ///
 /// // Create a date from a timestamp (seconds since Unix epoch)
 /// let date = Date::from_timestamp(1675854714.0);
@@ -52,7 +56,8 @@ pub struct Date(DateTime<Utc>);
 impl Date {
     /// Creates a new `Date` from the given chrono `DateTime`.
     ///
-    /// This method creates a new `Date` instance by wrapping a `chrono::DateTime<Utc>`.
+    /// This method creates a new `Date` instance by wrapping a
+    /// `chrono::DateTime<Utc>`.
     ///
     /// # Arguments
     ///
@@ -65,16 +70,13 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
     /// use chrono::{DateTime, Utc};
+    /// use dcbor::{Date, prelude::*};
     ///
     /// let datetime = Utc::now();
     /// let date = Date::from_datetime(datetime);
     /// ```
-    pub fn from_datetime(date_time: DateTime<Utc>) -> Self {
-        Date(date_time)
-    }
+    pub fn from_datetime(date_time: DateTime<Utc>) -> Self { Date(date_time) }
 
     /// Creates a new `Date` from year, month, and day components.
     ///
@@ -93,8 +95,7 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// // Create February 8, 2023
     /// let date = Date::from_ymd(2023, 2, 8);
@@ -108,7 +109,8 @@ impl Date {
         Self::from_datetime(dt)
     }
 
-    /// Creates a new `Date` from year, month, day, hour, minute, and second components.
+    /// Creates a new `Date` from year, month, day, hour, minute, and second
+    /// components.
     ///
     /// # Arguments
     ///
@@ -126,8 +128,7 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// // Create February 8, 2023, 15:30:45 UTC
     /// let date = Date::from_ymd_hms(2023, 2, 8, 15, 30, 45);
@@ -135,29 +136,33 @@ impl Date {
     ///
     /// # Panics
     ///
-    /// This method panics if the provided components do not form a valid date and time.
+    /// This method panics if the provided components do not form a valid date
+    /// and time.
     pub fn from_ymd_hms(
         year: i32,
         month: u32,
         day: u32,
         hour: u32,
         minute: u32,
-        second: u32
+        second: u32,
     ) -> Self {
-        let dt = Utc.with_ymd_and_hms(year, month, day, hour, minute, second).unwrap();
+        let dt = Utc
+            .with_ymd_and_hms(year, month, day, hour, minute, second)
+            .unwrap();
         Self::from_datetime(dt)
     }
 
     /// Creates a new `Date` from seconds since (or before) the Unix epoch.
     ///
-    /// This method creates a new `Date` representing the specified number of seconds
-    /// since the Unix epoch (1970-01-01T00:00:00Z). Negative values represent times
-    /// before the epoch.
+    /// This method creates a new `Date` representing the specified number of
+    /// seconds since the Unix epoch (1970-01-01T00:00:00Z). Negative values
+    /// represent times before the epoch.
     ///
     /// # Arguments
     ///
-    /// * `seconds_since_unix_epoch` - Seconds from the Unix epoch (positive or negative),
-    ///   which can include a fractional part for sub-second precision
+    /// * `seconds_since_unix_epoch` - Seconds from the Unix epoch (positive or
+    ///   negative), which can include a fractional part for sub-second
+    ///   precision
     ///
     /// # Returns
     ///
@@ -166,8 +171,7 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// // Create a date from a timestamp
     /// let date = Date::from_timestamp(1675854714.0);
@@ -179,20 +183,27 @@ impl Date {
     /// let with_fraction = Date::from_timestamp(1675854714.5);
     /// ```
     pub fn from_timestamp(seconds_since_unix_epoch: f64) -> Self {
-        let whole_seconds_since_unix_epoch = seconds_since_unix_epoch.trunc() as i64;
+        let whole_seconds_since_unix_epoch =
+            seconds_since_unix_epoch.trunc() as i64;
         let nsecs = (seconds_since_unix_epoch.fract() * 1_000_000_000.0) as u32;
-        Self::from_datetime(Utc.timestamp_opt(whole_seconds_since_unix_epoch, nsecs).unwrap())
+        Self::from_datetime(
+            Utc.timestamp_opt(whole_seconds_since_unix_epoch, nsecs)
+                .unwrap(),
+        )
     }
 
-    /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339) date (with or without time).
+    /// Creates a new `Date` from a string containing an ISO-8601 (RFC-3339)
+    /// date (with or without time).
     ///
-    /// This method parses a string representation of a date or date-time in ISO-8601/RFC-3339 format
-    /// and creates a new `Date` instance. It supports both full date-time strings (e.g.,
-    /// "2023-02-08T15:30:45Z") and date-only strings (e.g., "2023-02-08").
+    /// This method parses a string representation of a date or date-time in
+    /// ISO-8601/RFC-3339 format and creates a new `Date` instance. It
+    /// supports both full date-time strings (e.g., "2023-02-08T15:30:45Z")
+    /// and date-only strings (e.g., "2023-02-08").
     ///
     /// # Arguments
     ///
-    /// * `value` - A string containing a date or date-time in ISO-8601/RFC-3339 format
+    /// * `value` - A string containing a date or date-time in ISO-8601/RFC-3339
+    ///   format
     ///
     /// # Returns
     ///
@@ -202,8 +213,7 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// // Parse a date-time string
     /// let date = Date::from_string("2023-02-08T15:30:45Z").unwrap();
@@ -220,8 +230,13 @@ impl Date {
 
         // try parsing as just a date (with assumed zero time)
         if let Ok(d) = NaiveDate::parse_from_str(&value, "%Y-%m-%d") {
-            let dt = NaiveDateTime::new(d, chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap());
-            return Ok(Self::from_datetime(DateTime::from_naive_utc_and_offset(dt, Utc)));
+            let dt = NaiveDateTime::new(
+                d,
+                chrono::NaiveTime::from_hms_opt(0, 0, 0).unwrap(),
+            );
+            return Ok(Self::from_datetime(
+                DateTime::from_naive_utc_and_offset(dt, Utc),
+            ));
         }
 
         Err(Error::InvalidDate("Invalid date string".into()))
@@ -236,16 +251,14 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// let now = Date::now();
     /// ```
-    pub fn now() -> Self {
-        Self::from_datetime(Utc::now())
-    }
+    pub fn now() -> Self { Self::from_datetime(Utc::now()) }
 
-    /// Creates a new `Date` containing the current date and time plus the given duration.
+    /// Creates a new `Date` containing the current date and time plus the given
+    /// duration.
     ///
     /// # Arguments
     ///
@@ -253,17 +266,19 @@ impl Date {
     ///
     /// # Returns
     ///
-    /// A new `Date` instance representing the current UTC date and time plus the duration
+    /// A new `Date` instance representing the current UTC date and time plus
+    /// the duration
     ///
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
     /// use std::time::Duration;
     ///
+    /// use dcbor::{Date, prelude::*};
+    ///
     /// // Get a date 1 hour from now
-    /// let one_hour_later = Date::with_duration_from_now(Duration::from_secs(3600));
+    /// let one_hour_later =
+    ///     Date::with_duration_from_now(Duration::from_secs(3600));
     /// ```
     pub fn with_duration_from_now(duration: Duration) -> Self {
         Self::now() + duration
@@ -271,7 +286,8 @@ impl Date {
 
     /// Returns the underlying chrono `DateTime` struct.
     ///
-    /// This method provides access to the wrapped `chrono::DateTime<Utc>` instance.
+    /// This method provides access to the wrapped `chrono::DateTime<Utc>`
+    /// instance.
     ///
     /// # Returns
     ///
@@ -280,23 +296,21 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
     /// use chrono::Datelike;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// let date = Date::now();
     /// let datetime = date.datetime();
     /// let year = datetime.year();
     /// ```
-    pub fn datetime(&self) -> DateTime<Utc> {
-        self.0
-    }
+    pub fn datetime(&self) -> DateTime<Utc> { self.0 }
 
     /// Returns the `Date` as the number of seconds since the Unix epoch.
     ///
-    /// This method converts the date to a floating-point number representing the number
-    /// of seconds since the Unix epoch (1970-01-01T00:00:00Z). Negative values represent
-    /// times before the epoch. The fractional part represents sub-second precision.
+    /// This method converts the date to a floating-point number representing
+    /// the number of seconds since the Unix epoch (1970-01-01T00:00:00Z).
+    /// Negative values represent times before the epoch. The fractional
+    /// part represents sub-second precision.
     ///
     /// # Returns
     ///
@@ -305,8 +319,7 @@ impl Date {
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// let date = Date::from_ymd(2023, 2, 8);
     /// let timestamp = date.timestamp();
@@ -315,7 +328,8 @@ impl Date {
         let d = self.datetime();
         let whole_seconds_since_unix_epoch = d.timestamp();
         let nsecs = d.nanosecond();
-        (whole_seconds_since_unix_epoch as f64) + (nsecs as f64) / 1_000_000_000.0
+        (whole_seconds_since_unix_epoch as f64)
+            + (nsecs as f64) / 1_000_000_000.0
     }
 }
 
@@ -365,43 +379,31 @@ impl Sub for Date {
 }
 
 impl Default for Date {
-    fn default() -> Self {
-        Self::now()
-    }
+    fn default() -> Self { Self::now() }
 }
 
 impl TryFrom<&str> for Date {
     type Error = Error;
 
-    fn try_from(value: &str) -> Result<Self> {
-        Self::from_string(value)
-    }
+    fn try_from(value: &str) -> Result<Self> { Self::from_string(value) }
 }
 
 impl From<DateTime<Utc>> for Date {
-    fn from(value: DateTime<Utc>) -> Self {
-        Self::from_datetime(value)
-    }
+    fn from(value: DateTime<Utc>) -> Self { Self::from_datetime(value) }
 }
 
 impl From<Date> for CBOR {
-    fn from(value: Date) -> Self {
-        value.tagged_cbor()
-    }
+    fn from(value: Date) -> Self { value.tagged_cbor() }
 }
 
 impl AsRef<Date> for Date {
-    fn as_ref(&self) -> &Self {
-        self
-    }
+    fn as_ref(&self) -> &Self { self }
 }
 
 impl TryFrom<CBOR> for Date {
     type Error = Error;
 
-    fn try_from(cbor: CBOR) -> Result<Self> {
-        Self::from_tagged_cbor(cbor)
-    }
+    fn try_from(cbor: CBOR) -> Result<Self> { Self::from_tagged_cbor(cbor) }
 }
 
 /// Implementation of the `CBORTagged` trait for `Date`.
@@ -418,9 +420,7 @@ impl CBORTagged for Date {
     /// # Returns
     ///
     /// A vector containing tag 1
-    fn cbor_tags() -> Vec<Tag> {
-        tags_for_values(&[TAG_DATE])
-    }
+    fn cbor_tags() -> Vec<Tag> { tags_for_values(&[TAG_DATE]) }
 }
 
 /// Implementation of the `CBORTaggedEncodable` trait for `Date`.
@@ -431,15 +431,14 @@ impl CBORTaggedEncodable for Date {
     /// Converts this `Date` to an untagged CBOR value.
     ///
     /// The date is converted to a numeric value representing the number of
-    /// seconds since the Unix epoch. This value may be an integer or a floating-point
-    /// number, depending on whether the date has fractional seconds.
+    /// seconds since the Unix epoch. This value may be an integer or a
+    /// floating-point number, depending on whether the date has fractional
+    /// seconds.
     ///
     /// # Returns
     ///
     /// A CBOR value representing the timestamp
-    fn untagged_cbor(&self) -> CBOR {
-        self.timestamp().into()
-    }
+    fn untagged_cbor(&self) -> CBOR { self.timestamp().into() }
 }
 
 /// Implementation of the `CBORTaggedDecodable` trait for `Date`.
@@ -449,8 +448,8 @@ impl CBORTaggedEncodable for Date {
 impl CBORTaggedDecodable for Date {
     /// Creates a `Date` from an untagged CBOR value.
     ///
-    /// The CBOR value must be a numeric value (integer or floating-point) representing
-    /// the number of seconds since the Unix epoch.
+    /// The CBOR value must be a numeric value (integer or floating-point)
+    /// representing the number of seconds since the Unix epoch.
     ///
     /// # Arguments
     ///
@@ -468,17 +467,16 @@ impl CBORTaggedDecodable for Date {
 
 /// Implementation of the `Display` trait for `Date`.
 ///
-/// This implementation provides a string representation of a `Date` in ISO-8601 format.
-/// For dates with time exactly at midnight (00:00:00), only the date part is shown.
-/// For other times, a full date-time string is shown.
+/// This implementation provides a string representation of a `Date` in ISO-8601
+/// format. For dates with time exactly at midnight (00:00:00), only the date
+/// part is shown. For other times, a full date-time string is shown.
 impl fmt::Display for Date {
     /// Formats the `Date` as a string in ISO-8601 format.
     ///
     /// # Examples
     ///
     /// ```
-    /// use dcbor::prelude::*;
-    /// use dcbor::Date;
+    /// use dcbor::{Date, prelude::*};
     ///
     /// // A date at midnight will display as just the date
     /// let date = Date::from_ymd(2023, 2, 8);

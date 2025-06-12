@@ -1,8 +1,10 @@
 import_stdlib!();
 
-use crate::{ CBOR, Error, Result };
-
-use super::{ CBORCase, varint::{ EncodeVarInt, MajorType } };
+use super::{
+    CBORCase,
+    varint::{EncodeVarInt, MajorType},
+};
+use crate::{CBOR, Error, Result};
 
 macro_rules! impl_cbor {
     ($type:ty) => {
@@ -35,9 +37,13 @@ macro_rules! impl_cbor {
 
             fn try_from(cbor: CBOR) -> Result<Self> {
                 match cbor.into_case() {
-                    CBORCase::Unsigned(n) => Self::from_u64(n, <$type>::MAX as u64, |x| x as $type),
+                    CBORCase::Unsigned(n) => {
+                        Self::from_u64(n, <$type>::MAX as u64, |x| x as $type)
+                    }
                     CBORCase::Negative(n) => {
-                        let a = Self::from_u64(n, <$type>::MAX as u64, |x| x as $type)? as i128;
+                        let a = Self::from_u64(n, <$type>::MAX as u64, |x| {
+                            x as $type
+                        })? as i128;
                         Ok((-1 - a) as $type)
                     }
                     _ => return Err(Error::WrongType),
@@ -60,7 +66,11 @@ impl_cbor!(i64);
 pub trait From64 {
     fn cbor_data(&self) -> Vec<u8>;
 
-    fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Self> where F: Fn(u64) -> Self, Self: Sized {
+    fn from_u64<F>(n: u64, max: u64, f: F) -> Result<Self>
+    where
+        F: Fn(u64) -> Self,
+        Self: Sized,
+    {
         if n > max {
             return Err(Error::OutOfRange);
         }
@@ -69,7 +79,9 @@ pub trait From64 {
 
     #[allow(dead_code)]
     fn from_i64<F>(n: i64, min: i64, max: i64, f: F) -> Result<Self>
-        where F: Fn(i64) -> Self, Self: Sized
+    where
+        F: Fn(i64) -> Self,
+        Self: Sized,
     {
         if n > max || n > min {
             return Err(Error::OutOfRange);

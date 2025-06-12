@@ -12,10 +12,12 @@
 use half::f16;
 
 pub trait ExactFrom {
-    /// Creates a target numeric value from the given `f16`, if it can be represented exactly.
+    /// Creates a target numeric value from the given `f16`, if it can be
+    /// represented exactly.
     ///
     /// If the value passed as `source` is not representable exactly, the result
-    /// is `None`. For example, converting 21.0 will succeed, but 21.5 will fail:
+    /// is `None`. For example, converting 21.0 will succeed, but 21.5 will
+    /// fail:
     ///
     ///    use half::f16;
     ///    use exact::ExactFrom;
@@ -24,66 +26,90 @@ pub trait ExactFrom {
     ///
     /// - Parameter source: The value to convert.
     #[allow(dead_code)]
-    fn exact_from_f16(source: f16) -> Option<Self> where Self: Sized;
+    fn exact_from_f16(source: f16) -> Option<Self>
+    where
+        Self: Sized;
 
-    /// Creates a target numeric value from the given `f32`, if it can be represented exactly.
+    /// Creates a target numeric value from the given `f32`, if it can be
+    /// represented exactly.
     ///
     /// If the value passed as `source` is not representable exactly, the result
-    /// is `None`. For example, converting 21.0 will succeed, but 21.5 will fail:
+    /// is `None`. For example, converting 21.0 will succeed, but 21.5 will
+    /// fail:
     ///
     ///    use exact::ExactFrom;
     ///    assert_eq!(i64::exact_from_f32(21.0f32), Some(21));
     ///    assert_eq!(i64::exact_from_f32(21.5f32), None);
     ///
     /// - Parameter source: The value to convert.
-    fn exact_from_f32(source: f32) -> Option<Self> where Self: Sized;
+    fn exact_from_f32(source: f32) -> Option<Self>
+    where
+        Self: Sized;
 
-    /// Creates a target numeric value from the given `f64`, if it can be represented exactly.
+    /// Creates a target numeric value from the given `f64`, if it can be
+    /// represented exactly.
     ///
     /// If the value passed as `source` is not representable exactly, the result
-    /// is `None`. For example, converting 21.0 will succeed, but 21.5 will fail:
+    /// is `None`. For example, converting 21.0 will succeed, but 21.5 will
+    /// fail:
     ///
     ///    use exact::ExactFrom;
     ///    assert_eq!(i64::exact_from_f64(21.0), Some(21));
     ///    assert_eq!(i64::exact_from_f64(21.5), None);
     ///
     /// - Parameter source: The value to convert.
-    fn exact_from_f64(source: f64) -> Option<Self> where Self: Sized;
+    fn exact_from_f64(source: f64) -> Option<Self>
+    where
+        Self: Sized;
 
-    /// Creates a target numeric value from the given `u64`, if it can be represented exactly.
+    /// Creates a target numeric value from the given `u64`, if it can be
+    /// represented exactly.
     ///
     /// If the value passed as `source` is not representable exactly, the result
-    /// is `None`. For example, converting 21 to f64 will succeed, but 9223372036854775809 will fail:
+    /// is `None`. For example, converting 21 to f64 will succeed, but
+    /// 9223372036854775809 will fail:
     ///
     ///    use exact::ExactFrom;
     ///    assert_eq!(f64::exact_from_u64(21u64), Some(21.0));
-    ///    assert_eq!(f64::exact_from_u64(u64::MAX), Some(1.8446744073709552e19));
-    ///    assert_eq!(f64::exact_from_u64(9223372036854775809u64), None);
+    ///    assert_eq!(f64::exact_from_u64(u64::MAX),
+    /// Some(1.8446744073709552e19));    assert_eq!
+    /// (f64::exact_from_u64(9223372036854775809u64), None);
     ///
     /// - Parameter source: The value to convert.
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized;
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized;
 
-    /// Creates a target numeric value from the given `i64`, if it can be represented exactly.
+    /// Creates a target numeric value from the given `i64`, if it can be
+    /// represented exactly.
     ///
     /// If the value passed as `source` is not representable exactly, the result
-    /// is `None`. For example, converting 21 to f64 will succeed, but -9223372036854775809 will fail:
+    /// is `None`. For example, converting 21 to f64 will succeed, but
+    /// -9223372036854775809 will fail:
     ///
     ///   use exact::ExactFrom;
     ///   assert_eq!(f64::exact_from_i64(21i64), Some(21.0));
     ///   assert_eq!(f64::exact_from_i64(-21i64), Some(-21.0));
     ///   assert_eq!(f64::exact_from_i64(i64::MAX), Some(9.223372036854776e18));
-    ///   assert_eq!(f64::exact_from_i64(i64::MIN), Some(-9.223372036854776e18));
-    ///   assert_eq!(f64::exact_from_i64(-9223372036854775809i64), None);
+    ///   assert_eq!(f64::exact_from_i64(i64::MIN),
+    /// Some(-9.223372036854776e18));   assert_eq!
+    /// (f64::exact_from_i64(-9223372036854775809i64), None);
     ///
     /// - Parameter source: The value to convert.
     #[allow(dead_code)]
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized;
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized;
 
     #[allow(dead_code)]
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized;
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized;
 
     #[allow(dead_code)]
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized;
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized;
 }
 
 impl ExactFrom for i16 {
@@ -137,28 +163,40 @@ impl ExactFrom for i16 {
         Some(source as i16)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 32767 {
             return None;
         }
         Some(source as i16)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(-32768..=32767).contains(&source) {
             return None;
         }
         Some(source as i16)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 32767 {
             return None;
         }
         Some(source as i16)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(-32768..=32767).contains(&source) {
             return None;
         }
@@ -174,8 +212,8 @@ impl ExactFrom for i32 {
             return None;
         }
 
-        // A Float16 value, if finite, is always in-range for 32- and 64-bit signed
-        // integer types.
+        // A Float16 value, if finite, is always in-range for 32- and 64-bit
+        // signed integer types.
 
         if source.fract() != 0.0 {
             return None;
@@ -216,28 +254,40 @@ impl ExactFrom for i32 {
         Some(source as i32)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 2147483647 {
             return None;
         }
         Some(source as i32)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(-2147483648..=2147483647).contains(&source) {
             return None;
         }
         Some(source as i32)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 2147483647 {
             return None;
         }
         Some(source as i32)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(-2147483648..=2147483647).contains(&source) {
             return None;
         }
@@ -253,8 +303,8 @@ impl ExactFrom for i64 {
             return None;
         }
 
-        // A Float16 value, if finite, is always in-range for 32- and 64-bit signed
-        // integer types.
+        // A Float16 value, if finite, is always in-range for 32- and 64-bit
+        // signed integer types.
 
         if source.fract() != 0.0 {
             return None;
@@ -295,25 +345,37 @@ impl ExactFrom for i64 {
         Some(source as i64)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 9223372036854775807 {
             return None;
         }
         Some(source as i64)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 9223372036854775807 {
             return None;
         }
         Some(source as i64)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !((i64::MIN as i128)..=(i64::MAX as i128)).contains(&source) {
             return None;
         }
@@ -329,7 +391,8 @@ impl ExactFrom for i128 {
             return None;
         }
 
-        // A Float16 value, if finite, is always in-range for 128-bit signed integer types.
+        // A Float16 value, if finite, is always in-range for 128-bit signed
+        // integer types.
 
         if source.fract() != 0.0 {
             return None;
@@ -366,22 +429,34 @@ impl ExactFrom for i128 {
         Some(source as i128)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source as i128)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source as i128)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > i128::MAX as u128 {
             return None;
         }
         Some(source as i128)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source)
     }
 }
@@ -394,8 +469,8 @@ impl ExactFrom for u16 {
             return None;
         }
 
-        // A Float16 value, if greater than -1 and finite, is always in-range for
-        // 16-, 32-, and 64-bit unsigned integer types.
+        // A Float16 value, if greater than -1 and finite, is always in-range
+        // for 16-, 32-, and 64-bit unsigned integer types.
 
         if source <= -1.0 {
             return None;
@@ -440,28 +515,40 @@ impl ExactFrom for u16 {
         Some(source as u16)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 65535 {
             return None;
         }
         Some(source as u16)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(0..=65535).contains(&source) {
             return None;
         }
         Some(source as u16)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 65535 {
             return None;
         }
         Some(source as u16)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(0..=65535).contains(&source) {
             return None;
         }
@@ -477,8 +564,8 @@ impl ExactFrom for u32 {
             return None;
         }
 
-        // A Float16 value, if greater than -1 and finite, is always in-range for
-        // 16-, 32-, and 64-bit unsigned integer types.
+        // A Float16 value, if greater than -1 and finite, is always in-range
+        // for 16-, 32-, and 64-bit unsigned integer types.
 
         if source <= -1.0 {
             return None;
@@ -523,28 +610,40 @@ impl ExactFrom for u32 {
         Some(source as u32)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 4294967295 {
             return None;
         }
         Some(source as u32)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(0..=4294967295).contains(&source) {
             return None;
         }
         Some(source as u32)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > 4294967295 {
             return None;
         }
         Some(source as u32)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(0..=4294967295).contains(&source) {
             return None;
         }
@@ -560,8 +659,8 @@ impl ExactFrom for u64 {
             return None;
         }
 
-        // A Float16 value, if greater than -1 and finite, is always in-range for
-        // 16-, 32-, and 64-bit unsigned integer types.
+        // A Float16 value, if greater than -1 and finite, is always in-range
+        // for 16-, 32-, and 64-bit unsigned integer types.
 
         if source <= -1.0 {
             return None;
@@ -606,25 +705,37 @@ impl ExactFrom for u64 {
         Some(source as u64)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source < 0 {
             return None;
         }
         Some(source as u64)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source > u64::MAX as u128 {
             return None;
         }
         Some(source as u64)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if !(0..=u64::MAX as i128).contains(&source) {
             return None;
         }
@@ -683,22 +794,34 @@ impl ExactFrom for u128 {
         Some(source as u128)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source as u128)
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source < 0 {
             return None;
         }
         Some(source as u128)
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         Some(source)
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         if source < 0 {
             return None;
         }
@@ -725,11 +848,7 @@ impl ExactFrom for f16 {
             return None;
         }
         let f = f16::from_f32(source);
-        if f.to_f32() == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f.to_f32() == source { Some(f) } else { None }
     }
 
     fn exact_from_f64(source: f64) -> Option<Self> {
@@ -743,14 +862,13 @@ impl ExactFrom for f16 {
             return None;
         }
         let f = f16::from_f64(source);
-        if f.to_f64() == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f.to_f64() == source { Some(f) } else { None }
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = f16::from_f64(source as f64);
         if f.is_infinite() {
             return None;
@@ -762,7 +880,10 @@ impl ExactFrom for f16 {
         }
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = f16::from_f64(source as f64);
         if f.is_infinite() {
             return None;
@@ -774,7 +895,10 @@ impl ExactFrom for f16 {
         }
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = f16::from_f64(source as f64);
         if f.is_infinite() {
             return None;
@@ -786,7 +910,10 @@ impl ExactFrom for f16 {
         }
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = f16::from_f64(source as f64);
         if f.is_infinite() {
             return None;
@@ -819,44 +946,40 @@ impl ExactFrom for f32 {
             return Some(f32::NAN);
         }
         let f = source as f32;
-        if f as f64 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as f64 == source { Some(f) } else { None }
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = source as f32;
-        if f as u64 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as u64 == source { Some(f) } else { None }
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = source as f32;
-        if f as i64 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as i64 == source { Some(f) } else { None }
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = source as f32;
         if f.is_infinite() {
             return None;
         }
-        if f as u128 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as u128 == source { Some(f) } else { None }
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         // Check the range
         if !(-0x8000_0000_i128..=0x7FFF_FFFF_i128).contains(&source) {
             return None;
@@ -901,36 +1024,38 @@ impl ExactFrom for f64 {
         Some(source)
     }
 
-    fn exact_from_u64(source: u64) -> Option<Self> where Self: Sized {
+    fn exact_from_u64(source: u64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = source as f64;
-        if f as u64 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as u64 == source { Some(f) } else { None }
     }
 
-    fn exact_from_i64(source: i64) -> Option<Self> where Self: Sized {
+    fn exact_from_i64(source: i64) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = source as f64;
-        if f as i64 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as i64 == source { Some(f) } else { None }
     }
 
-    fn exact_from_u128(source: u128) -> Option<Self> where Self: Sized {
+    fn exact_from_u128(source: u128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         let f = source as f64;
-        if f as u128 == source {
-            Some(f)
-        } else {
-            None
-        }
+        if f as u128 == source { Some(f) } else { None }
     }
 
-    fn exact_from_i128(source: i128) -> Option<Self> where Self: Sized {
+    fn exact_from_i128(source: i128) -> Option<Self>
+    where
+        Self: Sized,
+    {
         // Check the range
-        if !(-0x8000_0000_0000_0000_i128..=0x7FFF_FFFF_FFFF_FFFF_i128).contains(&source) {
+        if !(-0x8000_0000_0000_0000_i128..=0x7FFF_FFFF_FFFF_FFFF_i128)
+            .contains(&source)
+        {
             return None;
         }
 
@@ -1082,7 +1207,10 @@ mod tests {
         assert_eq!(i128::exact_from_f16(f16::from_f64(21.5)), None);
         assert_eq!(i128::exact_from_f16(f16::from_f64(f64::NAN)), None);
         assert_eq!(i128::exact_from_f16(f16::from_f64(f64::INFINITY)), None);
-        assert_eq!(i128::exact_from_f16(f16::from_f64(f64::NEG_INFINITY)), None);
+        assert_eq!(
+            i128::exact_from_f16(f16::from_f64(f64::NEG_INFINITY)),
+            None
+        );
 
         assert_eq!(i128::exact_from_f32(21.0f32), Some(21));
         assert_eq!(i128::exact_from_f32(21.5f32), None);
@@ -1238,7 +1366,10 @@ mod tests {
         assert_eq!(u128::exact_from_f16(f16::from_f64(21.5)), None);
         assert_eq!(u128::exact_from_f16(f16::from_f64(f64::NAN)), None);
         assert_eq!(u128::exact_from_f16(f16::from_f64(f64::INFINITY)), None);
-        assert_eq!(u128::exact_from_f16(f16::from_f64(f64::NEG_INFINITY)), None);
+        assert_eq!(
+            u128::exact_from_f16(f16::from_f64(f64::NEG_INFINITY)),
+            None
+        );
 
         assert_eq!(u128::exact_from_f32(21.0f32), Some(21));
         assert_eq!(u128::exact_from_f32(21.5f32), None);
@@ -1271,23 +1402,41 @@ mod tests {
 
     #[test]
     fn test_exact_f16() {
-        assert_eq!(f16::exact_from_f16(f16::from_f64(21.0)), Some(f16::from_f64(21.0)));
-        assert_eq!(f16::exact_from_f16(f16::from_f64(21.5)), Some(f16::from_f64(21.5)));
+        assert_eq!(
+            f16::exact_from_f16(f16::from_f64(21.0)),
+            Some(f16::from_f64(21.0))
+        );
+        assert_eq!(
+            f16::exact_from_f16(f16::from_f64(21.5)),
+            Some(f16::from_f64(21.5))
+        );
         assert!(f16::exact_from_f16(f16::NAN).unwrap().is_nan());
         assert_eq!(f16::exact_from_f16(f16::INFINITY), Some(f16::INFINITY));
-        assert_eq!(f16::exact_from_f16(f16::NEG_INFINITY), Some(f16::NEG_INFINITY));
+        assert_eq!(
+            f16::exact_from_f16(f16::NEG_INFINITY),
+            Some(f16::NEG_INFINITY)
+        );
 
         assert_eq!(f16::exact_from_f32(21.0f32), Some(f16::from_f64(21.0)));
         assert_eq!(f16::exact_from_f32(21.5f32), Some(f16::from_f64(21.5)));
         assert!(f16::exact_from_f32(f32::NAN).unwrap().is_nan());
         assert_eq!(f16::exact_from_f32(f32::INFINITY), Some(f16::INFINITY));
-        assert_eq!(f16::exact_from_f32(f32::NEG_INFINITY), Some(f16::NEG_INFINITY));
+        assert_eq!(
+            f16::exact_from_f32(f32::NEG_INFINITY),
+            Some(f16::NEG_INFINITY)
+        );
 
         assert_eq!(f16::exact_from_f64(21.0), Some(f16::from_f64(21.0)));
         assert_eq!(f16::exact_from_f64(21.5), Some(f16::from_f64(21.5)));
         assert!(f16::exact_from_f64(f64::NAN).unwrap().is_nan());
-        assert_eq!(f16::exact_from_f64(f64::INFINITY), Some(f16::from_f64(f64::INFINITY)));
-        assert_eq!(f16::exact_from_f64(f64::NEG_INFINITY), Some(f16::from_f64(f64::NEG_INFINITY)));
+        assert_eq!(
+            f16::exact_from_f64(f64::INFINITY),
+            Some(f16::from_f64(f64::INFINITY))
+        );
+        assert_eq!(
+            f16::exact_from_f64(f64::NEG_INFINITY),
+            Some(f16::from_f64(f64::NEG_INFINITY))
+        );
 
         assert_eq!(f16::exact_from_u64(21u64), Some(f16::from_f64(21.0)));
         assert_eq!(f16::exact_from_u64(u64::MAX), None);
@@ -1316,28 +1465,46 @@ mod tests {
         assert_eq!(f32::exact_from_f16(f16::from_f64(21.5)), Some(21.5f32));
         assert!(f32::exact_from_f16(f16::NAN).unwrap().is_nan());
         assert_eq!(f32::exact_from_f16(f16::INFINITY), Some(f32::INFINITY));
-        assert_eq!(f32::exact_from_f16(f16::NEG_INFINITY), Some(f32::NEG_INFINITY));
+        assert_eq!(
+            f32::exact_from_f16(f16::NEG_INFINITY),
+            Some(f32::NEG_INFINITY)
+        );
 
         assert_eq!(f32::exact_from_f32(21.0f32), Some(21.0f32));
         assert_eq!(f32::exact_from_f32(21.5f32), Some(21.5f32));
         assert!(f32::exact_from_f32(f32::NAN).unwrap().is_nan());
         assert_eq!(f32::exact_from_f32(f32::INFINITY), Some(f32::INFINITY));
-        assert_eq!(f32::exact_from_f32(f32::NEG_INFINITY), Some(f32::NEG_INFINITY));
+        assert_eq!(
+            f32::exact_from_f32(f32::NEG_INFINITY),
+            Some(f32::NEG_INFINITY)
+        );
 
         assert_eq!(f32::exact_from_f64(21.0), Some(21.0f32));
         assert_eq!(f32::exact_from_f64(21.5), Some(21.5f32));
         assert!(f32::exact_from_f64(f64::NAN).unwrap().is_nan());
         assert_eq!(f32::exact_from_f64(f64::INFINITY), Some(f32::INFINITY));
-        assert_eq!(f32::exact_from_f64(f64::NEG_INFINITY), Some(f32::NEG_INFINITY));
+        assert_eq!(
+            f32::exact_from_f64(f64::NEG_INFINITY),
+            Some(f32::NEG_INFINITY)
+        );
 
         assert_eq!(f32::exact_from_u64(21u64), Some(21.0f32));
-        assert_eq!(f32::exact_from_u64(u64::MAX), Some(18446744073709551616.0f32));
+        assert_eq!(
+            f32::exact_from_u64(u64::MAX),
+            Some(18446744073709551616.0f32)
+        );
         assert_eq!(f32::exact_from_u64(9223372036854775809u64), None);
 
         assert_eq!(f32::exact_from_i64(21i64), Some(21.0f32));
         assert_eq!(f32::exact_from_i64(-21i64), Some(-21.0f32));
-        assert_eq!(f32::exact_from_i64(i64::MAX), Some(9223372036854775808.0f32));
-        assert_eq!(f32::exact_from_i64(i64::MIN), Some(-9223372036854775808.0f32));
+        assert_eq!(
+            f32::exact_from_i64(i64::MAX),
+            Some(9223372036854775808.0f32)
+        );
+        assert_eq!(
+            f32::exact_from_i64(i64::MIN),
+            Some(-9223372036854775808.0f32)
+        );
         assert_eq!(f32::exact_from_i64(-9223372036854775807i64), None);
 
         assert_eq!(f32::exact_from_u128(21u128), Some(21.0f32));
@@ -1357,19 +1524,28 @@ mod tests {
         assert_eq!(f64::exact_from_f16(f16::from_f64(21.5)), Some(21.5));
         assert!(f64::exact_from_f16(f16::NAN).unwrap().is_nan());
         assert_eq!(f64::exact_from_f16(f16::INFINITY), Some(f64::INFINITY));
-        assert_eq!(f64::exact_from_f16(f16::NEG_INFINITY), Some(f64::NEG_INFINITY));
+        assert_eq!(
+            f64::exact_from_f16(f16::NEG_INFINITY),
+            Some(f64::NEG_INFINITY)
+        );
 
         assert_eq!(f64::exact_from_f32(21.0f32), Some(21.0));
         assert_eq!(f64::exact_from_f32(21.5f32), Some(21.5));
         assert!(f64::exact_from_f32(f32::NAN).unwrap().is_nan());
         assert_eq!(f64::exact_from_f32(f32::INFINITY), Some(f64::INFINITY));
-        assert_eq!(f64::exact_from_f32(f32::NEG_INFINITY), Some(f64::NEG_INFINITY));
+        assert_eq!(
+            f64::exact_from_f32(f32::NEG_INFINITY),
+            Some(f64::NEG_INFINITY)
+        );
 
         assert_eq!(f64::exact_from_f64(21.0), Some(21.0));
         assert_eq!(f64::exact_from_f64(21.5), Some(21.5));
         assert!(f64::exact_from_f64(f64::NAN).unwrap().is_nan());
         assert_eq!(f64::exact_from_f64(f64::INFINITY), Some(f64::INFINITY));
-        assert_eq!(f64::exact_from_f64(f64::NEG_INFINITY), Some(f64::NEG_INFINITY));
+        assert_eq!(
+            f64::exact_from_f64(f64::NEG_INFINITY),
+            Some(f64::NEG_INFINITY)
+        );
 
         assert_eq!(f64::exact_from_u64(21u64), Some(21.0));
         assert_eq!(f64::exact_from_u64(u64::MAX), Some(18446744073709551616.0));

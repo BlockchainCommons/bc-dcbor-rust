@@ -1,6 +1,7 @@
 import_stdlib!();
 
-/// Internal representation of a tag name, with optimization for statically known names.
+/// Internal representation of a tag name, with optimization for statically
+/// known names.
 #[derive(Debug, Clone)]
 enum TagName {
     /// A tag name that's known at compile time, avoiding allocation.
@@ -13,7 +14,8 @@ enum TagName {
 /// Represents the numeric value of a CBOR tag.
 ///
 /// In CBOR, tags (major type 6) are identified by unsigned integer values.
-/// Per RFC 8949, tag values are registered with IANA to ensure interoperability.
+/// Per RFC 8949, tag values are registered with IANA to ensure
+/// interoperability.
 ///
 /// # Examples of standard CBOR tag values
 ///
@@ -36,23 +38,24 @@ pub type TagValue = u64;
 /// Tags in CBOR provide semantic information about the tagged data item.
 /// They are used to indicate that the data item has some additional semantics
 /// beyond its basic CBOR type. For example, a tag might indicate that a string
-/// should be interpreted as a date, or that a byte string contains embedded CBOR.
+/// should be interpreted as a date, or that a byte string contains embedded
+/// CBOR.
 ///
 /// This implementation supports both the numeric tag value and an optional
 /// human-readable name to improve code clarity and debugging.
 ///
 /// # Tag equality and comparison
 ///
-/// Tags are considered equal if their numeric values are equal, regardless of their names.
-/// This matches the CBOR specification behavior where the tag value (not the name)
-/// determines the semantic meaning.
+/// Tags are considered equal if their numeric values are equal, regardless of
+/// their names. This matches the CBOR specification behavior where the tag
+/// value (not the name) determines the semantic meaning.
 ///
 /// # Deterministic encoding
 ///
-/// Tags, like all other CBOR types, must follow deterministic encoding rules in dCBOR.
-/// The tag value is encoded according to the general integer encoding rules (shortest
-/// form possible), and the tagged content itself must also follow deterministic
-/// encoding rules.
+/// Tags, like all other CBOR types, must follow deterministic encoding rules in
+/// dCBOR. The tag value is encoded according to the general integer encoding
+/// rules (shortest form possible), and the tagged content itself must also
+/// follow deterministic encoding rules.
 ///
 /// # Examples
 ///
@@ -91,8 +94,9 @@ pub struct Tag {
 impl Tag {
     /// Creates a new CBOR tag with the given value and associated name.
     ///
-    /// This constructor allocates memory for the tag name, storing it as a dynamic string.
-    /// If the tag name is known at compile time, consider using `with_static_name` instead.
+    /// This constructor allocates memory for the tag name, storing it as a
+    /// dynamic string. If the tag name is known at compile time, consider
+    /// using `with_static_name` instead.
     ///
     /// # Parameters
     ///
@@ -106,7 +110,10 @@ impl Tag {
     ///
     /// let date_tag = Tag::new(12345, "This is a tagged string.");
     /// assert_eq!(date_tag.value(), 12345);
-    /// assert_eq!(date_tag.name(), Some("This is a tagged string.".to_string()));
+    /// assert_eq!(
+    ///     date_tag.name(),
+    ///     Some("This is a tagged string.".to_string())
+    /// );
     /// ```
     pub fn new(value: TagValue, name: impl Into<String>) -> Tag {
         Self { value, name: Some(TagName::Dynamic(name.into())) }
@@ -114,8 +121,8 @@ impl Tag {
 
     /// Creates a new CBOR tag with the given value and no name.
     ///
-    /// This constructor creates an unnamed tag, which is sufficient for many use cases
-    /// but may be less readable in code compared to named tags.
+    /// This constructor creates an unnamed tag, which is sufficient for many
+    /// use cases but may be less readable in code compared to named tags.
     ///
     /// # Parameters
     ///
@@ -134,15 +141,18 @@ impl Tag {
         Self { value, name: None }
     }
 
-    /// Creates a new CBOR tag at compile time with the given value and associated name.
+    /// Creates a new CBOR tag at compile time with the given value and
+    /// associated name.
     ///
-    /// This constructor is optimized for cases where the tag name is known at compile time,
-    /// avoiding runtime allocations for the name string. It can be used in `const` contexts.
+    /// This constructor is optimized for cases where the tag name is known at
+    /// compile time, avoiding runtime allocations for the name string. It
+    /// can be used in `const` contexts.
     ///
     /// # Parameters
     ///
     /// * `value` - The numeric tag value, typically registered with IANA
-    /// * `name` - A static string literal as the human-readable name for the tag
+    /// * `name` - A static string literal as the human-readable name for the
+    ///   tag
     ///
     /// # Examples
     ///
@@ -170,9 +180,7 @@ impl Tag {
     /// let tag = Tag::new(18, "cbor-data-item");
     /// assert_eq!(tag.value(), 18);
     /// ```
-    pub fn value(&self) -> TagValue {
-        self.value
-    }
+    pub fn value(&self) -> TagValue { self.value }
 
     /// Returns the tag's associated human-readable name, if any.
     ///
@@ -204,9 +212,9 @@ impl Tag {
 /// Compares tags for equality based on their numeric values.
 ///
 /// Tags are considered equal if they have the same numeric value, regardless of
-/// whether they have different names or if one has a name and the other doesn't.
-/// This matches the CBOR standard behavior where the tag value, not its human-readable
-/// name, determines its semantic meaning.
+/// whether they have different names or if one has a name and the other
+/// doesn't. This matches the CBOR standard behavior where the tag value, not
+/// its human-readable name, determines its semantic meaning.
 ///
 /// # Examples
 ///
@@ -218,31 +226,28 @@ impl Tag {
 /// let tag3 = Tag::new(32, "different-name");
 /// let tag4 = Tag::with_value(42);
 ///
-/// assert_eq!(tag1, tag2);       // Same value, one named and one unnamed
-/// assert_eq!(tag1, tag3);       // Same value, different names
-/// assert_ne!(tag1, tag4);       // Different values
+/// assert_eq!(tag1, tag2); // Same value, one named and one unnamed
+/// assert_eq!(tag1, tag3); // Same value, different names
+/// assert_ne!(tag1, tag4); // Different values
 /// ```
 impl PartialEq for Tag {
-    fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
-    }
+    fn eq(&self, other: &Self) -> bool { self.value == other.value }
 }
 
 /// Confirms `Tag` implements full equality, not just partial equality.
 ///
 /// This is required for `Tag` to be used in collections like `HashSet` and
 /// as keys in `HashMap` along with the `Hash` implementation.
-impl Eq for Tag { }
+impl Eq for Tag {}
 
 /// Implements hashing for `Tag` based solely on the numeric tag value.
 ///
 /// This implementation ensures that two tags with the same value but different
 /// names will hash to the same value, which is consistent with the equality
-/// implementation. This allows tags to be used as keys in hash-based collections.
+/// implementation. This allows tags to be used as keys in hash-based
+/// collections.
 impl hash::Hash for Tag {
-    fn hash<H: hash::Hasher>(&self, state: &mut H) {
-        self.value.hash(state);
-    }
+    fn hash<H: hash::Hasher>(&self, state: &mut H) { self.value.hash(state); }
 }
 
 /// Formats a tag for display, preferring the name if available.
@@ -273,7 +278,8 @@ impl fmt::Display for Tag {
 
 /// Converts a raw tag value to a `Tag` instance.
 ///
-/// This provides a convenient way to create unnamed tags directly from numeric values.
+/// This provides a convenient way to create unnamed tags directly from numeric
+/// values.
 ///
 /// # Examples
 ///
@@ -287,15 +293,14 @@ impl fmt::Display for Tag {
 /// assert_eq!(tag1, tag2);
 /// ```
 impl From<TagValue> for Tag {
-    fn from(value: TagValue) -> Self {
-        Tag::with_value(value)
-    }
+    fn from(value: TagValue) -> Self { Tag::with_value(value) }
 }
 
 /// Converts an `i32` integer to a `Tag` instance.
 ///
-/// This provides a convenient way to create unnamed tags from 32-bit signed integers.
-/// Note that the value will be converted to an unsigned 64-bit integer internally.
+/// This provides a convenient way to create unnamed tags from 32-bit signed
+/// integers. Note that the value will be converted to an unsigned 64-bit
+/// integer internally.
 ///
 /// # Examples
 ///
@@ -306,9 +311,7 @@ impl From<TagValue> for Tag {
 /// assert_eq!(tag.value(), 42);
 /// ```
 impl From<i32> for Tag {
-    fn from(value: i32) -> Self {
-        Tag::with_value(value as TagValue)
-    }
+    fn from(value: i32) -> Self { Tag::with_value(value as TagValue) }
 }
 
 /// Converts a `usize` to a `Tag` instance.
@@ -326,14 +329,10 @@ impl From<i32> for Tag {
 /// assert_eq!(tag.value(), 42);
 /// ```
 impl From<usize> for Tag {
-    fn from(value: usize) -> Self {
-        Tag::with_value(value as TagValue)
-    }
+    fn from(value: usize) -> Self { Tag::with_value(value as TagValue) }
 }
 
 /// Converts a reference to a `Tag` into an owned `Tag` instance.
 impl From<&Tag> for Tag {
-    fn from(tag: &Tag) -> Self {
-        tag.clone()
-    }
+    fn from(tag: &Tag) -> Self { tag.clone() }
 }

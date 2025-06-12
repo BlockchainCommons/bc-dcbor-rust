@@ -1,18 +1,19 @@
 import_stdlib!();
 
-use crate::{CBOR, CBORTagged, CBORCase};
+use crate::{CBOR, CBORCase, CBORTagged};
 
 /// # Tagged CBOR Encoding Support
-/// 
-/// This module provides the `CBORTaggedEncodable` trait, which enables types to 
+///
+/// This module provides the `CBORTaggedEncodable` trait, which enables types to
 /// be encoded as tagged CBOR values.
-/// 
+///
 /// CBOR tags provide semantic information about the encoded data. For example,
 /// tag 1 is used for dates, indicating that the value should be interpreted
-/// as a timestamp. The dCBOR library ensures these tags are encoded deterministically.
+/// as a timestamp. The dCBOR library ensures these tags are encoded
+/// deterministically.
 ///
-/// This trait enables seamless encoding of Rust types to properly tagged CBOR values.
-/// A trait for types that can be encoded to CBOR with a specific tag.
+/// This trait enables seamless encoding of Rust types to properly tagged CBOR
+/// values. A trait for types that can be encoded to CBOR with a specific tag.
 ///
 /// This trait extends `CBORTagged` to provide methods for encoding a value
 /// with its associated tag. Types that implement this trait define how they
@@ -60,15 +61,16 @@ use crate::{CBOR, CBORTagged, CBORCase};
 pub trait CBORTaggedEncodable: CBORTagged {
     /// Returns the untagged CBOR encoding of this instance.
     ///
-    /// This method defines how the value itself (without its tag) should 
+    /// This method defines how the value itself (without its tag) should
     /// be represented in CBOR format.
     fn untagged_cbor(&self) -> CBOR;
 
     /// Returns the tagged CBOR encoding of this instance.
     ///
     /// This method wraps the result of `untagged_cbor()` with the first tag
-    /// from `cbor_tags()`, which is considered the "preferred" tag for the type.
-    /// 
+    /// from `cbor_tags()`, which is considered the "preferred" tag for the
+    /// type.
+    ///
     /// Even if a type supports multiple tags for backward-compatible decoding
     /// via `cbor_tags()`, only the first (preferred) tag is used for encoding.
     /// This ensures consistency in newly created data while maintaining the
@@ -76,14 +78,13 @@ pub trait CBORTaggedEncodable: CBORTagged {
     ///
     /// In most cases, you don't need to override this method.
     fn tagged_cbor(&self) -> CBOR {
-        CBORCase::Tagged(Self::cbor_tags()[0].clone(), self.untagged_cbor()).into()
+        CBORCase::Tagged(Self::cbor_tags()[0].clone(), self.untagged_cbor())
+            .into()
     }
 
     /// Returns the tagged value in CBOR binary representation.
     ///
     /// This is a convenience method that converts the result of `tagged_cbor()`
     /// to binary format.
-    fn tagged_cbor_data(&self) -> Vec<u8> {
-        self.tagged_cbor().to_cbor_data()
-    }
+    fn tagged_cbor_data(&self) -> Vec<u8> { self.tagged_cbor().to_cbor_data() }
 }

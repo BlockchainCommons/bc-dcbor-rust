@@ -1,13 +1,13 @@
-use crate::{ CBOR, Error, Result, CBORTagged, CBORCase };
+use crate::{CBOR, CBORCase, CBORTagged, Error, Result};
 
 /// # Tagged CBOR Decoding Support
 ///
 /// This module provides the `CBORTaggedDecodable` trait, which enables types to
 /// be decoded from tagged CBOR values.
 ///
-/// Tagged CBOR values include semantic information about how to interpret the data.
-/// This trait allows Rust types to verify that incoming CBOR data has the expected
-/// tag(s) and to decode the data appropriately.
+/// Tagged CBOR values include semantic information about how to interpret the
+/// data. This trait allows Rust types to verify that incoming CBOR data has the
+/// expected tag(s) and to decode the data appropriately.
 /// A trait for types that can be decoded from CBOR with a specific tag.
 ///
 /// This trait extends `CBORTagged` and `TryFrom<CBOR>` to provide methods for
@@ -113,22 +113,28 @@ use crate::{ CBOR, Error, Result, CBORTagged, CBORCase };
 pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
     /// Creates an instance of this type by decoding it from untagged CBOR.
     ///
-    /// This method defines how to interpret the CBOR content (without considering
-    /// the tag) and convert it to the implementing type.
-    fn from_untagged_cbor(cbor: CBOR) -> Result<Self> where Self: Sized;
+    /// This method defines how to interpret the CBOR content (without
+    /// considering the tag) and convert it to the implementing type.
+    fn from_untagged_cbor(cbor: CBOR) -> Result<Self>
+    where
+        Self: Sized;
 
     /// Creates an instance of this type by decoding it from tagged CBOR.
     ///
-    /// This method first verifies that the CBOR value has one of the expected tags
-    /// (as defined by `cbor_tags()`), then delegates to `from_untagged_cbor()` to
-    /// decode the content.
+    /// This method first verifies that the CBOR value has one of the expected
+    /// tags (as defined by `cbor_tags()`), then delegates to
+    /// `from_untagged_cbor()` to decode the content.
     ///
-    /// For backward compatibility, this method accepts any tag from the `cbor_tags()`
-    /// vector, not just the first one. This allows new versions of types to still
-    /// accept data tagged with older/alternative tag values.
+    /// For backward compatibility, this method accepts any tag from the
+    /// `cbor_tags()` vector, not just the first one. This allows new
+    /// versions of types to still accept data tagged with older/alternative
+    /// tag values.
     ///
     /// In most cases, you don't need to override this method.
-    fn from_tagged_cbor(cbor: CBOR) -> Result<Self> where Self: Sized {
+    fn from_tagged_cbor(cbor: CBOR) -> Result<Self>
+    where
+        Self: Sized,
+    {
         match cbor.into_case() {
             CBORCase::Tagged(tag, item) => {
                 let cbor_tags = Self::cbor_tags();
@@ -138,23 +144,31 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
                     Err(Error::WrongTag(cbor_tags[0].clone(), tag))
                 }
             }
-            _ => Err(Error::WrongType)
+            _ => Err(Error::WrongType),
         }
     }
 
-    /// Creates an instance of this type by decoding it from binary encoded tagged CBOR.
+    /// Creates an instance of this type by decoding it from binary encoded
+    /// tagged CBOR.
     ///
-    /// This is a convenience method that first parses the binary data into a CBOR value,
-    /// then uses `from_tagged_cbor()` to decode it.
-    fn from_tagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self> where Self: Sized {
+    /// This is a convenience method that first parses the binary data into a
+    /// CBOR value, then uses `from_tagged_cbor()` to decode it.
+    fn from_tagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self>
+    where
+        Self: Sized,
+    {
         Self::from_tagged_cbor(CBOR::try_from_data(data)?)
     }
 
-    /// Creates an instance of this type by decoding it from binary encoded untagged CBOR.
+    /// Creates an instance of this type by decoding it from binary encoded
+    /// untagged CBOR.
     ///
-    /// This is a convenience method that first parses the binary data into a CBOR value,
-    /// then uses `from_untagged_cbor()` to decode it.
-    fn from_untagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self> where Self: Sized {
+    /// This is a convenience method that first parses the binary data into a
+    /// CBOR value, then uses `from_untagged_cbor()` to decode it.
+    fn from_untagged_cbor_data(data: impl AsRef<[u8]>) -> Result<Self>
+    where
+        Self: Sized,
+    {
         Self::from_untagged_cbor(CBOR::try_from_data(data)?)
     }
 }

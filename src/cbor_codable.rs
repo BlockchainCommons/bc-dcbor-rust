@@ -4,8 +4,9 @@ use crate::CBOR;
 
 /// # CBOR Encoding and Decoding Traits
 ///
-/// These traits provide functionality for converting between Rust types and CBOR data.
-/// They form the foundation of the dCBOR serialization infrastructure.
+/// These traits provide functionality for converting between Rust types and
+/// CBOR data. They form the foundation of the dCBOR serialization
+/// infrastructure.
 ///
 /// The main traits are:
 ///
@@ -17,8 +18,9 @@ use crate::CBOR;
 /// enable seamless integration with dCBOR's deterministic encoding rules.
 /// A trait for types that can be encoded to CBOR.
 ///
-/// This trait is automatically implemented for any type that implements `Into<CBOR>` and `Clone`.
-/// It provides convenient methods for converting instances into CBOR objects and binary data.
+/// This trait is automatically implemented for any type that implements
+/// `Into<CBOR>` and `Clone`. It provides convenient methods for converting
+/// instances into CBOR objects and binary data.
 ///
 /// ## Example
 ///
@@ -55,24 +57,21 @@ pub trait CBOREncodable: Into<CBOR> + Clone {
     /// Converts this value to a CBOR object.
     ///
     /// This is a convenience method that avoids consuming the original value.
-    fn to_cbor(&self) -> CBOR {
-        self.clone().into()
-    }
+    fn to_cbor(&self) -> CBOR { self.clone().into() }
 
     /// Converts this value directly to binary CBOR data.
     ///
     /// This is a shorthand for `self.to_cbor().to_cbor_data()`.
-    fn to_cbor_data(&self) -> Vec<u8> {
-        self.to_cbor().to_cbor_data()
-    }
+    fn to_cbor_data(&self) -> Vec<u8> { self.to_cbor().to_cbor_data() }
 }
 
-impl<T> CBOREncodable for T where T: Into<CBOR> + Clone { }
+impl<T> CBOREncodable for T where T: Into<CBOR> + Clone {}
 
 /// A trait for types that can be decoded from CBOR.
 ///
-/// This trait is automatically implemented for any type that implements `TryFrom<CBOR>`.
-/// It serves as a marker trait to indicate that a type supports being created from CBOR data.
+/// This trait is automatically implemented for any type that implements
+/// `TryFrom<CBOR>`. It serves as a marker trait to indicate that a type
+/// supports being created from CBOR data.
 ///
 /// ## Example
 ///
@@ -118,7 +117,7 @@ pub trait CBORDecodable: TryFrom<CBOR, Error = crate::Error> {
     }
 }
 
-impl<T> CBORDecodable for T where T: TryFrom<CBOR, Error = crate::Error> { }
+impl<T> CBORDecodable for T where T: TryFrom<CBOR, Error = crate::Error> {}
 
 /// A trait for types that can be both encoded to and decoded from CBOR.
 ///
@@ -170,6 +169,6 @@ impl<T> CBORDecodable for T where T: TryFrom<CBOR, Error = crate::Error> { }
 /// // Create a round-trip copy
 /// let person_copy: Person = cbor.try_into().unwrap(); // Using CBORDecodable
 /// ```
-pub trait CBORCodable { }
+pub trait CBORCodable {}
 
-impl<T> CBORCodable for T where T: CBORDecodable + CBOREncodable { }
+impl<T> CBORCodable for T where T: CBORDecodable + CBOREncodable {}

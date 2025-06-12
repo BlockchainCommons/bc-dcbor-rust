@@ -3,22 +3,25 @@
 #[cfg(feature = "std")]
 #[doc(hidden)]
 pub(crate) mod with_std {
-    pub(crate) use std::fmt;
-    pub(crate) use std::str;
+    pub(crate) use std::{
+        array::TryFromSliceError,
+        borrow::ToOwned,
+        boxed::Box,
+        cmp,
+        collections::{
+            BTreeMap, BTreeSet, HashMap, HashSet, VecDeque,
+            btree_map::Values as BTreeMapValues,
+        },
+        fmt, format, hash,
+        ops::Deref,
+        result::Result as StdResult,
+        str,
+        string::{String, ToString},
+        sync::{Arc, Mutex, MutexGuard, Once},
+        time::Duration,
+        vec::Vec,
+    };
 
-    pub(crate) use std::array::TryFromSliceError;
-    pub(crate) use std::borrow::ToOwned;
-    pub(crate) use std::boxed::Box;
-    pub(crate) use std::cmp;
-    pub(crate) use std::collections::{BTreeMap, BTreeSet, btree_map::Values as BTreeMapValues, VecDeque, HashSet, HashMap};
-    pub(crate) use std::format;
-    pub(crate) use std::hash;
-    pub(crate) use std::ops::Deref;
-    pub(crate) use std::string::{String, ToString};
-    pub(crate) use std::sync::{Arc, Once, Mutex, MutexGuard};
-    pub(crate) use std::time::Duration;
-    pub(crate) use std::vec::Vec;
-    pub(crate) use std::result::Result as StdResult;
     pub(crate) use thiserror::Error as ThisError;
 }
 
@@ -28,46 +31,48 @@ pub(crate) mod with_std {
 pub(crate) mod without_std {
     extern crate alloc;
 
-    pub(crate) use alloc::borrow::ToOwned;
-    pub(crate) use alloc::boxed::Box;
-    pub(crate) use alloc::collections::{BTreeMap, BTreeSet, btree_map::Values as BTreeMapValues, VecDeque};
-    pub(crate) use alloc::fmt;
-    pub(crate) use alloc::format;
     // pub(crate) use alloc::rc; // Unused import
     pub(crate) use alloc::str;
-    pub(crate) use alloc::string::{String, ToString};
-    pub(crate) use alloc::sync::Arc;
-    pub(crate) use alloc::vec;
-    pub(crate) use alloc::vec::Vec;
-    pub(crate) use core::result::Result as StdResult;
-    pub(crate) use core::array::TryFromSliceError;
-    pub(crate) use core::cmp;
-    pub(crate) use core::hash;
-    pub(crate) use core::ops::Deref;
-    pub(crate) use core::time::Duration;
-    pub(crate) use hashbrown::{HashSet, HashMap};
-    pub(crate) use spin::{Once, Mutex, MutexGuard};
+    pub(crate) use alloc::{
+        borrow::ToOwned,
+        boxed::Box,
+        collections::{
+            BTreeMap, BTreeSet, VecDeque, btree_map::Values as BTreeMapValues,
+        },
+        fmt, format,
+        string::{String, ToString},
+        sync::Arc,
+        vec,
+        vec::Vec,
+    };
+    pub(crate) use core::{
+        array::TryFromSliceError, cmp, hash, ops::Deref,
+        result::Result as StdResult, time::Duration,
+    };
+
+    pub(crate) use hashbrown::{HashMap, HashSet};
+    pub(crate) use spin::{Mutex, MutexGuard, Once};
     pub(crate) use thiserror_no_std::Error as ThisError;
 }
 
 // Re-export items that are needed in the public API
 #[cfg(feature = "std")]
 pub mod public_exports {
-    pub use std::sync::Arc;
-    pub use std::vec::Vec;
-    pub use std::string::String;
-    pub use std::collections::{HashMap, HashSet};
-    pub use std::boxed::Box;
+    pub use std::{
+        boxed::Box,
+        collections::{HashMap, HashSet},
+        string::String,
+        sync::Arc,
+        vec::Vec,
+    };
 }
 
 #[cfg(not(feature = "std"))]
 #[cfg(feature = "no_std")]
 pub mod public_exports {
     extern crate alloc;
-    pub use alloc::sync::Arc;
-    pub use alloc::vec::Vec;
-    pub use alloc::string::String;
-    pub use alloc::boxed::Box;
+    pub use alloc::{boxed::Box, string::String, sync::Arc, vec::Vec};
+
     pub use hashbrown::{HashMap, HashSet};
 }
 
