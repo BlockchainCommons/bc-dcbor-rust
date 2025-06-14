@@ -644,8 +644,8 @@ impl PartialEq for CBOR {
     }
 }
 
-impl std::hash::Hash for CBOR {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+impl hash::Hash for CBOR {
+    fn hash<H: hash::Hasher>(&self, state: &mut H) {
         use CBORCase::*;
         match self.as_case() {
             Unsigned(x) => {
