@@ -1,3 +1,30 @@
+//! # Conveniences for CBOR Values
+//!
+//! This module provides convenience functions for working with CBOR
+//! (Concise Binary Object Representation) values. It extends the `CBOR`
+//! type with a set of methods for creating, converting, and inspecting
+//! various CBOR data types.
+//!
+//! The convenience functions are organized into several categories:
+//!
+//! * **Byte Strings** - Methods for working with CBOR byte strings (major
+//!   type 2)
+//! * **Tagged Values** - Methods for creating and extracting CBOR tagged
+//!   values (major type 6)
+//! * **Text Strings** - Methods for working with CBOR text strings (major
+//!   type 3)
+//! * **Arrays** - Methods for creating and manipulating CBOR arrays (major
+//!   type 4)
+//! * **Maps** - Methods for creating and manipulating CBOR maps (major
+//!   type 5)
+//! * **Simple Values** - Methods for working with CBOR simple values like
+//!   `true`, `false`, `null`
+//! * **Numeric Values** - Methods for working with CBOR numeric types
+//!
+//! These methods make it easier to work with CBOR values in a type-safe
+//! manner, providing clearer error messages and more intuitive conversions
+//! between Rust and CBOR types.
+
 use crate::{CBOR, CBORCase, Error, Map, Result, Simple, tag::Tag};
 
 /// Conveniences for byte strings.
@@ -83,18 +110,103 @@ impl CBOR {
         }
     }
 
+    /// Checks if a CBOR value is a byte string (major type 2).
+    ///
+    /// # Arguments
+    ///
+    /// * `cbor` - A reference to a CBOR value
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the value is a byte string
+    /// * `false` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let bytes = CBOR::to_byte_string(vec![1, 2, 3]);
+    /// assert!(CBOR::is_byte_string(&bytes));
+    ///
+    /// let text: CBOR = "hello".into();
+    /// assert!(!CBOR::is_byte_string(&text));
+    /// ```
     pub fn is_byte_string(cbor: &Self) -> bool {
         matches!(cbor.as_case(), CBORCase::ByteString(_))
     }
 
+    /// Attempts to convert the CBOR value into a byte string.
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Vec<u8>)` if the value is a byte string
+    /// * `None` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// // Create a CBOR byte string
+    /// let cbor = CBOR::to_byte_string(vec![1, 2, 3]);
+    /// assert_eq!(cbor.into_byte_string(), Some(vec![1, 2, 3]));
+    ///
+    /// // This will return None since the value is a text string, not a byte string
+    /// let text: CBOR = "hello".into();
+    /// assert_eq!(text.into_byte_string(), None);
+    /// ```
     pub fn into_byte_string(self) -> Option<Vec<u8>> {
         self.try_into_byte_string().ok()
     }
 
+    /// Tries to convert a reference to a CBOR value into a byte string.
+    ///
+    /// # Arguments
+    ///
+    /// * `cbor` - A reference to a CBOR value
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(Vec<u8>)` if the value is a byte string
+    /// * `Err(Error::WrongType)` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let cbor = CBOR::to_byte_string(vec![1, 2, 3]);
+    /// let bytes = CBOR::try_byte_string(&cbor).unwrap();
+    /// assert_eq!(bytes, vec![1, 2, 3]);
+    /// ```
     pub fn try_byte_string(cbor: &Self) -> Result<Vec<u8>> {
         cbor.clone().try_into_byte_string()
     }
 
+    /// Gets a reference to the byte string data if the CBOR value is a byte
+    /// string.
+    ///
+    /// # Arguments
+    ///
+    /// * `cbor` - A reference to a CBOR value
+    ///
+    /// # Returns
+    ///
+    /// * `Some(&[u8])` - A reference to the byte string data if the value is a
+    ///   byte string
+    /// * `None` - If the value is not a byte string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let bytes = vec![1, 2, 3];
+    /// let cbor = CBOR::to_byte_string(&bytes);
+    /// let byte_string_ref = CBOR::as_byte_string(&cbor).unwrap();
+    /// assert_eq!(byte_string_ref, &[1, 2, 3]);
+    /// ```
     pub fn as_byte_string(cbor: &Self) -> Option<&[u8]> {
         match cbor.as_case() {
             CBORCase::ByteString(b) => Some(b),
@@ -157,6 +269,29 @@ impl CBOR {
         matches!(cbor.as_case(), CBORCase::Tagged(_, _))
     }
 
+    /// Gets references to the tag and the tagged value if the CBOR value is a
+    /// tagged value.
+    ///
+    /// # Arguments
+    ///
+    /// * `cbor` - A reference to a CBOR value
+    ///
+    /// # Returns
+    ///
+    /// * `Some((&Tag, &CBOR))` - References to the tag and the tagged value if
+    ///   the CBOR value is a tagged value
+    /// * `None` - If the value is not a tagged value
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let tagged = CBOR::to_tagged_value(42, "hello");
+    /// let (tag, value) = CBOR::as_tagged_value(&tagged).unwrap();
+    /// assert_eq!(tag.value(), 42);
+    /// assert_eq!(value.diagnostic(), "\"hello\"");
+    /// ```
     pub fn as_tagged_value(cbor: &Self) -> Option<(&Tag, &CBOR)> {
         match cbor.as_case() {
             CBORCase::Tagged(tag, value) => Some((tag, value)),
@@ -164,6 +299,29 @@ impl CBOR {
         }
     }
 
+    /// Tries to convert a reference to a CBOR value into a tagged value.
+    ///
+    /// # Arguments
+    ///
+    /// * `cbor` - A reference to a CBOR value
+    ///
+    /// # Returns
+    ///
+    /// * `Ok((Tag, CBOR))` - The tag and the tagged value if the CBOR value is
+    ///   a tagged value
+    /// * `Err(Error::WrongType)` - If the value is not a tagged value
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let tagged = CBOR::to_tagged_value(42, "hello");
+    /// let (tag, value) = CBOR::try_tagged_value(&tagged).unwrap();
+    /// assert_eq!(tag.value(), 42);
+    /// let s: String = value.try_into().unwrap();
+    /// assert_eq!(s, "hello");
+    /// ```
     pub fn try_tagged_value(cbor: &Self) -> Result<(Tag, CBOR)> {
         cbor.clone().try_into_tagged_value()
     }
@@ -185,6 +343,38 @@ impl CBOR {
         }
     }
 
+    /// Tries to extract a CBOR value that is tagged with an expected tag from a
+    /// reference.
+    ///
+    /// # Arguments
+    ///
+    /// * `cbor` - A reference to a CBOR value
+    /// * `expected_tag` - The tag value that is expected
+    ///
+    /// # Returns
+    ///
+    /// * `Ok(CBOR)` - The tagged value if the CBOR value is tagged with the
+    ///   expected tag
+    /// * `Err(Error::WrongType)` - If the value is not a tagged value
+    /// * `Err(Error::WrongTag)` - If the value is tagged but with a different
+    ///   tag
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let tagged = CBOR::to_tagged_value(42, "hello");
+    ///
+    /// // This will succeed because the tag matches
+    /// let value = CBOR::try_expected_tagged_value(&tagged, 42).unwrap();
+    /// let s: String = value.try_into().unwrap();
+    /// assert_eq!(s, "hello");
+    ///
+    /// // This will fail because the tag doesn't match
+    /// let result = CBOR::try_expected_tagged_value(&tagged, 43);
+    /// assert!(result.is_err());
+    /// ```
     pub fn try_expected_tagged_value(
         cbor: &Self,
         expected_tag: impl Into<Tag>,
@@ -338,10 +528,44 @@ impl CBOR {
 
 /// Conveniences for simple values.
 impl CBOR {
-    /// The CBOR simple value representing `null` (`None`).
+    /// Creates a CBOR value representing `null`.
+    ///
+    /// This is equivalent to the CBOR simple value `null` (major type 7, simple
+    /// value 22).
+    ///
+    /// # Returns
+    ///
+    /// A CBOR value representing `null`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let null_value = CBOR::null();
+    /// assert!(null_value.is_null());
+    /// assert_eq!(null_value.diagnostic(), "null");
+    /// ```
     pub fn null() -> Self { CBORCase::Simple(Simple::Null).into() }
 
-    /// Check if the CBOR value is null.
+    /// Checks if the CBOR value is `null`.
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the value is the CBOR simple value `null`
+    /// * `false` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let null_value = CBOR::null();
+    /// assert!(null_value.is_null());
+    ///
+    /// let other_value: CBOR = 42u64.into();
+    /// assert!(!other_value.is_null());
+    /// ```
     pub fn is_null(&self) -> bool {
         matches!(self.as_case(), CBORCase::Simple(Simple::Null))
     }
@@ -349,7 +573,35 @@ impl CBOR {
 
 /// Conveniences for numeric values.
 impl CBOR {
-    /// Check if the CBOR value is a number.
+    /// Checks if the CBOR value represents a number.
+    ///
+    /// A CBOR value is considered to be a number if it is:
+    /// - An unsigned integer (major type 0)
+    /// - A negative integer (major type 1)
+    /// - A floating-point value (major type 7, simple values 25, 26, or 27)
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the value represents a number
+    /// * `false` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::{CBORCase, Simple, prelude::*};
+    ///
+    /// let unsigned: CBOR = 42u64.into();
+    /// assert!(unsigned.is_number());
+    ///
+    /// let negative: CBOR = (-42i64).into();
+    /// assert!(negative.is_number());
+    ///
+    /// let float: CBOR = CBORCase::Simple(Simple::Float(3.14)).into();
+    /// assert!(float.is_number());
+    ///
+    /// let text: CBOR = "not a number".into();
+    /// assert!(!text.is_number());
+    /// ```
     pub fn is_number(&self) -> bool {
         match self.as_case() {
             CBORCase::Unsigned(_) | CBORCase::Negative(_) => true,
@@ -358,7 +610,24 @@ impl CBOR {
         }
     }
 
-    /// Check if the CBOR value is the NaN (Not a Number) representation.
+    /// Checks if the CBOR value represents the NaN (Not a Number) value.
+    ///
+    /// # Returns
+    ///
+    /// * `true` if the value is the CBOR representation of NaN
+    /// * `false` otherwise
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::{CBORCase, Simple, prelude::*};
+    ///
+    /// let nan_value = CBOR::nan();
+    /// assert!(nan_value.is_nan());
+    ///
+    /// let float: CBOR = CBORCase::Simple(Simple::Float(3.14)).into();
+    /// assert!(!float.is_nan());
+    /// ```
     pub fn is_nan(&self) -> bool {
         match self.as_case() {
             CBORCase::Simple(s) => s.is_nan(),
@@ -366,6 +635,19 @@ impl CBOR {
         }
     }
 
-    /// The CBOR simple value representing `NaN` (Not a Number).
+    /// Creates a CBOR value representing NaN (Not a Number).
+    ///
+    /// # Returns
+    ///
+    /// A CBOR value representing NaN.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use dcbor::prelude::*;
+    ///
+    /// let nan_value = CBOR::nan();
+    /// assert!(nan_value.is_nan());
+    /// ```
     pub fn nan() -> Self { CBORCase::Simple(Simple::Float(f64::NAN)).into() }
 }
