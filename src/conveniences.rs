@@ -128,8 +128,8 @@ impl CBOR {
     /// let text: CBOR = "hello".into();
     /// assert!(!CBOR::is_byte_string(&text));
     /// ```
-    pub fn is_byte_string(cbor: &Self) -> bool {
-        matches!(cbor.as_case(), CBORCase::ByteString(_))
+    pub fn is_byte_string(&self) -> bool {
+        matches!(self.as_case(), CBORCase::ByteString(_))
     }
 
     /// Attempts to convert the CBOR value into a byte string.
@@ -176,35 +176,12 @@ impl CBOR {
     /// let bytes = CBOR::try_byte_string(&cbor).unwrap();
     /// assert_eq!(bytes, vec![1, 2, 3]);
     /// ```
-    pub fn try_byte_string(cbor: &Self) -> Result<Vec<u8>> {
-        cbor.clone().try_into_byte_string()
+    pub fn try_byte_string(&self) -> Result<Vec<u8>> {
+        self.clone().try_into_byte_string()
     }
 
-    /// Gets a reference to the byte string data if the CBOR value is a byte
-    /// string.
-    ///
-    /// # Arguments
-    ///
-    /// * `cbor` - A reference to a CBOR value
-    ///
-    /// # Returns
-    ///
-    /// * `Some(&[u8])` - A reference to the byte string data if the value is a
-    ///   byte string
-    /// * `None` - If the value is not a byte string
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use dcbor::prelude::*;
-    ///
-    /// let bytes = vec![1, 2, 3];
-    /// let cbor = CBOR::to_byte_string(&bytes);
-    /// let byte_string_ref = CBOR::as_byte_string(&cbor).unwrap();
-    /// assert_eq!(byte_string_ref, &[1, 2, 3]);
-    /// ```
-    pub fn as_byte_string(cbor: &Self) -> Option<&[u8]> {
-        match cbor.as_case() {
+    pub fn as_byte_string(&self) -> Option<&[u8]> {
+        match self.as_case() {
             CBORCase::ByteString(b) => Some(b),
             _ => None,
         }
@@ -261,35 +238,12 @@ impl CBOR {
         }
     }
 
-    pub fn is_tagged_value(cbor: &Self) -> bool {
-        matches!(cbor.as_case(), CBORCase::Tagged(_, _))
+    pub fn is_tagged_value(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Tagged(_, _))
     }
 
-    /// Gets references to the tag and the tagged value if the CBOR value is a
-    /// tagged value.
-    ///
-    /// # Arguments
-    ///
-    /// * `cbor` - A reference to a CBOR value
-    ///
-    /// # Returns
-    ///
-    /// * `Some((&Tag, &CBOR))` - References to the tag and the tagged value if
-    ///   the CBOR value is a tagged value
-    /// * `None` - If the value is not a tagged value
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use dcbor::prelude::*;
-    ///
-    /// let tagged = CBOR::to_tagged_value(42, "hello");
-    /// let (tag, value) = CBOR::as_tagged_value(&tagged).unwrap();
-    /// assert_eq!(tag.value(), 42);
-    /// assert_eq!(value.diagnostic(), "\"hello\"");
-    /// ```
-    pub fn as_tagged_value(cbor: &Self) -> Option<(&Tag, &CBOR)> {
-        match cbor.as_case() {
+    pub fn as_tagged_value(&self) -> Option<(&Tag, &CBOR)> {
+        match self.as_case() {
             CBORCase::Tagged(tag, value) => Some((tag, value)),
             _ => None,
         }
@@ -318,8 +272,8 @@ impl CBOR {
     /// let s: String = value.try_into().unwrap();
     /// assert_eq!(s, "hello");
     /// ```
-    pub fn try_tagged_value(cbor: &Self) -> Result<(Tag, CBOR)> {
-        cbor.clone().try_into_tagged_value()
+    pub fn try_tagged_value(&self) -> Result<(Tag, CBOR)> {
+        self.clone().try_into_tagged_value()
     }
 
     /// Extract the CBOR value as an expected tagged value.
@@ -372,10 +326,10 @@ impl CBOR {
     /// assert!(result.is_err());
     /// ```
     pub fn try_expected_tagged_value(
-        cbor: &Self,
+        &self,
         expected_tag: impl Into<Tag>,
     ) -> Result<CBOR> {
-        cbor.clone().try_into_expected_tagged_value(expected_tag)
+        self.clone().try_into_expected_tagged_value(expected_tag)
     }
 }
 
@@ -391,18 +345,18 @@ impl CBOR {
         }
     }
 
-    pub fn is_text(cbor: &Self) -> bool {
-        matches!(cbor.as_case(), CBORCase::Text(_))
+    pub fn is_text(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Text(_))
     }
 
-    pub fn try_text(cbor: &Self) -> Result<String> {
-        cbor.clone().try_into_text()
+    pub fn try_text(&self) -> Result<String> {
+        self.clone().try_into_text()
     }
 
     pub fn into_text(self) -> Option<String> { self.try_into_text().ok() }
 
-    pub fn as_text(cbor: &Self) -> Option<&str> {
-        match cbor.as_case() {
+    pub fn as_text(&self) -> Option<&str> {
+        match self.as_case() {
             CBORCase::Text(t) => Some(t),
             _ => None,
         }
@@ -421,18 +375,18 @@ impl CBOR {
         }
     }
 
-    pub fn is_array(cbor: &Self) -> bool {
-        matches!(cbor.as_case(), CBORCase::Array(_))
+    pub fn is_array(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Array(_))
     }
 
-    pub fn try_array(cbor: &Self) -> Result<Vec<CBOR>> {
-        cbor.clone().try_into_array()
+    pub fn try_array(&self) -> Result<Vec<CBOR>> {
+        self.clone().try_into_array()
     }
 
     pub fn into_array(self) -> Option<Vec<CBOR>> { self.try_into_array().ok() }
 
-    pub fn as_array(cbor: &Self) -> Option<&[CBOR]> {
-        match cbor.as_case() {
+    pub fn as_array(&self) -> Option<&[CBOR]> {
+        match self.as_case() {
             CBORCase::Array(a) => Some(a),
             _ => None,
         }
@@ -451,11 +405,11 @@ impl CBOR {
         }
     }
 
-    pub fn is_map(cbor: &Self) -> bool {
-        matches!(cbor.as_case(), CBORCase::Map(_))
+    pub fn is_map(&self) -> bool {
+        matches!(self.as_case(), CBORCase::Map(_))
     }
 
-    pub fn try_map(cbor: &Self) -> Result<Map> { cbor.clone().try_into_map() }
+    pub fn try_map(&self) -> Result<Map> { self.clone().try_into_map() }
 
     pub fn into_map(self) -> Option<Map> { self.try_into_map().ok() }
 
@@ -469,8 +423,8 @@ impl CBOR {
         }
     }
 
-    pub fn as_map(cbor: &Self) -> Option<&Map> {
-        match cbor.as_case() {
+    pub fn as_map(&self) -> Option<&Map> {
+        match self.as_case() {
             CBORCase::Map(m) => Some(m),
             _ => None,
         }
@@ -485,8 +439,8 @@ impl CBOR {
     /// The CBOR simple value representing `true`.
     pub fn r#true() -> Self { CBORCase::Simple(Simple::True).into() }
 
-    pub fn as_bool(cbor: &Self) -> Option<bool> {
-        match cbor.as_case() {
+    pub fn as_bool(&self) -> Option<bool> {
+        match self.as_case() {
             CBORCase::Simple(Simple::True) => Some(true),
             CBORCase::Simple(Simple::False) => Some(false),
             _ => None,
@@ -500,15 +454,15 @@ impl CBOR {
         }
     }
 
-    pub fn is_bool(cbor: &Self) -> bool {
+    pub fn is_bool(&self) -> bool {
         matches!(
-            cbor.as_case(),
+            self.as_case(),
             CBORCase::Simple(Simple::True | Simple::False)
         )
     }
 
-    pub fn try_bool(cbor: &Self) -> Result<bool> {
-        cbor.clone().try_into_bool()
+    pub fn try_bool(&self) -> Result<bool> {
+        self.clone().try_into_bool()
     }
 
     /// Check if the CBOR value is true.
