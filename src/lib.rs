@@ -151,6 +151,8 @@ use exact::ExactFrom;
 
 pub mod prelude;
 
+mod conveniences;
+
 // Re-export standard library types used in our public API
 #[doc(hidden)]
 pub use stdlib::public_exports::*;
