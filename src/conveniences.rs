@@ -7,16 +7,12 @@
 //!
 //! The convenience functions are organized into several categories:
 //!
-//! * **Byte Strings** - Methods for working with CBOR byte strings (major
-//!   type 2)
+//! * **Byte Strings** - Methods for working with CBOR byte strings
 //! * **Tagged Values** - Methods for creating and extracting CBOR tagged
-//!   values (major type 6)
-//! * **Text Strings** - Methods for working with CBOR text strings (major
-//!   type 3)
-//! * **Arrays** - Methods for creating and manipulating CBOR arrays (major
-//!   type 4)
-//! * **Maps** - Methods for creating and manipulating CBOR maps (major
-//!   type 5)
+//!   values
+//! * **Text Strings** - Methods for working with CBOR text strings
+//! * **Arrays** - Methods for creating and manipulating CBOR arrays
+//! * **Maps** - Methods for creating and manipulating CBOR maps
 //! * **Simple Values** - Methods for working with CBOR simple values like
 //!   `true`, `false`, `null`
 //! * **Numeric Values** - Methods for working with CBOR numeric types
@@ -31,7 +27,7 @@ use crate::{CBOR, CBORCase, Error, Map, Result, Simple, tag::Tag};
 impl CBOR {
     /// Creates a new CBOR value representing a byte string.
     ///
-    /// This method creates a CBOR byte string (major type 2) from any type that
+    /// This method creates a CBOR byte string from any type that
     /// can be referenced as a byte slice.
     ///
     /// # Arguments
@@ -110,7 +106,7 @@ impl CBOR {
         }
     }
 
-    /// Checks if a CBOR value is a byte string (major type 2).
+    /// Checks if a CBOR value is a byte string.
     ///
     /// # Arguments
     ///
@@ -219,7 +215,7 @@ impl CBOR {
 impl CBOR {
     /// Creates a new CBOR value representing a tagged value.
     ///
-    /// This method creates a CBOR tagged value (major type 6) by applying a tag
+    /// This method creates a CBOR tagged value by applying a tag
     /// to another CBOR value. Tags provide semantic information about how
     /// the tagged data should be interpreted.
     ///
@@ -530,8 +526,7 @@ impl CBOR {
 impl CBOR {
     /// Creates a CBOR value representing `null`.
     ///
-    /// This is equivalent to the CBOR simple value `null` (major type 7, simple
-    /// value 22).
+    /// This is equivalent to the CBOR simple value `null`.
     ///
     /// # Returns
     ///
