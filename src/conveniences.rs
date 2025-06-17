@@ -21,6 +21,8 @@
 //! manner, providing clearer error messages and more intuitive conversions
 //! between Rust and CBOR types.
 
+import_stdlib!();
+
 use crate::{CBOR, CBORCase, Error, Map, Result, Simple, tag::Tag};
 
 /// Conveniences for byte strings.
