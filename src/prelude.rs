@@ -6,3 +6,6 @@ pub use crate::{
     TagValue, TagsStore, TagsStoreOpt, TagsStoreTrait, cbor_tag,
     const_cbor_tag, tags_for_values, with_tags, with_tags_mut,
 };
+
+// Re-export walk module types for convenience
+pub use crate::walk::{EdgeType, Visitor, WalkElement};

@@ -149,6 +149,8 @@ mod exact;
 mod varint;
 use exact::ExactFrom;
 
+pub mod walk;
+
 pub mod prelude;
 
 mod conveniences;
