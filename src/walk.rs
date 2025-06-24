@@ -168,11 +168,14 @@ impl EdgeType {
 ///
 /// The visitor returns a tuple containing:
 /// - The state to pass to child elements
-/// - A boolean indicating whether to stop traversal (true = stop, false =
-///   continue)
+/// - A boolean indicating whether to prevent descent into children of this
+///   element (true = don't visit children, false = continue normally)
 ///
-/// The visitor returns a state that will be passed to child elements.
-/// This enables accumulating state or passing context during traversal.
+/// The stop flag consistently means "don't visit the children of the current
+/// element". This enables depth-limited traversal by checking `level >=
+/// max_level`. For full walk abortion, the visitor can maintain its own abort
+/// flag and return `true` when the flag is set, causing the walk to unwind
+/// quickly.
 ///
 /// # Type Parameters
 ///

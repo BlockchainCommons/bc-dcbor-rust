@@ -4,8 +4,7 @@ pub use crate::{
     CBORTaggedDecodable, CBORTaggedEncodable, DiagFormatOpts,
     Error as CBORError, HexFormatOpts, Map, Result as CBORResult, Set, Tag,
     TagValue, TagsStore, TagsStoreOpt, TagsStoreTrait, cbor_tag,
-    const_cbor_tag, tags_for_values, with_tags, with_tags_mut,
+    const_cbor_tag, tags_for_values,
+    walk::{EdgeType, Visitor, WalkElement},
+    with_tags, with_tags_mut,
 };
-
-// Re-export walk module types for convenience
-pub use crate::walk::{EdgeType, Visitor, WalkElement};

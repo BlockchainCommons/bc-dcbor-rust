@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use dcbor::{prelude::*, walk::WalkElement};
+use dcbor::prelude::*;
 
 fn main() {
     // Create a map with various types
