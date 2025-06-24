@@ -46,6 +46,7 @@
 //! assert!(*count.borrow() > 0);
 //! ```
 
+import_stdlib!();
 use crate::{CBOR, CBORCase};
 
 /// Represents an element or element pair during CBOR tree traversal.
@@ -343,6 +344,7 @@ impl CBOR {
     }
 }
 
+#[cfg(feature = "std")]
 #[cfg(test)]
 mod tests {
     use std::cell::RefCell;

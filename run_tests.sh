@@ -23,12 +23,12 @@ test_additional_features() {
     cargo test --lib --bins --tests --benches --features "$features" > /dev/null
 }
 
-section "All Default Features and doctests"
-cargo test > /dev/null
+test_only_features "no_std"
+test_only_features "no_std,multithreaded"
 
 test_additional_features "multithreaded"
 test_additional_features "anyhow"
 test_additional_features "anyhow,multithreaded"
 
-test_only_features "no_std"
-test_only_features "no_std,multithreaded"
+section "All Default Features and doctests"
+cargo test > /dev/null
