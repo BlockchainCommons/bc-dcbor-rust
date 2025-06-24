@@ -138,7 +138,7 @@ pub trait CBORTaggedDecodable: TryFrom<CBOR> + CBORTagged {
         match cbor.into_case() {
             CBORCase::Tagged(tag, item) => {
                 let cbor_tags = Self::cbor_tags();
-                if cbor_tags.iter().any(|t| *t == tag) {
+                if cbor_tags.contains(&tag) {
                     Self::from_untagged_cbor(item)
                 } else {
                     Err(Error::WrongTag(cbor_tags[0].clone(), tag))
