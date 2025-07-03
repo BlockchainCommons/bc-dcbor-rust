@@ -1,6 +1,17 @@
 # Blockchain Commons Deterministic CBOR ("dCBOR") for Rust
 
-<!--Guidelines: https://github.com/BlockchainCommons/secure-template/wiki -->
+<!--Guidelines: https:| Wolf McNally      | Lead Researcher/Engineer | [@WolfMcNally](https://github.com/wolfmcnally)   | \<Wolf@WolfMcNally.com\>              | 9436 52EE 3844 1760 C3DC  3536 4B6C 2FCF 8947 80AE |
+
+## Version History
+
+### 0.22.0 - July 2, 2025
+- Added comprehensive CBOR tree traversal functionality with new walk module
+- Implemented visitor pattern for structured CBOR data inspection and transformation
+- Added extensive examples and test suite for walk operations
+- Enhanced API with walk-related exports in prelude
+- Minor documentation and formatting improvements
+
+## Responsible Disclosureithub.com/BlockchainCommons/secure-template/wiki -->
 
 ### _by Wolf McNally_
 
@@ -29,7 +40,7 @@ This deterministic approach ensures that semantically equivalent data items are 
 
 ```toml
 [dependencies]
-dcbor = "0.21.1"
+dcbor = "0.22.0"
 ```
 
 ## Related Projects
