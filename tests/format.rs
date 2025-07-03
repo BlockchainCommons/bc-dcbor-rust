@@ -427,7 +427,7 @@ fn format_date() {
     dcbor::register_tags();
     #[rustfmt::skip]
     run("format_date_negative",
-        dcbor::Date::from_timestamp(-100.0).into(),
+        Date::from_timestamp(-100.0).into(),
         "date(-100)",
         "tagged(date, negative(-100))",
         "1(-100)",
@@ -443,7 +443,7 @@ fn format_date() {
 
     #[rustfmt::skip]
     run("format_date_positive",
-        dcbor::Date::from_timestamp(1647887071.0).into(),
+        Date::from_timestamp(1647887071.0).into(),
         "date(1647887071)",
         "tagged(date, unsigned(1647887071))",
         "1(1647887071)",
@@ -463,7 +463,7 @@ fn format_fractional_date() {
     dcbor::register_tags();
     #[rustfmt::skip]
     run("format_fractional_date",
-        dcbor::Date::from_timestamp(0.5).into(),
+        Date::from_timestamp(0.5).into(),
         "date(0.5)",
         "tagged(date, simple(0.5))",
         "1(0.5)",

@@ -1,7 +1,7 @@
 pub use crate::{
     ByteString, CBOR, CBORCase, CBORCodable, CBORDecodable, CBOREncodable,
     CBORSortable, CBORSummarizer, CBORTagged, CBORTaggedCodable,
-    CBORTaggedDecodable, CBORTaggedEncodable, DiagFormatOpts,
+    CBORTaggedDecodable, CBORTaggedEncodable, Date, DiagFormatOpts,
     Error as CBORError, HexFormatOpts, Map, Result as CBORResult, Set, Tag,
     TagValue, TagsStore, TagsStoreOpt, TagsStoreTrait, cbor_tag,
     const_cbor_tag, tags_for_values,

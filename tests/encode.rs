@@ -77,7 +77,7 @@ fn test_cbor_codable<T>(
     expected_data: &str,
 ) where
     T: TryFrom<CBOR> + Into<CBOR>,
-    <T as TryFrom<dcbor::CBOR>>::Error: std::fmt::Debug,
+    <T as TryFrom<CBOR>>::Error: std::fmt::Debug,
 {
     let cbor = t.into();
     assert_actual_expected!(format!("{:?}", cbor), expected_debug);
@@ -733,7 +733,7 @@ fn tag() {
 #[test]
 fn encode_date() {
     test_cbor_codable(
-        dcbor::Date::from_timestamp(1675854714.0),
+        Date::from_timestamp(1675854714.0),
         "tagged(1, unsigned(1675854714))",
         "1(1675854714)",
         "c11a63e3837a",
