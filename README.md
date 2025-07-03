@@ -1,15 +1,6 @@
 # Blockchain Commons Deterministic CBOR ("dCBOR") for Rust
 
-<!--Guidelines: https:| Wolf McNally      | Lead Researcher/Engineer | [@WolfMcNally](https://github.com/wolfmcnally)   | \<Wolf@WolfMcNally.com\>              | 9436 52EE 3844 1760 C3DC  3536 4B6C 2FCF 8947 80AE |
-
-## Version History
-
-### 0.22.0 - July 2, 2025
-- Added comprehensive CBOR tree traversal functionality with new walk module
-- Implemented visitor pattern for structured CBOR data inspection and transformation
-- Added extensive examples and test suite for walk operations
-- Enhanced API with walk-related exports in prelude
-- Minor documentation and formatting improvements
+<!--Guidelines: https://github.com/BlockchainCommons/secure-template/wiki -->
 
 ## Responsible Disclosureithub.com/BlockchainCommons/secure-template/wiki -->
 
@@ -56,6 +47,15 @@ dcbor = "0.22.0"
 We still welcome your feedback about the library. Let us know if the API meets your needs, if the functionality is easy to use, if the usage of Rust feels properly standardized, and if the library solves any problems you are encountering when doing this kind of coding. Comments can be posted [to the Gordian Developer Community](https://github.com/BlockchainCommons/Gordian-Developer-Community/discussions/116).
 
 See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
+
+## Version History
+
+### 0.22.0 - July 2, 2025
+- Added comprehensive CBOR tree traversal functionality with new walk module
+- Implemented visitor pattern for structured CBOR data inspection and transformation
+- Added extensive examples and test suite for walk operations
+- Enhanced API with walk-related exports in prelude
+- Minor documentation and formatting improvements
 
 ## Financial Support
 
