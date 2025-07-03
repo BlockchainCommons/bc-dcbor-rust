@@ -2,8 +2,6 @@
 
 <!--Guidelines: https://github.com/BlockchainCommons/secure-template/wiki -->
 
-## Responsible Disclosureithub.com/BlockchainCommons/secure-template/wiki -->
-
 ### _by Wolf McNally_
 
 ---
