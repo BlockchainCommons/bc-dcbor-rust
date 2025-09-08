@@ -52,7 +52,7 @@ pub(crate) mod without_std {
 
     pub(crate) use hashbrown::{HashMap, HashSet};
     pub(crate) use spin::{Mutex, MutexGuard, Once};
-    pub(crate) use thiserror_no_std::Error as ThisError;
+    pub(crate) use thiserror::Error as ThisError;
 }
 
 // Re-export items that are needed in the public API

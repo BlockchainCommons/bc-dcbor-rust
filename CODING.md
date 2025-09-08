@@ -27,7 +27,6 @@ cargo doc --no-deps --target-dir cargo-docs
 ### Development Guidelines
 
 - **Production quality** - Write code as you would for a real-world implementation
-- **Proper error handling** - Use `Result<T>` with `anyhow::Context` for all functions that can fail
 - **Clean code** - Fix all compiler errors and Clippy lints
 
 ### Testing

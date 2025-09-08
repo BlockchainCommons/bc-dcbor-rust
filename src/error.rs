@@ -165,9 +165,3 @@ impl From<String> for Error {
 }
 
 pub type Result<T> = StdResult<T, Error>;
-
-#[cfg(feature = "anyhow")]
-impl From<anyhow::Error> for Error {
-    /// Converts an `anyhow::Error` into a `CBORError::Custom` variant.
-    fn from(error: anyhow::Error) -> Self { Error::msg(error.to_string()) }
-}

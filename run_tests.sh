@@ -27,8 +27,6 @@ test_only_features "no_std"
 test_only_features "no_std,multithreaded"
 
 test_additional_features "multithreaded"
-test_additional_features "anyhow"
-test_additional_features "anyhow,multithreaded"
 
 section "All Default Features and doctests"
 cargo test > /dev/null
