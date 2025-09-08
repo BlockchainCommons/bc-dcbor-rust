@@ -1,4 +1,7 @@
-use dcbor::{prelude::*, walk::{EdgeType, WalkElement}};
+use dcbor::{
+    prelude::*,
+    walk::{EdgeType, WalkElement},
+};
 
 fn main() {
     // Test with various CBOR structures to show diagnostic_flat works during

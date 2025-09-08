@@ -1,6 +1,9 @@
-use dcbor::prelude::*;
-use dcbor::walk::{EdgeType, WalkElement};
 use std::cell::RefCell;
+
+use dcbor::{
+    prelude::*,
+    walk::{EdgeType, WalkElement},
+};
 
 fn main() {
     // Create a complex CBOR structure
@@ -16,11 +19,18 @@ fn main() {
 
     let cbor = CBOR::from(map);
 
-    println!("CBOR structure (flat diagnostic): {}", cbor.diagnostic_flat());
+    println!(
+        "CBOR structure (flat diagnostic): {}",
+        cbor.diagnostic_flat()
+    );
     println!("\nWalking the CBOR tree:");
 
     // Walk the structure and print each element
-    let visitor = |element: &WalkElement, level: usize, edge: EdgeType, _state: ()| -> ((), bool) {
+    let visitor = |element: &WalkElement,
+                   level: usize,
+                   edge: EdgeType,
+                   _state: ()|
+     -> ((), bool) {
         let indent = "  ".repeat(level);
         let edge_label = edge.label().unwrap_or_else(|| "root".to_string());
 
@@ -52,20 +62,24 @@ fn main() {
         key_value_pairs: 0,
     });
 
-    let counter_visitor = |element: &WalkElement, _level: usize, _edge: EdgeType, mut state: Counter| -> (Counter, bool) {
+    let counter_visitor = |element: &WalkElement,
+                           _level: usize,
+                           _edge: EdgeType,
+                           mut state: Counter|
+     -> (Counter, bool) {
         state.total += 1;
 
         match element {
             WalkElement::KeyValue { .. } => state.key_value_pairs += 1,
-            WalkElement::Single(cbor_elem) => {
-                match cbor_elem.as_case() {
-                    CBORCase::Map(_) => state.maps += 1,
-                    CBORCase::Array(_) => state.arrays += 1,
-                    CBORCase::Text(_) => state.strings += 1,
-                    CBORCase::Unsigned(_) | CBORCase::Negative(_) => state.numbers += 1,
-                    _ => {}
+            WalkElement::Single(cbor_elem) => match cbor_elem.as_case() {
+                CBORCase::Map(_) => state.maps += 1,
+                CBORCase::Array(_) => state.arrays += 1,
+                CBORCase::Text(_) => state.strings += 1,
+                CBORCase::Unsigned(_) | CBORCase::Negative(_) => {
+                    state.numbers += 1
                 }
-            }
+                _ => {}
+            },
         }
 
         // Store the state for final reporting
@@ -74,14 +88,17 @@ fn main() {
         (state, false)
     };
 
-    cbor.walk(Counter {
-        total: 0,
-        maps: 0,
-        arrays: 0,
-        strings: 0,
-        numbers: 0,
-        key_value_pairs: 0,
-    }, &counter_visitor);
+    cbor.walk(
+        Counter {
+            total: 0,
+            maps: 0,
+            arrays: 0,
+            strings: 0,
+            numbers: 0,
+            key_value_pairs: 0,
+        },
+        &counter_visitor,
+    );
 
     let counts = final_count.borrow();
     println!("Total elements: {}", counts.total);

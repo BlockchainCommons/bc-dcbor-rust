@@ -1,5 +1,9 @@
 use std::cell::RefCell;
-use dcbor::{prelude::*, walk::{EdgeType, WalkElement}};
+
+use dcbor::{
+    prelude::*,
+    walk::{EdgeType, WalkElement},
+};
 
 fn main() {
     let mut map = Map::new();
@@ -11,12 +15,19 @@ fn main() {
     let visit_log = RefCell::new(Vec::<String>::new());
     let should_abort = RefCell::new(false);
 
-    let visitor = |element: &WalkElement, level: usize, edge: EdgeType, state: ()| -> ((), bool) {
-        let desc = format!("L{} [{:?}] {}", level, edge, element.diagnostic_flat());
+    let visitor = |element: &WalkElement,
+                   level: usize,
+                   edge: EdgeType,
+                   state: ()|
+     -> ((), bool) {
+        let desc =
+            format!("L{} [{:?}] {}", level, edge, element.diagnostic_flat());
 
         // If we're already aborting, still log but return true to stop descent
         if *should_abort.borrow() {
-            visit_log.borrow_mut().push(format!("ABORT_STATE: {}", desc));
+            visit_log
+                .borrow_mut()
+                .push(format!("ABORT_STATE: {}", desc));
             return (state, true);
         }
 
@@ -44,5 +55,8 @@ fn main() {
 
     let log_str = log.join(" | ");
     println!("\nFull log: {}", log_str);
-    println!("Contains 'should_not_see': {}", log_str.contains("should_not_see"));
+    println!(
+        "Contains 'should_not_see': {}",
+        log_str.contains("should_not_see")
+    );
 }

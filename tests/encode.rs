@@ -330,12 +330,7 @@ fn test_normalized_string() {
 
 #[test]
 fn encode_array() {
-    test_cbor(
-    Vec::<CBOR>::new(),
-        "array([])",
-        "[]",
-        "80",
-    );
+    test_cbor(Vec::<CBOR>::new(), "array([])", "[]", "80");
     test_cbor(
         vec![1, 2, 3],
         "array([unsigned(1), unsigned(2), unsigned(3)])",
@@ -381,12 +376,7 @@ fn encode_heterogenous_array() {
 #[test]
 fn encode_map() {
     let mut m = Map::new();
-    test_cbor(
-        &m,
-        r#"map({})"#,
-        r#"{}"#,
-        "a0",
-    );
+    test_cbor(&m, r#"map({})"#, r#"{}"#, "a0");
 
     m.insert(-1, 3);
     m.insert(vec![-1], 7);

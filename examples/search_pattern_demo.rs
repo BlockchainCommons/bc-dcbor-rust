@@ -1,7 +1,9 @@
 use std::cell::RefCell;
 
-use dcbor::prelude::*;
-use dcbor::walk::{EdgeType, WalkElement};
+use dcbor::{
+    prelude::*,
+    walk::{EdgeType, WalkElement},
+};
 
 fn main() {
     // Create a complex CBOR structure similar to what SearchPattern might
@@ -94,7 +96,8 @@ fn main() {
     }
     println!();
 
-    // Example 3: Search for specific patterns (with the new WalkElement API, this is much easier!)
+    // Example 3: Search for specific patterns (with the new WalkElement API,
+    // this is much easier!)
     println!("=== Searching for specific key-value patterns ===");
     let matches = RefCell::new(Vec::new());
 
@@ -103,19 +106,23 @@ fn main() {
                             _edge: EdgeType,
                             _state: ()|
      -> ((), bool) {
-        // The new WalkElement API makes key-value pattern matching much more ergonomic!
+        // The new WalkElement API makes key-value pattern matching much more
+        // ergonomic!
         if let Some((key, value)) = element.as_key_value() {
             if let CBORCase::Text(key_str) = key.as_case() {
-                if key_str == "email" && matches!(value.as_case(), CBORCase::Text(_)) {
+                if key_str == "email"
+                    && matches!(value.as_case(), CBORCase::Text(_))
+                {
                     matches.borrow_mut().push(format!(
                         "Found email: {}",
                         value.diagnostic_flat()
                     ));
-                } else if key_str == "id" && matches!(value.as_case(), CBORCase::Unsigned(_)) {
-                    matches.borrow_mut().push(format!(
-                        "Found ID: {}",
-                        value.diagnostic_flat()
-                    ));
+                } else if key_str == "id"
+                    && matches!(value.as_case(), CBORCase::Unsigned(_))
+                {
+                    matches
+                        .borrow_mut()
+                        .push(format!("Found ID: {}", value.diagnostic_flat()));
                 }
             }
         }

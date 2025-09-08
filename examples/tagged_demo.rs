@@ -1,5 +1,4 @@
-use dcbor::prelude::*;
-use dcbor::walk::WalkElement;
+use dcbor::{prelude::*, walk::WalkElement};
 
 fn main() {
     // Create a tagged value with nested content
@@ -9,7 +8,7 @@ fn main() {
 
     let tagged_cbor = CBOR::from(CBORCase::Tagged(
         Tag::from(100u64),
-        CBOR::from(inner_map.clone())
+        CBOR::from(inner_map.clone()),
     ));
 
     println!("Tagged CBOR: {}", tagged_cbor.diagnostic());
@@ -19,11 +18,23 @@ fn main() {
         let indent = "  ".repeat(depth);
         match element {
             WalkElement::Single(cbor) => {
-                println!("{}{}[{:?}] {}", indent, count, edge, cbor.diagnostic_flat());
+                println!(
+                    "{}{}[{:?}] {}",
+                    indent,
+                    count,
+                    edge,
+                    cbor.diagnostic_flat()
+                );
             }
             WalkElement::KeyValue { key, value } => {
-                println!("{}{}[{:?}] {}: {}", indent, count, edge,
-                    key.diagnostic_flat(), value.diagnostic_flat());
+                println!(
+                    "{}{}[{:?}] {}: {}",
+                    indent,
+                    count,
+                    edge,
+                    key.diagnostic_flat(),
+                    value.diagnostic_flat()
+                );
             }
         }
         (count + 1, false)
@@ -34,11 +45,23 @@ fn main() {
         let indent = "  ".repeat(depth);
         match element {
             WalkElement::Single(cbor) => {
-                println!("{}{}[{:?}] {}", indent, count, edge, cbor.diagnostic_flat());
+                println!(
+                    "{}{}[{:?}] {}",
+                    indent,
+                    count,
+                    edge,
+                    cbor.diagnostic_flat()
+                );
             }
             WalkElement::KeyValue { key, value } => {
-                println!("{}{}[{:?}] {}: {}", indent, count, edge,
-                    key.diagnostic_flat(), value.diagnostic_flat());
+                println!(
+                    "{}{}[{:?}] {}: {}",
+                    indent,
+                    count,
+                    edge,
+                    key.diagnostic_flat(),
+                    value.diagnostic_flat()
+                );
             }
         }
         (count + 1, false)

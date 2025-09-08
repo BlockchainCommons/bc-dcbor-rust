@@ -1,9 +1,6 @@
 use std::cell::RefCell;
 
-use dcbor::{
-    prelude::*,
-    walk::WalkElement,
-};
+use dcbor::{prelude::*, walk::WalkElement};
 
 fn main() {
     println!("=== Testing stop flag behavior ===\n");

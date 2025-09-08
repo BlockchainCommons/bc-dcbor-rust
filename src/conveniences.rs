@@ -8,8 +8,7 @@
 //! The convenience functions are organized into several categories:
 //!
 //! * **Byte Strings** - Methods for working with CBOR byte strings
-//! * **Tagged Values** - Methods for creating and extracting CBOR tagged
-//!   values
+//! * **Tagged Values** - Methods for creating and extracting CBOR tagged values
 //! * **Text Strings** - Methods for working with CBOR text strings
 //! * **Arrays** - Methods for creating and manipulating CBOR arrays
 //! * **Maps** - Methods for creating and manipulating CBOR maps
@@ -351,9 +350,7 @@ impl CBOR {
         matches!(self.as_case(), CBORCase::Text(_))
     }
 
-    pub fn try_text(&self) -> Result<String> {
-        self.clone().try_into_text()
-    }
+    pub fn try_text(&self) -> Result<String> { self.clone().try_into_text() }
 
     pub fn into_text(self) -> Option<String> { self.try_into_text().ok() }
 
@@ -407,9 +404,7 @@ impl CBOR {
         }
     }
 
-    pub fn is_map(&self) -> bool {
-        matches!(self.as_case(), CBORCase::Map(_))
-    }
+    pub fn is_map(&self) -> bool { matches!(self.as_case(), CBORCase::Map(_)) }
 
     pub fn try_map(&self) -> Result<Map> { self.clone().try_into_map() }
 
@@ -463,9 +458,7 @@ impl CBOR {
         )
     }
 
-    pub fn try_bool(&self) -> Result<bool> {
-        self.clone().try_into_bool()
-    }
+    pub fn try_bool(&self) -> Result<bool> { self.clone().try_into_bool() }
 
     /// Check if the CBOR value is true.
     pub fn is_true(&self) -> bool {

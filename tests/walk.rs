@@ -152,8 +152,8 @@ fn test_early_termination() {
                                                     * will be visited */
         CBOR::from("abort_marker"), // This will set stop flag
         CBOR::from(vec!["should", "not", "see"]), /* This array will be
-                                                   * visited but not its
-                                                   * children */
+                                     * visited but not its
+                                     * children */
     ]);
 
     let visit_log = RefCell::new(Vec::<String>::new());

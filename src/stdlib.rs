@@ -32,14 +32,13 @@ pub(crate) mod without_std {
     extern crate alloc;
 
     // pub(crate) use alloc::rc; // Unused import
-    pub(crate) use alloc::str;
     pub(crate) use alloc::{
         borrow::ToOwned,
         boxed::Box,
         collections::{
             BTreeMap, BTreeSet, VecDeque, btree_map::Values as BTreeMapValues,
         },
-        fmt, format,
+        fmt, format, str,
         string::{String, ToString},
         sync::Arc,
         vec,
