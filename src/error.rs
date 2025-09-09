@@ -1,7 +1,6 @@
 import_stdlib!();
 
 use core::str::Utf8Error;
-
 use crate::tag::Tag;
 
 /// A comprehensive set of errors that can occur during CBOR encoding and
