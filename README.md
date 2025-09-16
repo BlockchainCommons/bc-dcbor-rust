@@ -29,7 +29,7 @@ This deterministic approach ensures that semantically equivalent data items are 
 
 ```toml
 [dependencies]
-dcbor = "0.22.0"
+dcbor = "0.23.0"
 ```
 
 ## Related Projects
@@ -47,6 +47,12 @@ We still welcome your feedback about the library. Let us know if the API meets y
 See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
 
 ## Version History
+
+### 0.23.0 - September 16, 2025
+- Remove dependency on anyhow library
+- Migrate thiserror from v1 to v2
+- Code formatting improvements
+- Improve tests
 
 ### 0.22.0 - July 2, 2025
 - Added comprehensive CBOR tree traversal functionality with new walk module
