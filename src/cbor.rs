@@ -34,9 +34,22 @@ use crate::{
 ///
 /// - **Deterministic encoding**: Guarantees that semantically equivalent data
 ///   structures will always be encoded to identical byte sequences
-/// - **Reference counting**: Enables efficient sharing of CBOR structures
+///
+/// - **Immutability**: `CBOR` is immutable. Operations that appear to
+///   "modify" a `CBOR` value actually create a new value.
+///
+/// - **O(1) Cloning**: `CBOR` uses reference counting (`Rc` or `Arc` when the
+///   `multithreaded` feature is enabled) and structure sharing to enable
+///   efficient O(1) cloning of a `CBOR` or recursively, any `CBOR`s it
+///   contains. Cloning a `CBOR` simply increments the reference count, allowing
+///   multiple owners without duplicating the underlying data.
+///
+/// - **Reference counting**: Enables efficient sharing of CBOR structures using
+///   `Rc` or `Arc` when the `multithreaded` feature is enabled
+///
 /// - **Type safety**: Uses Rust's type system to safely handle different CBOR
 ///   data types
+///
 /// - **Conversion traits**: Implements Rust's standard conversion traits for
 ///   ergonomic use
 ///
