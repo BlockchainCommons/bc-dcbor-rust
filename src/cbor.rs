@@ -35,8 +35,8 @@ use crate::{
 /// - **Deterministic encoding**: Guarantees that semantically equivalent data
 ///   structures will always be encoded to identical byte sequences
 ///
-/// - **Immutability**: `CBOR` is immutable. Operations that appear to
-///   "modify" a `CBOR` value actually create a new value.
+/// - **Immutability**: `CBOR` is immutable. Operations that appear to "modify"
+///   a `CBOR` value actually create a new value.
 ///
 /// - **O(1) Cloning**: `CBOR` uses reference counting (`Rc` or `Arc` when the
 ///   `multithreaded` feature is enabled) and structure sharing to enable

@@ -25,14 +25,13 @@ fn main() {
         visit_log.borrow_mut().push(desc);
 
         // Check if this is our abort marker
-        if let WalkElement::Single(cbor) = element {
-            if let CBORCase::Text(text) = cbor.as_case() {
-                if text == "abort_marker" {
-                    *found_abort.borrow_mut() = true;
-                    println!("Found abort marker!");
-                    return (state, true);
-                }
-            }
+        if let WalkElement::Single(cbor) = element
+            && let CBORCase::Text(text) = cbor.as_case()
+            && text == "abort_marker"
+        {
+            *found_abort.borrow_mut() = true;
+            println!("Found abort marker!");
+            return (state, true);
         }
 
         // If we've seen the abort marker and this is an array at level 1, stop

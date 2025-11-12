@@ -127,10 +127,10 @@ fn test_visitor_state_threading() {
      -> ((), bool) {
         match element {
             WalkElement::Single(cbor) => {
-                if let CBORCase::Unsigned(n) = cbor.as_case() {
-                    if n % 2 == 0 {
-                        *even_count.borrow_mut() += 1;
-                    }
+                if let CBORCase::Unsigned(n) = cbor.as_case()
+                    && n % 2 == 0
+                {
+                    *even_count.borrow_mut() += 1;
                 }
             }
             WalkElement::KeyValue { .. } => {}
@@ -169,16 +169,15 @@ fn test_early_termination() {
         visit_log.borrow_mut().push(desc);
 
         // Check if this is our abort marker
-        if let WalkElement::Single(cbor) = element {
-            if let CBORCase::Text(text) = cbor.as_case() {
-                if text == "abort_marker" {
-                    *found_abort.borrow_mut() = true;
-                    // Return stop=true to prevent descent into this element's
-                    // children (though strings don't have
-                    // children anyway)
-                    return (state, true);
-                }
-            }
+        if let WalkElement::Single(cbor) = element
+            && let CBORCase::Text(text) = cbor.as_case()
+            && text == "abort_marker"
+        {
+            *found_abort.borrow_mut() = true;
+            // Return stop=true to prevent descent into this element's
+            // children (though strings don't have
+            // children anyway)
+            return (state, true);
         }
 
         // If we've seen the abort marker and this is an array at level 1, stop

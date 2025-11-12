@@ -84,10 +84,10 @@ impl CBOR {
                 )];
                 if !d.is_empty() {
                     let mut note: Option<String> = None;
-                    if let Ok(a) = str::from_utf8(d) {
-                        if let Some(b) = sanitized(a) {
-                            note = Some(flanked(&b, "\"", "\""));
-                        }
+                    if let Ok(a) = str::from_utf8(d)
+                        && let Some(b) = sanitized(a)
+                    {
+                        note = Some(flanked(&b, "\"", "\""));
                     }
                     items.push(DumpItem::new(
                         level + 1,

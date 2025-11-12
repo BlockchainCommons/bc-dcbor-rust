@@ -476,11 +476,10 @@ mod tests {
                        _edge: EdgeType,
                        state: ()|
          -> ((), bool) {
-            if let Some((key, value)) = element.as_key_value() {
-                if let (CBORCase::Text(k), _) = (key.as_case(), value.as_case())
-                {
-                    key_value_pairs.borrow_mut().push(k.clone());
-                }
+            if let Some((key, value)) = element.as_key_value()
+                && let (CBORCase::Text(k), _) = (key.as_case(), value.as_case())
+            {
+                key_value_pairs.borrow_mut().push(k.clone());
             }
             (state, false)
         };

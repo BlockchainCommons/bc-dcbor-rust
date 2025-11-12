@@ -51,12 +51,11 @@ static CBOR_NAN: [u8; 3] = [0xf9, 0x7e, 0x00];
 impl From<f64> for CBOR {
     fn from(value: f64) -> Self {
         let n = value;
-        if n < 0.0f64 {
-            if let Some(n) = i128::exact_from_f64(n) {
-                if let Some(i) = u64::exact_from_i128(-1 - n) {
-                    return CBORCase::Negative(i).into();
-                }
-            }
+        if n < 0.0f64
+            && let Some(n) = i128::exact_from_f64(n)
+            && let Some(i) = u64::exact_from_i128(-1 - n)
+        {
+            return CBORCase::Negative(i).into();
         }
         if let Some(i) = u64::exact_from_f64(n) {
             return i.into();
@@ -71,13 +70,12 @@ pub(crate) fn f64_cbor_data(value: f64) -> Vec<u8> {
     if (f as f64) == n {
         return f32_cbor_data(f);
     }
-    if n < 0.0f64 {
-        if let Some(n) = i128::exact_from_f64(n) {
-            if let Some(i) = u64::exact_from_i128(-1 - n) {
-                let cbor: CBOR = CBORCase::Negative(i).into();
-                return cbor.to_cbor_data();
-            }
-        }
+    if n < 0.0f64
+        && let Some(n) = i128::exact_from_f64(n)
+        && let Some(i) = u64::exact_from_i128(-1 - n)
+    {
+        let cbor: CBOR = CBORCase::Negative(i).into();
+        return cbor.to_cbor_data();
     }
     if let Some(i) = u64::exact_from_f64(n) {
         return i.cbor_data();
@@ -123,10 +121,10 @@ impl TryFrom<CBOR> for f64 {
 impl From<f32> for CBOR {
     fn from(value: f32) -> Self {
         let n = value;
-        if n < 0.0f32 {
-            if let Some(i) = u64::exact_from_f32(-1f32 - n) {
-                return CBORCase::Negative(i).into();
-            }
+        if n < 0.0f32
+            && let Some(i) = u64::exact_from_f32(-1f32 - n)
+        {
+            return CBORCase::Negative(i).into();
         }
         if let Some(i) = u32::exact_from_f32(n) {
             return i.into();
@@ -141,11 +139,11 @@ pub(crate) fn f32_cbor_data(value: f32) -> Vec<u8> {
     if f.to_f32() == n {
         return f16_cbor_data(f);
     }
-    if n < 0.0f32 {
-        if let Some(i) = u64::exact_from_f32(-1f32 - n) {
-            let cbor: CBOR = CBORCase::Negative(i).into();
-            return cbor.to_cbor_data();
-        }
+    if n < 0.0f32
+        && let Some(i) = u64::exact_from_f32(-1f32 - n)
+    {
+        let cbor: CBOR = CBORCase::Negative(i).into();
+        return cbor.to_cbor_data();
     }
     if let Some(i) = u32::exact_from_f32(n) {
         return i.cbor_data();
@@ -197,10 +195,10 @@ impl TryFrom<CBOR> for f32 {
 impl From<f16> for CBOR {
     fn from(value: f16) -> Self {
         let n = value.to_f64();
-        if n < 0.0 {
-            if let Some(i) = u64::exact_from_f64(-1f64 - n) {
-                return CBORCase::Negative(i).into();
-            }
+        if n < 0.0
+            && let Some(i) = u64::exact_from_f64(-1f64 - n)
+        {
+            return CBORCase::Negative(i).into();
         }
         if let Some(i) = u16::exact_from_f64(n) {
             return i.into();
@@ -211,11 +209,11 @@ impl From<f16> for CBOR {
 
 pub(crate) fn f16_cbor_data(value: f16) -> Vec<u8> {
     let n = value.to_f64();
-    if n < 0.0 {
-        if let Some(i) = u64::exact_from_f64(-1f64 - n) {
-            let cbor: CBOR = CBORCase::Negative(i).into();
-            return cbor.to_cbor_data();
-        }
+    if n < 0.0
+        && let Some(i) = u64::exact_from_f64(-1f64 - n)
+    {
+        let cbor: CBOR = CBORCase::Negative(i).into();
+        return cbor.to_cbor_data();
     }
     if let Some(i) = u16::exact_from_f64(n) {
         return i.cbor_data();

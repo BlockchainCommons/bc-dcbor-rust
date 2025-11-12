@@ -16,10 +16,10 @@ fn main() {
     let texts = RefCell::new(Vec::new());
     cbor.walk((), &|element, _depth, _edge, state| {
         // Now we can collect ALL text nodes with a simple pattern match!
-        if let Some(cbor) = element.as_single() {
-            if let CBORCase::Text(s) = cbor.as_case() {
-                texts.borrow_mut().push(s.clone());
-            }
+        if let Some(cbor) = element.as_single()
+            && let CBORCase::Text(s) = cbor.as_case()
+        {
+            texts.borrow_mut().push(s.clone());
         }
         (state, false)
     });
@@ -30,12 +30,11 @@ fn main() {
     println!("\n=== Comparison: Key-value pairs are ALSO available ===");
     let kv_pairs = RefCell::new(Vec::new());
     cbor.walk((), &|element, _depth, _edge, state| {
-        if let Some((key, value)) = element.as_key_value() {
-            if let (CBORCase::Text(k), CBORCase::Text(v)) =
+        if let Some((key, value)) = element.as_key_value()
+            && let (CBORCase::Text(k), CBORCase::Text(v)) =
                 (key.as_case(), value.as_case())
-            {
-                kv_pairs.borrow_mut().push(format!("{} -> {}", k, v));
-            }
+        {
+            kv_pairs.borrow_mut().push(format!("{} -> {}", k, v));
         }
         (state, false)
     });

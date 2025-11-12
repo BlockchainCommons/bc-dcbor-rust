@@ -43,10 +43,10 @@ fn main() {
                          _edge: EdgeType,
                          _state: ()|
      -> ((), bool) {
-        if let Some(cbor_elem) = element.as_single() {
-            if let CBORCase::Text(s) = cbor_elem.as_case() {
-                string_values.borrow_mut().push(s.clone());
-            }
+        if let Some(cbor_elem) = element.as_single()
+            && let CBORCase::Text(s) = cbor_elem.as_case()
+        {
+            string_values.borrow_mut().push(s.clone());
         }
         ((), false) // Continue traversal
     };
@@ -108,22 +108,21 @@ fn main() {
      -> ((), bool) {
         // The new WalkElement API makes key-value pattern matching much more
         // ergonomic!
-        if let Some((key, value)) = element.as_key_value() {
-            if let CBORCase::Text(key_str) = key.as_case() {
-                if key_str == "email"
-                    && matches!(value.as_case(), CBORCase::Text(_))
-                {
-                    matches.borrow_mut().push(format!(
-                        "Found email: {}",
-                        value.diagnostic_flat()
-                    ));
-                } else if key_str == "id"
-                    && matches!(value.as_case(), CBORCase::Unsigned(_))
-                {
-                    matches
-                        .borrow_mut()
-                        .push(format!("Found ID: {}", value.diagnostic_flat()));
-                }
+        if let Some((key, value)) = element.as_key_value()
+            && let CBORCase::Text(key_str) = key.as_case()
+        {
+            if key_str == "email"
+                && matches!(value.as_case(), CBORCase::Text(_))
+            {
+                matches
+                    .borrow_mut()
+                    .push(format!("Found email: {}", value.diagnostic_flat()));
+            } else if key_str == "id"
+                && matches!(value.as_case(), CBORCase::Unsigned(_))
+            {
+                matches
+                    .borrow_mut()
+                    .push(format!("Found ID: {}", value.diagnostic_flat()));
             }
         }
         ((), false)

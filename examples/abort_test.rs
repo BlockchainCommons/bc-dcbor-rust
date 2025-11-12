@@ -34,13 +34,12 @@ fn main() {
         visit_log.borrow_mut().push(desc.clone());
 
         // Check if this triggers abort
-        if let WalkElement::Single(cbor) = element {
-            if let CBORCase::Text(text) = cbor.as_case() {
-                if text == "abort" {
-                    *should_abort.borrow_mut() = true;
-                    println!("ABORT TRIGGERED at: {}", desc);
-                }
-            }
+        if let WalkElement::Single(cbor) = element
+            && let CBORCase::Text(text) = cbor.as_case()
+            && text == "abort"
+        {
+            *should_abort.borrow_mut() = true;
+            println!("ABORT TRIGGERED at: {}", desc);
         }
 
         (state, false)

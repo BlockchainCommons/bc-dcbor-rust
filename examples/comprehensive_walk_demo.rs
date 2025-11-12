@@ -42,39 +42,39 @@ fn main() {
      -> ((), bool) {
         // The WalkElement enum makes key-value pattern matching incredibly
         // ergonomic!
-        if let Some((key, value)) = element.as_key_value() {
-            if let CBORCase::Text(key_str) = key.as_case() {
-                match key_str.as_str() {
-                    "email" => {
-                        if let CBORCase::Text(email) = value.as_case() {
-                            found_patterns
-                                .borrow_mut()
-                                .push(format!("📧 Email: {}", email));
-                        }
+        if let Some((key, value)) = element.as_key_value()
+            && let CBORCase::Text(key_str) = key.as_case()
+        {
+            match key_str.as_str() {
+                "email" => {
+                    if let CBORCase::Text(email) = value.as_case() {
+                        found_patterns
+                            .borrow_mut()
+                            .push(format!("📧 Email: {}", email));
                     }
-                    "name" => {
-                        if let CBORCase::Text(name) = value.as_case() {
-                            found_patterns
-                                .borrow_mut()
-                                .push(format!("👤 Name: {}", name));
-                        }
-                    }
-                    "city" => {
-                        if let CBORCase::Text(city) = value.as_case() {
-                            found_patterns
-                                .borrow_mut()
-                                .push(format!("🏙️  City: {}", city));
-                        }
-                    }
-                    "zip" => {
-                        if let CBORCase::Unsigned(zip) = value.as_case() {
-                            found_patterns
-                                .borrow_mut()
-                                .push(format!("📮 ZIP: {}", zip));
-                        }
-                    }
-                    _ => {}
                 }
+                "name" => {
+                    if let CBORCase::Text(name) = value.as_case() {
+                        found_patterns
+                            .borrow_mut()
+                            .push(format!("👤 Name: {}", name));
+                    }
+                }
+                "city" => {
+                    if let CBORCase::Text(city) = value.as_case() {
+                        found_patterns
+                            .borrow_mut()
+                            .push(format!("🏙️  City: {}", city));
+                    }
+                }
+                "zip" => {
+                    if let CBORCase::Unsigned(zip) = value.as_case() {
+                        found_patterns
+                            .borrow_mut()
+                            .push(format!("📮 ZIP: {}", zip));
+                    }
+                }
+                _ => {}
             }
         }
         ((), false) // Continue traversal
@@ -202,17 +202,15 @@ fn main() {
                             _edge: EdgeType,
                             _state: ()|
      -> ((), bool) {
-        if let Some((key, value)) = element.as_key_value() {
-            if let (CBORCase::Text(k), CBORCase::Text(v)) =
+        if let Some((key, value)) = element.as_key_value()
+            && let (CBORCase::Text(k), CBORCase::Text(v)) =
                 (key.as_case(), value.as_case())
-            {
-                if k.as_str() == "email" {
-                    search_results
-                        .borrow_mut()
-                        .push(format!("Found email: {}", v));
-                    return ((), true); // Stop traversal after finding the first email
-                }
-            }
+            && k.as_str() == "email"
+        {
+            search_results
+                .borrow_mut()
+                .push(format!("Found email: {}", v));
+            return ((), true); // Stop traversal after finding the first email
         }
         ((), false)
     };
