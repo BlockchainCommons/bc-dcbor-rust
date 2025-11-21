@@ -50,7 +50,7 @@ use crate::{
 /// // Decode from CBOR
 /// let decoded_date: Date = cbor.try_into().unwrap();
 /// ```
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Date(DateTime<Utc>);
 
 impl Date {
