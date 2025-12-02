@@ -396,10 +396,6 @@ impl From<Date> for CBOR {
     fn from(value: Date) -> Self { value.tagged_cbor() }
 }
 
-impl AsRef<Date> for Date {
-    fn as_ref(&self) -> &Self { self }
-}
-
 impl TryFrom<CBOR> for Date {
     type Error = Error;
 
