@@ -29,7 +29,7 @@ This deterministic approach ensures that semantically equivalent data items are 
 
 ```toml
 [dependencies]
-dcbor = "0.24.0"
+dcbor = "0.24.1"
 ```
 
 ## Related Projects
@@ -47,6 +47,9 @@ We still welcome your feedback about the library. Let us know if the API meets y
 See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
 
 ## Version History
+
+### 0.24.1 - December 4, 2025
+- Updated third-party dependencies.
 
 ### 0.24.0 - December 2, 2025
 - Add Copy trait to Date.
