@@ -25,8 +25,12 @@ test_additional_features() {
 
 test_only_features "no_std"
 test_only_features "no_std,multithreaded"
+test_only_features "no_std,num-bigint"
+test_only_features "no_std,multithreaded,num-bigint"
 
 test_additional_features "multithreaded"
+test_additional_features "num-bigint"
+test_additional_features "multithreaded,num-bigint"
 
 section "All Default Features and doctests"
 cargo test > /dev/null

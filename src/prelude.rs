@@ -1,3 +1,5 @@
+#[cfg(feature = "num-bigint")]
+pub use crate::{BigInt, BigUint, Sign};
 pub use crate::{
     ByteString, CBOR, CBORCase, CBORCodable, CBORDecodable, CBOREncodable,
     CBORSortable, CBORSummarizer, CBORTagged, CBORTaggedCodable,

@@ -170,6 +170,12 @@ macro_rules! cbor_tag {
 }
 
 const_cbor_tag!(1, DATE, "date");
+// Tag value for positive bignums (RFC 8949 §3.4.3).
+#[cfg(feature = "num-bigint")]
+const_cbor_tag!(2, POSITIVE_BIGNUM, "positive-bignum");
+// Tag value for negative bignums (RFC 8949 §3.4.3).
+#[cfg(feature = "num-bigint")]
+const_cbor_tag!(3, NEGATIVE_BIGNUM, "negative-bignum");
 
 pub fn register_tags_in(tags_store: &mut TagsStore) {
     let tags = vec![cbor_tag!(DATE)];
@@ -180,6 +186,32 @@ pub fn register_tags_in(tags_store: &mut TagsStore) {
             Ok(format!("{}", Date::from_untagged_cbor(untagged_cbor)?))
         }),
     );
+    #[cfg(feature = "num-bigint")]
+    {
+        use crate::{
+            bigint_from_negative_untagged_cbor, biguint_from_untagged_cbor,
+        };
+
+        let biguint_tag = cbor_tag!(POSITIVE_BIGNUM);
+        let bigint_tag = cbor_tag!(NEGATIVE_BIGNUM);
+        tags_store.insert_all(vec![biguint_tag.clone(), bigint_tag.clone()]);
+
+        tags_store.set_summarizer(
+            TAG_POSITIVE_BIGNUM,
+            Arc::new(|untagged_cbor, _| {
+                let biguint = biguint_from_untagged_cbor(untagged_cbor)?;
+                Ok(format!("bignum({})", biguint))
+            }),
+        );
+
+        tags_store.set_summarizer(
+            TAG_NEGATIVE_BIGNUM,
+            Arc::new(|untagged_cbor, _| {
+                let bigint = bigint_from_negative_untagged_cbor(untagged_cbor)?;
+                Ok(format!("bignum({})", bigint))
+            }),
+        );
+    }
 }
 
 pub fn register_tags() {
