@@ -293,6 +293,7 @@ fn format_negative() {
 }
 
 #[test]
+// expected-text-output-rubric:
 #[rustfmt::skip]
 fn format_string() {
     run("format_string",
@@ -312,6 +313,7 @@ fn format_string() {
 }
 
 #[test]
+// expected-text-output-rubric:
 #[rustfmt::skip]
 fn format_simple_array() {
     run("format_simple_array",
@@ -333,6 +335,7 @@ fn format_simple_array() {
 }
 
 #[test]
+// expected-text-output-rubric:
 #[rustfmt::skip]
 fn format_nested_array() {
     let a: CBOR = [1, 2, 3].into();
@@ -375,6 +378,7 @@ fn format_nested_array() {
 }
 
 #[test]
+// expected-text-output-rubric:
 #[rustfmt::skip]
 fn format_map() {
     let mut map = Map::new();
@@ -402,6 +406,7 @@ fn format_map() {
 }
 
 #[test]
+// expected-text-output-rubric:
 #[rustfmt::skip]
 fn format_tagged() {
     let a = CBOR::to_tagged_value(100, "Hello");
@@ -425,6 +430,7 @@ fn format_tagged() {
 #[test]
 fn format_date() {
     dcbor::register_tags();
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     run("format_date_negative",
         Date::from_timestamp(-100.0).into(),
@@ -441,6 +447,7 @@ fn format_date() {
         "}.trim()
     );
 
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     run("format_date_positive",
         Date::from_timestamp(1647887071.0).into(),
@@ -461,6 +468,7 @@ fn format_date() {
 #[test]
 fn format_fractional_date() {
     dcbor::register_tags();
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     run("format_fractional_date",
         Date::from_timestamp(0.5).into(),
@@ -484,6 +492,7 @@ fn format_structure() {
     let cbor = CBOR::try_from_hex(encoded_cbor_hex).unwrap();
     let description = "49([1, h'536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e', [707([1, h'2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a']), 707([1, h'0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900'])]])";
     let debug_description = "tagged(49, array([unsigned(1), bytes(536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e), array([tagged(707, array([unsigned(1), bytes(2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a)])), tagged(707, array([unsigned(1), bytes(0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900)]))])]))";
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let diagnostic = indoc! {"
         49(
@@ -509,6 +518,7 @@ fn format_structure() {
     "}.trim();
     let diagnostic_flat = "49([1, h'536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e', [707([1, h'2b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710a']), 707([1, h'0f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900'])]])";
     let hex = "d83183015829536f6d65206d7973746572696573206172656e2774206d65616e7420746f20626520736f6c7665642e82d902c3820158402b9238e19eafbc154b49ec89edd4e0fb1368e97332c6913b4beb637d1875824f3e43bd7fb0c41fb574f08ce00247413d3ce2d9466e0ccfa4a89b92504982710ad902c3820158400f9c7af36804ffe5313c00115e5a31aa56814abaa77ff301da53d48613496e9c51a98b36d55f6fb5634fdb0123910cfa4904f1c60523df41013dc3749b377900";
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let hex_annotated = indoc! {r#"
         d8 31                                   # tag(49)
@@ -548,6 +558,7 @@ fn format_structure_2() {
     let cbor = CBOR::try_from_hex(encoded_cbor_hex).unwrap();
     let description = r#"300({1: h'59f2293a5bce7d4de59e71b4207ac5d2', 2: 1(1614124800), 3: "Dark Purple Aqua Love", 4: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."})"#;
     let debug_description = r#"tagged(300, map({0x01: (unsigned(1), bytes(59f2293a5bce7d4de59e71b4207ac5d2)), 0x02: (unsigned(2), tagged(1, unsigned(1614124800))), 0x03: (unsigned(3), text("Dark Purple Aqua Love")), 0x04: (unsigned(4), text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."))}))"#;
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let diagnostic = indoc! {r#"
         300(
@@ -563,6 +574,7 @@ fn format_structure_2() {
             }
         )
     "#}.trim();
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let diagnostic_annotated = indoc! {r#"
         300(
@@ -581,6 +593,7 @@ fn format_structure_2() {
     let diagnostic_flat = r#"300({1: h'59f2293a5bce7d4de59e71b4207ac5d2', 2: 1(1614124800), 3: "Dark Purple Aqua Love", 4: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."})"#;
     let summary = r#"300({1: h'59f2293a5bce7d4de59e71b4207ac5d2', 2: 2021-02-24, 3: "Dark Purple Aqua Love", 4: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."})"#;
     let hex = "d9012ca4015059f2293a5bce7d4de59e71b4207ac5d202c11a6035970003754461726b20507572706c652041717561204c6f766504787b4c6f72656d20697073756d20646f6c6f722073697420616d65742c20636f6e73656374657475722061646970697363696e6720656c69742c2073656420646f20656975736d6f642074656d706f7220696e6369646964756e74207574206c61626f726520657420646f6c6f7265206d61676e6120616c697175612e";
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let hex_annotated = indoc! {r#"
         d9 012c                                 # tag(300)
@@ -627,6 +640,7 @@ fn format_key_order() {
     let cbor: CBOR = m.into();
     let description = r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#;
     let debug_description = r#"map({0x0a: (unsigned(10), unsigned(1)), 0x1864: (unsigned(100), unsigned(2)), 0x20: (negative(-1), unsigned(3)), 0x617a: (text("z"), unsigned(4)), 0x626161: (text("aa"), unsigned(5)), 0x811864: (array([unsigned(100)]), unsigned(6)), 0x8120: (array([negative(-1)]), unsigned(7)), 0xf4: (simple(false), unsigned(8))})"#;
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let diagnostic = indoc! {r#"
         {
@@ -650,6 +664,7 @@ fn format_key_order() {
     "#}.trim();
     let diagnostic_flat = r#"{10: 1, 100: 2, -1: 3, "z": 4, "aa": 5, [100]: 6, [-1]: 7, false: 8}"#;
     let hex = "a80a011864022003617a046261610581186406812007f408";
+    // expected-text-output-rubric:
     #[rustfmt::skip]
     let hex_annotated = indoc! {r#"
         a8              # map(8)
