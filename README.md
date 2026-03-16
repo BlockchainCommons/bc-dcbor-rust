@@ -29,7 +29,7 @@ This deterministic approach ensures that semantically equivalent data items are 
 
 ```toml
 [dependencies]
-dcbor = "0.25.1"
+dcbor = "0.25.2"
 ```
 
 ## Related Projects
@@ -47,6 +47,9 @@ We still welcome your feedback about the library. Let us know if the API meets y
 See [Blockchain Commons' Development Phases](https://github.com/BlockchainCommons/Community/blob/master/release-path.md).
 
 ## Version History
+
+### 0.25.2 - March 16, 2026
+- Add numeric reduction example demonstrating integer/float extraction and dCBOR canonical encoding rules.
 
 ### 0.25.1 - January 31, 2026
 - Add expected-text-output-rubric comments to test files.
